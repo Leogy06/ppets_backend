@@ -3,6 +3,7 @@ import express from "express";
 import sequilize from "./db/config.ts";
 import employee_routes from "./routes/employee_routes.ts";
 import cors from "cors";
+import department_routes from "./routes/department_routes.ts";
 
 config();
 
@@ -21,7 +22,9 @@ const startServer = () => {
     console.log("All models were synchronized succesfully.");
   });
 
+  //employee routes
   app.use("/employees", employee_routes);
+  app.use("/departments", department_routes);
 
   app.listen(port, () => {
     console.log(`\x1b[32m\x1b[1m✔ App is running on port: ${port}\x1b[0m`);

@@ -2,12 +2,18 @@ import { DataTypes, Model, Sequelize } from "sequelize";
 import sequelize from "../db/config.ts";
 
 class Employee extends Model {
-  public id!: string;
-  public email!: string;
-  public firstName!: string;
-  public middleName?: string;
-  public lastName!: string;
-  public suffix?: string;
+  public ID!: number;
+  public ID_NUMBER!: number;
+  public FIRSTNAME!: string;
+  public MIDDLENAME?: string;
+  public LASTNAME!: string;
+  public SUFFIX?: string;
+
+  public DEPARTMENT_ID?: number;
+  public CURRENT_DEPARTMENT?: number;
+  public CREATED_BY?: number;
+  public CREATED_WHEN?: Date;
+  public DELETED?: number;
 }
 
 //datatypes employee columns
@@ -40,7 +46,7 @@ Employee.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    DETAILED_DEPARTMENT_ID: {
+    CURRENT_DEPARTMENT: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
