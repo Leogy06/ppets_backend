@@ -18,7 +18,7 @@ const sequelize = new Sequelize(db_name, "root", db_password, {
 
 sequelize
   .authenticate()
-  .then(() => console.log("Connected to MySQ ✅"))
+  .then(() => console.log("\x1b[32m\x1b[1m✔ Connected to MySQL \x1b[0m"))
   .catch((err) => console.error("Unable to connect database: ", err));
 
 export default sequelize;
