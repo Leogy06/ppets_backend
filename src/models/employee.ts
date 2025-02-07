@@ -66,6 +66,10 @@ Employee.init(
       type: DataTypes.DATE,
       allowNull: false,
     },
+    DELETED: {
+      type: DataTypes.TINYINT,
+      allowNull: false,
+    },
   },
 
   {

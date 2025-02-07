@@ -1,6 +1,7 @@
 import express from "express";
 import Department from "../models/department.ts";
 import Employee from "../models/employee.ts";
+import { Op } from "sequelize";
 
 //employee type
 interface EmployeeProps {
@@ -15,6 +16,8 @@ interface EmployeeProps {
   CREATED_BY?: number;
   CREATED_WHEN?: Date;
   DELETED?: number;
+  UPDATED_BY: number;
+  UPDATED_WHEN: Date;
 }
 
 //for employee page
@@ -26,7 +29,9 @@ export const getEmployees = async (
     const { department } = req.query;
 
     const { rows: employees } = await Employee.findAndCountAll({
-      where: department ? { DEPARTMENT_ID: department } : {},
+      where: department
+        ? { DEPARTMENT_ID: department, DELETED: { [Op.or]: [0, null] } }
+        : { DELETED: { [Op.or]: [0, null] } },
     });
 
     employees.sort((a: any, b: any) =>
@@ -114,8 +119,6 @@ export const editEmployee = async (
     SUFFIX,
     DEPARTMENT_ID,
     CURRENT_DEPARTMENT,
-    CREATED_BY,
-    CREATED_WHEN,
     DELETED,
   } = req.body;
   try {
@@ -123,10 +126,23 @@ export const editEmployee = async (
       return res.status(500).json({ message: "ID is empty." });
     }
 
+    //check if theres employee in that id
     const employee = await Employee.findOne({ where: { ID } });
 
     if (!employee) {
       return res.status(400).json({ message: "Employee doesn't exist." });
+    }
+
+    //check if new id number is duplicated
+    if (ID_NUMBER) {
+      const isIDExist = await Employee.findOne({
+        where: { ID_NUMBER, ID: { [Op.ne]: ID } },
+      });
+      if (isIDExist) {
+        return res
+          .status(400)
+          .json({ message: "ID number has already taken." });
+      }
     }
 
     const editEntries: Partial<EmployeeProps> = {};
@@ -152,15 +168,14 @@ export const editEmployee = async (
     if (CURRENT_DEPARTMENT) {
       editEntries.CURRENT_DEPARTMENT = CURRENT_DEPARTMENT;
     }
-    if (CREATED_BY) {
-      editEntries.CREATED_BY = CREATED_BY;
-    }
-    if (CREATED_WHEN) {
-      editEntries.CREATED_WHEN = CREATED_WHEN;
-    }
+
     if (DELETED !== undefined) {
       editEntries.DELETED = DELETED;
     }
+
+    //default values
+    editEntries.UPDATED_WHEN = new Date();
+    editEntries.UPDATED_BY = 2; // change this into dynamic
 
     const updatedEmpl = await Employee.update(editEntries, { where: { ID } });
 
@@ -172,5 +187,70 @@ export const editEmployee = async (
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: `Unable to edit employee. - ${error}` });
+  }
+};
+
+//delete but set empoyee delete to 1
+
+export const deleteEmployee = async (
+  req: express.Request,
+  res: express.Response
+): Promise<any> => {
+  const { DELETED } = req.query;
+  const { IDs } = req.body;
+
+  console.log("Deleted: ", DELETED);
+  console.log("IDs: ", IDs);
+
+  try {
+    if (!IDs) {
+      return res.status(400).json({ message: "No ID has been sent." });
+    }
+
+    const deleteStatus = Number(DELETED);
+
+    if (DELETED === undefined || DELETED === null || isNaN(deleteStatus)) {
+      return res.status(400).json({ message: "Invalid delete value." });
+    }
+
+    const emplIds = Array.isArray(IDs) ? IDs : [IDs];
+
+    const emplExist = await Employee.findAll({
+      where: { ID: { [Op.in]: emplIds } },
+    });
+
+    if (!emplExist) {
+      return res
+        .status(400)
+        .json({ message: "Unable to edit. - Employee doesn't exist." });
+    }
+
+    if (!emplExist.length) {
+      return res.status(400).json({
+        message: "Unable to change delete status. - Employees do not exist.",
+      });
+    }
+
+    //check if every employee is deleted.
+    const alreadyDeleted = emplExist.every(
+      (emp) => emp.DELETED === deleteStatus
+    );
+
+    if (alreadyDeleted) {
+      return res.status(400).json({ message: "Delete status already set." });
+    }
+
+    const result = await Employee.update(
+      { DELETED: deleteStatus, UPDATED_WHEN: new Date() },
+      { where: { ID: { [Op.in]: emplIds } } }
+    );
+
+    res.status(200).json({
+      message: "Employees updated successfully.",
+      affectedRows: result[0],
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: `Unable to delete employee - ${error}` });
   }
 };
