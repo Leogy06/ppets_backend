@@ -88,7 +88,7 @@ export const addEmployee = async (
       LASTNAME,
       SUFFIX,
       DEPARTMENT_ID,
-      CURRENT_DEPARTMENT: DEPARTMENT_ID,
+      CURRENT_DPT_ID: DEPARTMENT_ID,
       CREATED_BY: 1, //change this when login for admin is ready
       CREATED_WHEN: new Date(),
       UPDATED_WHEN: new Date(),
