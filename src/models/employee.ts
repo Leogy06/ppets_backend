@@ -21,6 +21,9 @@ Employee.init(
   {
     ID: {
       type: DataTypes.STRING,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true,
     },
     ID_NUMBER: {
       type: DataTypes.INTEGER,

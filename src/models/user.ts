@@ -1,5 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
+import Employee from "./employee.js";
 
 class User extends Model {
   public ID!: number;
@@ -44,6 +45,10 @@ User.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    current_dpt_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
   },
 
   {
@@ -52,5 +57,8 @@ User.init(
     timestamps: false,
   }
 );
+
+User.belongsTo(Employee, { foreignKey: "emp_id" });
+Employee.hasMany(User, { foreignKey: "emp_id" });
 
 export default User;

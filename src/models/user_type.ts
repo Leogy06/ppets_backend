@@ -1,17 +1,18 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
 
-class Roles extends Model {
+class User_type extends Model {
   public id!: number;
   public description!: string;
 }
 
-Roles.init(
+User_type.init(
   {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       allowNull: false,
+      autoIncrement: true,
     },
     description: {
       type: DataTypes.STRING,
@@ -20,9 +21,9 @@ Roles.init(
   },
   {
     sequelize,
-    tableName: "roles",
+    tableName: "user_type",
     timestamps: false,
   }
 );
 
-export default Roles;
+export default User_type;

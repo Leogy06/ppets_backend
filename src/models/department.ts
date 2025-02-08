@@ -17,6 +17,7 @@ Department.init(
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
+      allowNull: false,
     },
     DEPARTMENT_NAME: {
       type: DataTypes.STRING,
