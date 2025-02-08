@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getDepartments } from "../controllers/department_controller.ts";
+import { getDepartments } from "../controllers/department_controller.js";
 
 const department_routes = Router();
 

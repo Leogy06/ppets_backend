@@ -1,10 +1,9 @@
 import { config } from "dotenv";
 import express from "express";
-import sequilize from "./db/config.ts";
-import employee_routes from "./routes/employee_routes.ts";
+import sequilize from "./db/config.js";
+import employee_routes from "./routes/employee_routes.js";
 import cors from "cors";
-import department_routes from "./routes/department_routes.ts";
-
+import department_routes from "./routes/department_routes.js";
 config();
 
 const app = express();
@@ -31,4 +30,5 @@ const startServer = () => {
   });
 };
 
+//starting the server
 startServer();

@@ -1,5 +1,5 @@
 import { DataTypes, Model, Sequelize } from "sequelize";
-import sequelize from "../db/config.ts";
+import sequelize from "../db/config.js";
 
 class Employee extends Model {
   public ID!: number;
@@ -10,7 +10,7 @@ class Employee extends Model {
   public SUFFIX?: string;
 
   public DEPARTMENT_ID?: number;
-  public CURRENT_DEPARTMENT?: number;
+  public CURRENT_DPT_ID?: number;
   public CREATED_BY?: number;
   public CREATED_WHEN?: Date;
   public DELETED?: number;
@@ -46,7 +46,7 @@ Employee.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    CURRENT_DEPARTMENT: {
+    CURRENT_DPT_ID: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },

@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
+    "outDir": "dist", // Output compiled files here
+    "rootDir": "src", // Source TypeScript files live here
+    "module": "NodeNext", // For ES Module support
+    "moduleResolution": "NodeNext",
     "target": "ESNext",
-    "rootDir": "./src",
-    "outDir": "./dist",
     "strict": true,
-    "noEmit": true,
-    "allowImportingTsExtensions": true,
-    "esModuleInterop": true
-  }
+    "esModuleInterop": true,
+    "declaration": true
+  },
+  "include": ["src"] // Ensure only the "src" folder is compiled
 }

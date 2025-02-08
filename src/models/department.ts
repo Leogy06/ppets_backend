@@ -1,5 +1,5 @@
 import { DataTypes, Model } from "sequelize";
-import sequelize from "../db/config.ts";
+import sequelize from "../db/config.js";
 
 class Department extends Model {
   public ID!: number;

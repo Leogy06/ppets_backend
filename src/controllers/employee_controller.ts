@@ -1,6 +1,6 @@
 import express from "express";
-import Department from "../models/department.ts";
-import Employee from "../models/employee.ts";
+import Department from "../models/department.js";
+import Employee from "../models/employee.js";
 import { Op } from "sequelize";
 
 //employee type
