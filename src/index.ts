@@ -4,6 +4,7 @@ import sequilize from "./db/config.js";
 import employee_routes from "./routes/employee_routes.js";
 import cors from "cors";
 import department_routes from "./routes/department_routes.js";
+import user_routes from "./routes/user_routes.js";
 config();
 
 const app = express();
@@ -24,6 +25,7 @@ const startServer = () => {
   //employee routes
   app.use("/employees", employee_routes);
   app.use("/departments", department_routes);
+  app.use("/user", user_routes);
 
   app.listen(port, () => {
     console.log(`\x1b[32m\x1b[1m✔ App is running on port: ${port}\x1b[0m`);

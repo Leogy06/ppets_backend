@@ -3,33 +3,48 @@ import sequelize from "../db/config.js";
 
 class User extends Model {
   public ID!: number;
- public ID_NUMBER!:number;
-
+  public empl_id!: number;
+  public username!: string;
+  public password!: string;
+  public email!: string;
+  public is_active!: number;
+  public role!: number;
 }
 
 //datatypes employee columns
 User.init(
- {
-  id:{
-    type:DataTypes.STRING,
+  {
+    id: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    emp_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    username: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    is_active: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    role: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
   },
-  username:{
-    type:DataTypes.STRING,
-  },
-  password:{
-    type:DataTypes.STRING,
-  },
-  email:{
-    type:DataTypes.STRING,
-  },
-  is_active:{
-    type:DataTypes.INTEGER,
-  },
-  role:{
-    type:DataTypes.INTEGER,
-  },
-  
- },
 
   {
     sequelize,

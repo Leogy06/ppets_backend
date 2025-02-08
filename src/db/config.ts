@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 import { Sequelize } from "sequelize";
 
-config({path: ".env.local"});
+config({ path: ".env.local" });
 
 const { DB_NAME, DB_PASSWORD, DB_HOST, DB_PORT } = process.env;
 
@@ -9,11 +9,6 @@ const db_password = DB_PASSWORD;
 const db_host = DB_HOST;
 const db_port = Number(DB_PORT);
 const db_name = String(DB_NAME);
-
-console.log("DB_NAME:", db_name);
-console.log("DB_PASSWORD:", db_password);
-console.log("DB_HOST:", db_host);
-console.log("DB_PORT:", db_port);
 
 const sequelize = new Sequelize(db_name, "root", db_password, {
   host: db_host,
@@ -24,6 +19,8 @@ const sequelize = new Sequelize(db_name, "root", db_password, {
 sequelize
   .authenticate()
   .then(() => console.log("\x1b[32m\x1b[1m✔ Connected to MySQL \x1b[0m"))
-  .catch((err) => console.error("\x1b[31m\x1b[1m✖ Unable to connect database: \x1b[0m", err));
+  .catch((err) =>
+    console.error("\x1b[31m\x1b[1m✖ Unable to connect database: \x1b[0m", err)
+  );
 
 export default sequelize;
