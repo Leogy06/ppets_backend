@@ -5,9 +5,22 @@ import bcrypt from "bcryptjs";
 import { configDotenv } from "dotenv";
 import Employee from "../models/employee.js";
 import Roles from "../models/user_type.js";
-import { log } from "console";
+import { CustomRequest, generateToken } from "../middlewares/auth.js";
+import jwt from "jsonwebtoken";
 
 configDotenv({ path: ".env.local" });
+
+interface UserProps extends User {
+  id: number;
+  emp_id: number;
+  username: string;
+  password: string;
+  email: string;
+  is_active: number;
+  role: number;
+  current_dpt_id?: number;
+  refreshToken?: string;
+}
 
 // Adds a new user to the database
 export const addUser = async (
@@ -30,12 +43,14 @@ export const addUser = async (
     const hashedPassword = await bcrypt.hash(password, salt);
 
     //checking if empl id and role does not exist
-    const [isEmpIDExist, isRoleIDExist, isEmailExist] = await Promise.all([
-      //this should be in order
-      Employee.count({ where: { ID: emp_id } }),
-      Roles.count({ where: { id: role } }),
-      User.count({ where: { email } }),
-    ]);
+    const [isEmpIDExist, isRoleIDExist, isEmailExist, isUsernameExist] =
+      await Promise.all([
+        //this should be in order
+        Employee.count({ where: { ID: emp_id } }),
+        Roles.count({ where: { id: role } }),
+        User.count({ where: { email } }),
+        User.count({ where: { username } }),
+      ]);
 
     //check emp_id exist
     if (isEmpIDExist === 0) {
@@ -44,13 +59,18 @@ export const addUser = async (
         .json({ message: "Employee does not register in list of employee." });
     }
 
-    if (isEmailExist >= 1) {
+    if (isEmailExist > 0) {
       return res.status(400).json({ message: "Email has already taken." });
     }
 
     //check if role id exist
     if (isRoleIDExist === 0) {
       return res.status(400).json({ message: "Role id does not exist." });
+    }
+
+    //check if duplicate username
+    if (isUsernameExist > 0) {
+      return res.status(400).json({ message: "Username has already taken." });
     }
 
     const newUser = await User.create({
@@ -95,11 +115,127 @@ export const viewUsers = async (
 };
 
 //login users
-export const login = async (req: express.Request, res: express.Response) => {
+export const login = async (
+  req: CustomRequest,
+  res: express.Response
+): Promise<any> => {
   const { username, password } = req.body;
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   try {
+    const user = (await User.findOne({
+      where: { username },
+    })) as UserProps | null;
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    if (!user.password) {
+      return res
+        .status(500)
+        .json({ message: "User password is missing in db" });
+    }
+
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordMatch) {
+      return res.status(400).json({ message: "Invalid password." });
+    }
+    const token = generateToken(user);
+
+    res.cookie("accessToken", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    //username
+    res.cookie("username", user.username, {
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 1000, //7 days
+    });
+
+    res.cookie("role", user.role, {
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 1000, //7 days
+    });
+
+    res.status(200).json({
+      message: "Login successfully.",
+      user,
+    });
   } catch (error) {
     console.error(`Unable to login - ${error}`);
     res.status(500).json({ message: `Unable to login - ${error}` });
+  }
+};
+
+//logout user
+export const logout = async (req: express.Request, res: express.Response) => {
+  try {
+    //clear token
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    //clear username
+    res.clearCookie("username", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    //clear role
+    res.clearCookie("role", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+    res.status(200).json({ message: "Logged out." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: `Unable to logout. - ${error}` });
+  }
+};
+
+//check user if still login
+export const checkUser = (
+  req: express.Request,
+  res: express.Response
+): express.Response | any => {
+  const { accessToken, role, username } = req.cookies;
+  try {
+    if (!accessToken || !role || !username) {
+      return res.status(401).json({ message: "Unauthorized access." });
+    }
+
+    jwt.verify(
+      accessToken,
+      process.env.JWT_SECRET as string,
+      (err: any, decoded: any) => {
+        if (err) {
+          return res.status(401).json({ message: "Invalid token." });
+        }
+
+        res.status(200).json({
+          message: "User is authenticated.",
+          user: { username, role },
+        });
+      }
+    );
+  } catch (error) {
+    console.error(`Unable to check user - ${error}`);
+    res.status(500).json({ message: `Unable to check user - ${error}` });
   }
 };

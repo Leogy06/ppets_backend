@@ -2,21 +2,13 @@ import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
 import Employee from "./employee.js";
 
-class User extends Model {
-  public ID!: number;
-  public empl_id!: number;
-  public username!: string;
-  public password!: string;
-  public email!: string;
-  public is_active!: number;
-  public role!: number;
-}
+class User extends Model {}
 
 //datatypes employee columns
 User.init(
   {
     id: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
       autoIncrement: true,

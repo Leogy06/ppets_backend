@@ -1,20 +1,7 @@
-import { DataTypes, Model, Sequelize } from "sequelize";
+import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
 
-class Employee extends Model {
-  public ID!: number;
-  public ID_NUMBER!: number;
-  public FIRSTNAME!: string;
-  public MIDDLENAME?: string;
-  public LASTNAME!: string;
-  public SUFFIX?: string;
-
-  public DEPARTMENT_ID?: number;
-  public CURRENT_DPT_ID?: number;
-  public CREATED_BY?: number;
-  public CREATED_WHEN?: Date;
-  public DELETED?: number;
-}
+class Employee extends Model {}
 
 //datatypes employee columns
 Employee.init(

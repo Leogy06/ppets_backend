@@ -5,6 +5,8 @@ import employee_routes from "./routes/employee_routes.js";
 import cors from "cors";
 import department_routes from "./routes/department_routes.js";
 import user_routes from "./routes/user_routes.js";
+import cookieParser from "cookie-parser";
+import { protectRoute } from "./middlewares/auth.js";
 config();
 
 const app = express();
@@ -13,18 +15,27 @@ const port = process.env.PORT || 8080;
 
 //middleware to parse JSON bodies
 app.use(express.json());
+app.use(cookieParser());
 
-// Enable CORS for all origins
-app.use(cors());
+// Enable CORS for specific origins and credentials
+app.use(
+  cors({
+    origin: process.env.CLIENT_ORIGIN,
+    credentials: true,
+  })
+);
+
 const startServer = () => {
-  //creates table in db base on our models
+  //synchronize model's prop with db's table column
   sequilize.sync().then(() => {
-    console.log("All models were synchronized succesfully.");
+    console.log(
+      "\x1b[32m\x1b[1m✔ All models were synchronized succesfully.\x1b[0m"
+    );
   });
 
   //employee routes
-  app.use("/employees", employee_routes);
-  app.use("/departments", department_routes);
+  app.use("/employees", protectRoute, employee_routes);
+  app.use("/departments", protectRoute, department_routes);
   app.use("/user", user_routes);
 
   app.listen(port, () => {

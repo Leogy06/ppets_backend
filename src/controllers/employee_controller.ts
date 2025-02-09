@@ -233,7 +233,7 @@ export const deleteEmployee = async (
 
     //check if every employee is deleted.
     const alreadyDeleted = emplExist.every(
-      (emp) => emp.DELETED === deleteStatus
+      (emp) => emp.getDataValue("DELETED") === deleteStatus
     );
 
     if (alreadyDeleted) {
