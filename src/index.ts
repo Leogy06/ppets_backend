@@ -7,6 +7,7 @@ import department_routes from "./routes/department_routes.js";
 import user_routes from "./routes/user_routes.js";
 import cookieParser from "cookie-parser";
 import { protectRoute } from "./middlewares/auth.js";
+import item_routes from "./routes/item_routes.js";
 config();
 
 const app = express();
@@ -35,8 +36,15 @@ const startServer = () => {
 
   //employee routes
   app.use("/employees", protectRoute, employee_routes);
+
+  //department routes
   app.use("/departments", protectRoute, department_routes);
+
+  //user routes
   app.use("/user", user_routes);
+
+  //item routes
+  app.use("/item", item_routes);
 
   app.listen(port, () => {
     console.log(`\x1b[32m\x1b[1m✔ App is running on port: ${port}\x1b[0m`);

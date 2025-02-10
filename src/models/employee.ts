@@ -36,7 +36,7 @@ Employee.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    CURRENT_DPT_ID: {
+    CURRENT_DEPARTMENT: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },

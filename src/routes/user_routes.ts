@@ -13,7 +13,7 @@ const user_routes = Router();
 
 //validate, add function
 user_routes
-  .post("/", userValidationRules, protectRoute, addUser)
+  .post("/", userValidationRules, addUser)
   .get("/", protectRoute, viewUsers)
   .post("/auth/api/login", login)
   .post("/auth/api/logout", logout)
