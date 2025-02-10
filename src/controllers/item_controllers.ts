@@ -3,9 +3,12 @@ import Item from "../models/item.js";
 
 interface ItemAttributes extends Item {
   id?: number;
+  name: string;
   description: string;
   quantity: number;
   ics: string;
+  are_no: string;
+  prop_no: string;
   serial_no: string;
   value: number;
   status: string;
@@ -19,27 +22,32 @@ export const addItem = async (
   response: express.Response
 ): Promise<any> => {
   const {
+    name,
     description,
     quantity,
     ics,
+    are_no,
+    prop_no,
     serial_no,
     value,
-    status,
     category_item,
   } = request.body;
   try {
-    if (!description || !quantity || !ics || !serial_no || !value || !status) {
+    if (!name || !description || !quantity || !value) {
       return response.status(400).json({ message: "All fields are required." });
     }
 
     const newItem = await Item.create({
+      name,
       description,
       quantity,
       ics,
+      are_no,
+      prop_no,
       serial_no,
       value,
-      status,
       category_item,
+      status: 1,
     });
     response.status(201).json(newItem);
 
@@ -76,9 +84,12 @@ export const editItem = async (
 ): Promise<any> => {
   const { id } = request.params;
   const {
+    name,
     description,
     quantity,
     ics,
+    are_no,
+    prop_no,
     serial_no,
     value,
     status,
@@ -92,9 +103,12 @@ export const editItem = async (
       return response.status(404).json({ message: "Item not found." });
     }
 
+    item.name = name || item.name;
     item.description = description || item.description;
     item.quantity = quantity || item.quantity;
     item.ics = ics || item.ics;
+    item.are_no = are_no || item.are_no;
+    item.prop_no = prop_no || item.prop_no;
     item.serial_no = serial_no || item.serial_no;
     item.value = value || item.value;
     item.status = status || item.status;

@@ -6,18 +6,16 @@ import {
   getEmployees,
 } from "../controllers/employee_controller.js";
 
-const employee_routes = Router();
+const employee_routes = Router()
+  //get all employees
+  .get("/", getEmployees)
 
-//get all employees
-employee_routes.get("/", getEmployees);
+  //add employee
+  .post("/", addEmployee)
+  //edit employee
+  .put("/", editEmployee)
 
-//add employee
-employee_routes.post("/", addEmployee);
-
-//edit employee
-employee_routes.put("/", editEmployee);
-
-//delete employee
-employee_routes.delete("/delete", deleteEmployee);
+  //delete employee
+  .delete("/delete", deleteEmployee);
 
 export default employee_routes;

@@ -9,10 +9,7 @@ import {
 import userValidationRules from "../middlewares/userValidations.js";
 import { protectRoute } from "../middlewares/auth.js";
 
-const user_routes = Router();
-
-//validate, add function
-user_routes
+const user_routes = Router()
   .post("/", userValidationRules, addUser)
   .get("/", protectRoute, viewUsers)
   .post("/auth/api/login", login)

@@ -11,8 +11,12 @@ Item.init(
       unique: true,
       primaryKey: true,
     },
+    name: {
+      type: DataTypes.STRING(45),
+      allowNull: false,
+    },
     description: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(100),
       allowNull: false,
     },
     quantity: {
@@ -20,19 +24,19 @@ Item.init(
       allowNull: false,
     },
     ics: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(45),
       allowNull: true,
     },
     are_no: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(45),
       allowNull: true,
     },
     prop_no: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING(45),
       allowNull: true,
     },
     serial_no: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(45),
       allowNull: true,
     },
     value: {

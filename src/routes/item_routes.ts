@@ -5,8 +5,14 @@ import {
   getItems,
 } from "../controllers/item_controllers.js";
 
-const item_routes = Router();
+const item_routes = Router()
+  //add item
+  .post("/", addItem)
 
-item_routes.post("/", addItem).get("/", getItems).put("/:id", editItem);
+  //get items
+  .get("/", getItems)
+
+  //edit item
+  .put("/:id", editItem);
 
 export default item_routes;
