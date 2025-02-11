@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   addItem,
+  deleteItem,
   editItem,
   getItems,
 } from "../controllers/item_controllers.js";
@@ -13,6 +14,9 @@ const item_routes = Router()
   .get("/", getItems)
 
   //edit item
-  .put("/:id", editItem);
+  .put("/:id", editItem)
+
+  //delete item
+  .delete("/", deleteItem);
 
 export default item_routes;

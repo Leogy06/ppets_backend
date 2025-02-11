@@ -11,6 +11,7 @@ Item.init(
       unique: true,
       primaryKey: true,
     },
+
     name: {
       type: DataTypes.STRING(45),
       allowNull: false,
@@ -22,6 +23,10 @@ Item.init(
     quantity: {
       type: DataTypes.INTEGER,
       allowNull: false,
+    },
+    emp_owner: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
     ics: {
       type: DataTypes.STRING(45),
@@ -55,6 +60,10 @@ Item.init(
       type: DataTypes.TINYINT,
       allowNull: false,
       defaultValue: 0,
+    },
+    added_by: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
   },
   {
