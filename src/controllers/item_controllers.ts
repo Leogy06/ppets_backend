@@ -28,17 +28,36 @@ export const addItem = async (
     name,
     description,
     quantity,
-    emp_owner,
     ics,
     are_no,
     prop_no,
     serial_no,
-    value,
-    added_by,
+    pis_no,
+    class_no,
+    acc_code,
+    unit_value,
+    accountable_emp,
+    //no need total value,
+    remarks,
+    //status should be one upon creating
     category_item,
+    //deleted is 0 ofcourse
+    added_by,
+    //added auto generate
+    //created auto generate
   } = request.body;
+
+  console.log(request.body);
+
   try {
-    if (!name || !description || !quantity || !value) {
+    if (
+      !name ||
+      !description ||
+      !quantity ||
+      !unit_value ||
+      !category_item ||
+      !added_by
+    ) {
       return response.status(400).json({ message: "All fields are required." });
     }
 
@@ -48,13 +67,18 @@ export const addItem = async (
       quantity,
       ics,
       are_no,
-      emp_owner,
       prop_no,
       serial_no,
-      value,
+      pis_no,
+      class_no,
+      acc_code,
+      unit_value,
+      accountable_emp,
+      total_value: unit_value * quantity,
+      remarks,
+      status: 1,
       category_item,
       added_by,
-      status: 1,
     });
     response.status(201).json(newItem);
 

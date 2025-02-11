@@ -7,7 +7,7 @@ class Employee extends Model {}
 Employee.init(
   {
     ID: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
       autoIncrement: true,
@@ -17,26 +17,26 @@ Employee.init(
       allowNull: false,
     },
     FIRSTNAME: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(45),
       allowNull: false,
     },
     MIDDLENAME: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(28),
       allowNull: true,
     },
     LASTNAME: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(45),
       allowNull: false,
     },
     SUFFIX: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(10),
       allowNull: true,
     },
     DEPARTMENT_ID: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    CURRENT_DEPARTMENT: {
+    CURRENT_DPT_ID: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },

@@ -24,10 +24,7 @@ Item.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    emp_owner: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
+
     ics: {
       type: DataTypes.STRING(45),
       allowNull: true,
@@ -44,26 +41,58 @@ Item.init(
       type: DataTypes.STRING(45),
       allowNull: true,
     },
-    value: {
+    pis_no: {
+      type: DataTypes.STRING(45),
+      allowNull: true,
+    },
+    class_no: {
+      type: DataTypes.STRING(45),
+      allowNull: true,
+    },
+    acct_code: {
+      type: DataTypes.STRING(45),
+      allowNull: true,
+    },
+    unit_value: {
       type: DataTypes.FLOAT,
       allowNull: false,
     },
+    accountable_emp: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    total_value: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    remarks: {
+      type: DataTypes.STRING(45),
+      allowNull: true,
+    },
+
+    //item status
     status: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+
+    //category of the item
     category_item: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+
+    //check if deleted
     deleted: {
       type: DataTypes.TINYINT,
       allowNull: false,
       defaultValue: 0,
     },
+
+    //who admin added
     added_by: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
     },
   },
   {

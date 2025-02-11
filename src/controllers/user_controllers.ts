@@ -35,7 +35,8 @@ export const addUser = async (
   //sends an error if theres invalid data
 
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    const errorMsg = errors.array().map((err) => ({ messages: err.msg }));
+    return res.status(400).json(errorMsg);
   }
 
   try {
@@ -46,7 +47,7 @@ export const addUser = async (
     const [isEmpIDExist, isRoleIDExist, isEmailExist, isUsernameExist] =
       await Promise.all([
         //this should be in order
-        Employee.count({ where: { ID: emp_id } }),
+        Employee.count({ where: { ID_NUMBER: emp_id } }),
         Roles.count({ where: { id: role } }),
         User.count({ where: { email } }),
         User.count({ where: { username } }),
@@ -210,30 +211,34 @@ export const logout = async (req: express.Request, res: express.Response) => {
 };
 
 //check user if still login
-export const checkUser = (
+export const checkUser = async (
   req: express.Request,
   res: express.Response
-): express.Response | any => {
-  const { accessToken, role, username } = req.cookies;
+): Promise<express.Response | any> => {
+  const { accessToken } = req.cookies;
+
+  if (!accessToken) {
+    return res.status(401).json({ message: "Unauthorized access." });
+  }
   try {
-    if (!accessToken || !role || !username) {
-      return res.status(401).json({ message: "Unauthorized access." });
-    }
-
-    jwt.verify(
+    const decoded = jwt.verify(
       accessToken,
-      process.env.JWT_SECRET as string,
-      (err: any, decoded: any) => {
-        if (err) {
-          return res.status(401).json({ message: "Invalid token." });
-        }
+      process.env.JWT_SECRET as string
+    ) as { id: number };
 
-        res.status(200).json({
-          message: "User is authenticated.",
-          user: { username, role },
-        });
-      }
-    );
+    const user = (await User.findOne({
+      where: { id: decoded.id },
+    })) as UserProps | null;
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+    res.status(200).json({
+      message: "User is authenticated.",
+      user,
+      id: user.id,
+      role: user.role,
+    });
   } catch (error) {
     console.error(`Unable to check user - ${error}`);
     res.status(500).json({ message: `Unable to check user - ${error}` });
