@@ -64,6 +64,13 @@ export const addEmployee = async (
       return res.status(400).json({ message: "Missing required fields" });
     }
 
+    if (ID_NUMBER && String(ID_NUMBER).length < 5) {
+      // Do something if ID_NUMBER has at least 5 characters
+      return res
+        .status(400)
+        .json({ message: "ID number digits should be atleast 5." });
+    }
+
     //prevent duplication id number
     const isIDNumberExist = await Employee.findOne({
       where: { ID_NUMBER: ID_NUMBER },
@@ -96,9 +103,7 @@ export const addEmployee = async (
       DELETED: 0,
     });
 
-    res
-      .status(201)
-      .json({ message: "Employee has been added.", newEmployee, department });
+    res.status(201).json({ message: "Employee has been added.", newEmployee });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: `Unexpected error occured - ${error}` });
