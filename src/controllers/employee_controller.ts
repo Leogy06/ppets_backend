@@ -25,9 +25,15 @@ export const getEmployees = async (
   req: express.Request,
   res: express.Response
 ): Promise<any> => {
-  try {
-    const { department } = req.query;
+  const { department } = req.query;
 
+  if (!department) {
+    return res
+      .status(400)
+      .json({ message: "Department ID is required to find all employees." });
+  }
+
+  try {
     const { rows: employees } = await Employee.findAndCountAll({
       where: department
         ? { DEPARTMENT_ID: department, DELETED: { [Op.or]: [0, null] } }
@@ -257,5 +263,30 @@ export const deleteEmployee = async (
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: `Unable to delete employee - ${error}` });
+  }
+};
+
+//get employee by id
+//used in auth context
+export const getEmployeeById = async (
+  req: express.Request,
+  res: express.Response
+): Promise<express.Response | any> => {
+  const { empId } = req.params;
+  try {
+    if (!empId) {
+      return res.status(400).json({ message: "Employee ID is required." });
+    }
+
+    const foundEmployee = await Employee.findByPk(empId);
+
+    if (!foundEmployee) {
+      return res.status(400).json({ message: "Employee does not exist." });
+    }
+
+    res.status(200).json(foundEmployee);
+  } catch (error) {
+    console.error(`Unable to get employee by ID - ${error}`);
+    res.status(500).json({ message: `Unable to get employee by ID -${error}` });
   }
 };

@@ -10,7 +10,7 @@ import userValidationRules from "../middlewares/userValidations.js";
 import { protectRoute } from "../middlewares/auth.js";
 
 const user_routes = Router()
-  .post("/", userValidationRules, addUser)
+  .post("/", protectRoute, userValidationRules, addUser)
   .get("/", protectRoute, viewUsers)
   .post("/auth/api/login", login)
   .post("/auth/api/logout", logout)

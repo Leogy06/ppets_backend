@@ -203,3 +203,24 @@ export const deleteItem = async (
     res.status(500).json({ message: `Unable to delete item. - ${error}` });
   }
 };
+
+//get items base on who owned
+export const getItemsByOwner = async (
+  req: express.Request,
+  res: express.Response
+): Promise<express.Response | any> => {
+  const { empId } = req.params;
+  try {
+    if (!empId) {
+      return res.status(400).json({ message: "Employee id is required." });
+    }
+    const ownedItems = await Item.findAll({
+      where: { accountable_emp: empId },
+    });
+
+    res.status(200).json(ownedItems);
+  } catch (error) {
+    console.error(`Unable to get items - ${error}`);
+    res.status(500).json({ message: `Unable to get items. - ${error} ` });
+  }
+};

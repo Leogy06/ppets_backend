@@ -1,5 +1,6 @@
 import express from "express";
 import ItemCategory from "../models/item_category.js";
+import Item from "../models/item.js";
 
 export const addCategoryItem = async (
   req: express.Request,

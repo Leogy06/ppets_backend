@@ -47,19 +47,21 @@ export const addUser = async (
     const [isEmpIDExist, isRoleIDExist, isEmailExist, isUsernameExist] =
       await Promise.all([
         //this should be in order
-        Employee.count({ where: { ID_NUMBER: emp_id } }),
+        Employee.count({ where: { ID: emp_id } }),
         Roles.count({ where: { id: role } }),
         User.count({ where: { email } }),
         User.count({ where: { username } }),
       ]);
 
     //check emp_id exist
+    //emp id should exist in emp tbl
     if (isEmpIDExist === 0) {
       return res
         .status(400)
         .json({ message: "Employee does not register in list of employee." });
     }
 
+    //email should not duplicated
     if (isEmailExist > 0) {
       return res.status(400).json({ message: "Email has already taken." });
     }
@@ -74,6 +76,7 @@ export const addUser = async (
       return res.status(400).json({ message: "Username has already taken." });
     }
 
+    //creatin new user
     const newUser = await User.create({
       emp_id,
       username,
@@ -161,13 +164,13 @@ export const login = async (
     res.cookie("username", user.username, {
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 1000, //7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000, //7 days
     });
 
     res.cookie("role", user.role, {
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 1000, //7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000, //7 days
     });
 
     res.status(200).json({
@@ -242,5 +245,26 @@ export const checkUser = async (
   } catch (error) {
     console.error(`Unable to check user - ${error}`);
     res.status(500).json({ message: `Unable to check user - ${error}` });
+  }
+};
+
+export const getUserById = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const { userId } = req.params;
+  try {
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required." });
+    }
+
+    const foundUser = await User.findByPk(userId);
+
+    res.status(200).json(foundUser);
+  } catch (error) {
+    console.error(`Unable to get the user by id - ${error}`);
+    res
+      .status(500)
+      .json({ message: `Unable to get the user by id - ${error}` });
   }
 };

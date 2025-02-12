@@ -4,6 +4,7 @@ import {
   deleteItem,
   editItem,
   getItems,
+  getItemsByOwner,
 } from "../controllers/item_controllers.js";
 
 const item_routes = Router()
@@ -17,6 +18,9 @@ const item_routes = Router()
   .put("/:id", editItem)
 
   //delete item
-  .delete("/", deleteItem);
+  .delete("/", deleteItem)
+
+  //get items by owned
+  .get("/:empId", getItemsByOwner);
 
 export default item_routes;
