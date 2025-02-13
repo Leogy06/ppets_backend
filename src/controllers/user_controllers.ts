@@ -233,38 +233,21 @@ export const checkUser = async (
       where: { id: decoded.id },
     })) as UserProps | null;
 
+    const empDetails = await Employee.findByPk(user?.emp_id);
+
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
+
     res.status(200).json({
       message: "User is authenticated.",
       user,
+      empDetails,
       id: user.id,
       role: user.role,
     });
   } catch (error) {
     console.error(`Unable to check user - ${error}`);
     res.status(500).json({ message: `Unable to check user - ${error}` });
-  }
-};
-
-export const getUserById = async (
-  req: express.Request,
-  res: express.Response
-) => {
-  const { userId } = req.params;
-  try {
-    if (!userId) {
-      return res.status(400).json({ message: "User ID is required." });
-    }
-
-    const foundUser = await User.findByPk(userId);
-
-    res.status(200).json(foundUser);
-  } catch (error) {
-    console.error(`Unable to get the user by id - ${error}`);
-    res
-      .status(500)
-      .json({ message: `Unable to get the user by id - ${error}` });
   }
 };

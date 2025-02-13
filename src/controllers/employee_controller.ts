@@ -21,6 +21,7 @@ interface EmployeeProps {
 }
 
 //for employee page
+//get employee by department
 export const getEmployees = async (
   req: express.Request,
   res: express.Response
