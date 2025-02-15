@@ -1,0 +1,76 @@
+export interface EmployeeProps {
+  ID: number;
+  ID_NUMBER: number;
+  FIRSTNAME: string;
+  MIDDLENAME?: string | null;
+  LASTNAME: string;
+  SUFFIX?: string | null;
+  DEPARTMENT_ID: number;
+  CURRENT_DPT_ID?: number | null;
+  CREATED_BY?: number | null;
+  CREATED_WHEN?: Date | null;
+  UPDATED_BY?: number | null;
+  UPDATED_WHEN?: Date | null;
+  DELETED?: 0 | 1;
+}
+
+export interface DepartmentProps {
+  ID: number; // auto_increment primary key
+  DEPARTMENT_NAME?: string | null;
+  CODE?: string | null;
+  DESCRIPTION?: string | null;
+  OFFICER?: string | null;
+  POSITION?: string | null;
+  ENTRY_DATE?: Date | null;
+}
+
+export interface InventoryItemProps {
+  id: number;
+  name: string;
+  description: string;
+  quantity: number;
+  ics?: string | null;
+  are_no?: string | null;
+  prop_no?: string | null;
+  serial_no?: string | null;
+  pis_no?: string | null;
+  class_no?: string | null;
+  acct_code?: string | null;
+  unit_value: number;
+  accountable_emp?: number | null;
+  total_value: number;
+  remarks?: string | null;
+  status: number;
+  category_item: number;
+  deleted: 0 | 1; // Assuming it's a boolean-like tinyint
+  added_by: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ItemCategoryProps {
+  id: number;
+  description: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface RolesProps {
+  id: number;
+  description: string;
+}
+export interface UserTypeProps {
+  id: number;
+  description: string;
+}
+
+export interface UserProps {
+  id: number;
+  username: string;
+  password: string;
+  email?: string | null;
+  is_active: number; // Assuming it's a boolean-like integer (1 for active, 0 for inactive)
+  role: number;
+  emp_id: number;
+  current_dpt_id: number;
+}

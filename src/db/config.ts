@@ -15,15 +15,6 @@ const db_name = String(DB_NAME);
 const db_username = String(DB_USERNAME);
 const db_dialect = DB_DIALECT as Dialect;
 
-console.log({
-  db_dialect,
-  db_host,
-  db_port,
-  db_password,
-  db_name,
-  db_username,
-});
-
 const sequelize = new Sequelize(db_name, db_username, db_password, {
   host: db_host,
   port: db_port,

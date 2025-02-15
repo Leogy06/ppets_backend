@@ -146,6 +146,12 @@ export const login = async (
         .json({ message: "User password is missing in db" });
     }
 
+    const empDetails = await Employee.findByPk(user.emp_id);
+
+    if (!empDetails) {
+      return res.status(400).json({ message: "Employee does not exist." });
+    }
+
     const isPasswordMatch = await bcrypt.compare(password, user.password);
 
     if (!isPasswordMatch) {
@@ -176,6 +182,7 @@ export const login = async (
     res.status(200).json({
       message: "Login successfully.",
       user,
+      empDetails,
     });
   } catch (error) {
     console.error(`Unable to login - ${error}`);

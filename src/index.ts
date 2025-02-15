@@ -17,6 +17,8 @@ const port = process.env.PORT || 8080;
 
 //middleware to parse JSON bodies
 app.use(express.json());
+
+//http cookie parser
 app.use(cookieParser());
 
 // Enable CORS for specific origins and credentials

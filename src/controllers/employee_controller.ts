@@ -2,23 +2,7 @@ import express from "express";
 import Department from "../models/department.js";
 import Employee from "../models/employee.js";
 import { Op } from "sequelize";
-
-//employee type
-interface EmployeeProps {
-  ID: number;
-  ID_NUMBER: number;
-  FIRSTNAME: string;
-  MIDDLENAME?: string;
-  LASTNAME: string;
-  SUFFIX?: string;
-  DEPARTMENT_ID?: number;
-  CURRENT_DEPARTMENT?: number;
-  CREATED_BY?: number;
-  CREATED_WHEN?: Date;
-  DELETED?: number;
-  UPDATED_BY: number;
-  UPDATED_WHEN: Date;
-}
+import { EmployeeProps } from "../types/types.js";
 
 //for employee page
 //get employee by department
@@ -130,7 +114,7 @@ export const editEmployee = async (
     LASTNAME,
     SUFFIX,
     DEPARTMENT_ID,
-    CURRENT_DEPARTMENT,
+    CURRENT_DPT_ID,
     DELETED,
   } = req.body;
   try {
@@ -177,8 +161,8 @@ export const editEmployee = async (
     if (DEPARTMENT_ID) {
       editEntries.DEPARTMENT_ID = DEPARTMENT_ID;
     }
-    if (CURRENT_DEPARTMENT) {
-      editEntries.CURRENT_DEPARTMENT = CURRENT_DEPARTMENT;
+    if (CURRENT_DPT_ID) {
+      editEntries.CURRENT_DPT_ID = CURRENT_DPT_ID;
     }
 
     if (DELETED !== undefined) {
