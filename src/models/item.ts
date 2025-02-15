@@ -1,5 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
+import Employee from "./employee.js";
 class Item extends Model {}
 
 Item.init(
@@ -101,5 +102,10 @@ Item.init(
     timestamps: true,
   }
 );
+
+Item.belongsTo(Employee, {
+  foreignKey: "accountable_emp",
+  as: "itemCustodian",
+});
 
 export default Item;

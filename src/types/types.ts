@@ -1,3 +1,5 @@
+import Item from "../models/item.js";
+
 export interface EmployeeProps {
   ID: number;
   ID_NUMBER: number;
@@ -24,7 +26,7 @@ export interface DepartmentProps {
   ENTRY_DATE?: Date | null;
 }
 
-export interface InventoryItemProps {
+export interface ItemProps extends Item {
   id: number;
   name: string;
   description: string;

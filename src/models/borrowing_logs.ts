@@ -1,9 +1,11 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
+import Item from "./item.js";
+import Employee from "./employee.js";
 
-class BorrowingLogs extends Model {}
+class BorrowingTransaction extends Model {}
 
-BorrowingLogs.init(
+BorrowingTransaction.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -29,12 +31,28 @@ BorrowingLogs.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    status: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+    },
     remarks: {
       type: DataTypes.STRING(100),
       allowNull: true,
     },
   },
-  { sequelize, timestamps: true, tableName: "borrowing_logs" }
+  { sequelize, timestamps: true, tableName: "borrowing_transaction" }
 );
 
-export default BorrowingLogs;
+// Define the association
+BorrowingTransaction.belongsTo(Item, {
+  foreignKey: "borrowedItem",
+  as: "name",
+});
+
+BorrowingTransaction.belongsTo(Employee, {
+  foreignKey: "owner",
+  as: "ownerEmp",
+});
+
+export default BorrowingTransaction;

@@ -9,6 +9,7 @@ import cookieParser from "cookie-parser";
 import { protectRoute } from "./middlewares/auth.js";
 import item_routes from "./routes/item_routes.js";
 import item_category_routes from "./routes/item_category_routes.js";
+import borrowing_routes from "./routes/borrowing_routes.js";
 config();
 
 const app = express();
@@ -51,6 +52,8 @@ const startServer = () => {
 
   //item category
   app.use("/item-category", protectRoute, item_category_routes);
+
+  app.use("/borrowing", protectRoute, borrowing_routes);
 
   app.listen(port, () => {
     console.log(`\x1b[32m\x1b[1m✔ App is running on port: ${port}\x1b[0m`);

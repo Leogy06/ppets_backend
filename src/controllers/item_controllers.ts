@@ -1,23 +1,9 @@
 import express from "express";
 import Item from "../models/item.js";
 import { Op } from "sequelize";
+import { ItemProps } from "../types/types.js";
+import Employee from "../models/employee.js";
 
-interface ItemAttributes extends Item {
-  id?: number;
-  name: string;
-  description: string;
-  quantity: number;
-  emp_owner: number;
-  ics: string;
-  are_no: string;
-  prop_no: string;
-  serial_no: string;
-  value: number;
-  status: string;
-  category_item?: number;
-  deleted?: number;
-  added_by: number;
-}
 //get items not deleted
 //and ascend by description
 export const addItem = async (
@@ -46,8 +32,6 @@ export const addItem = async (
     //added auto generate
     //created auto generate
   } = request.body;
-
-  console.log(request.body);
 
   try {
     if (
@@ -97,7 +81,8 @@ export const getItems = async (
   try {
     const items = await Item.findAll({
       where: { deleted: 0 },
-      order: [["description", "ASC"]],
+      order: [["name", "ASC"]],
+      include: [{ model: Employee, as: "itemCustodian" }],
     });
     response.status(200).json(items);
   } catch (error) {
@@ -128,7 +113,7 @@ export const editItem = async (
   } = request.body;
 
   try {
-    const item = (await Item.findByPk(id)) as ItemAttributes | null;
+    const item = (await Item.findByPk(id)) as ItemProps | null;
 
     if (!item) {
       return response.status(404).json({ message: "Item not found." });
@@ -141,7 +126,7 @@ export const editItem = async (
     item.are_no = are_no || item.are_no;
     item.prop_no = prop_no || item.prop_no;
     item.serial_no = serial_no || item.serial_no;
-    item.value = value || item.value;
+    item.unit_value = value || item.unit_value;
     item.status = status || item.status;
     item.category_item = category_item || item.category_item;
 
