@@ -37,12 +37,7 @@ User.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    current_dpt_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
   },
-
   {
     sequelize,
     tableName: "users",

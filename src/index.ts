@@ -10,6 +10,7 @@ import { protectRoute } from "./middlewares/auth.js";
 import item_routes from "./routes/item_routes.js";
 import item_category_routes from "./routes/item_category_routes.js";
 import borrowing_routes from "./routes/borrowing_routes.js";
+import user_type_routes from "./routes/user_type_routes.js";
 config();
 
 const app = express();
@@ -53,7 +54,11 @@ const startServer = () => {
   //item category
   app.use("/item-category", protectRoute, item_category_routes);
 
+  //borrowing
   app.use("/borrowing", protectRoute, borrowing_routes);
+
+  //user type
+  app.use("/user_type", user_type_routes);
 
   app.listen(port, () => {
     console.log(`\x1b[32m\x1b[1m✔ App is running on port: ${port}\x1b[0m`);

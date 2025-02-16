@@ -13,6 +13,5 @@ const userValidationRules = [
   body("emp_id").notEmpty().withMessage("Employee ID is required."),
   //validate role
   body("role").notEmpty().withMessage("User role is required."),
-  body("departmentId").notEmpty().withMessage("Department Id is required."),
 ];
 export default userValidationRules;

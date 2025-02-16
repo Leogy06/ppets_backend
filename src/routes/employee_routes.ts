@@ -3,6 +3,7 @@ import {
   addEmployee,
   deleteEmployee,
   editEmployee,
+  getDeletedEmployees,
   getEmployeeById,
   getEmployees,
 } from "../controllers/employee_controller.js";
@@ -19,6 +20,9 @@ const employee_routes = Router()
   //delete employee
   .delete("/delete", deleteEmployee)
 
-  .get("/:empId", getEmployeeById);
+  .get("/:empId", getEmployeeById)
+
+  //get deleted employees
+  .get("/api/deleted/", getDeletedEmployees);
 
 export default employee_routes;

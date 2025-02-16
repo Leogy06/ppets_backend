@@ -1,10 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
 
-class User_type extends Model {
-  public id!: number;
-  public description!: string;
-}
+class User_type extends Model {}
 
 User_type.init(
   {
@@ -13,9 +10,10 @@ User_type.init(
       primaryKey: true,
       allowNull: false,
       autoIncrement: true,
+      unique: true,
     },
     description: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(20),
       allowNull: false,
     },
   },

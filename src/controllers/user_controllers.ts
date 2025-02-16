@@ -7,6 +7,7 @@ import Employee from "../models/employee.js";
 import Roles from "../models/user_type.js";
 import { CustomRequest, generateToken } from "../middlewares/auth.js";
 import jwt from "jsonwebtoken";
+import User_type from "../models/user_type.js";
 
 configDotenv({ path: ".env.local" });
 
@@ -27,7 +28,7 @@ export const addUser = async (
   req: express.Request,
   res: express.Response
 ): Promise<any> => {
-  const { emp_id, username, email, password, role, departmentId } = req.body;
+  const { emp_id, username, email, password, role } = req.body;
 
   //validating the entered datas.
   const errors = validationResult(req);
@@ -42,6 +43,9 @@ export const addUser = async (
   try {
     const salt = await bcrypt.genSalt(Number(process.env.BCRYPT_SALT_ROUNDS));
     const hashedPassword = await bcrypt.hash(password, salt);
+
+    const user_types = await User_type.findAll();
+    const employees = await Employee.findAll();
 
     //checking if empl id and role does not exist
     const [isEmpIDExist, isRoleIDExist, isEmailExist, isUsernameExist] =
@@ -68,7 +72,9 @@ export const addUser = async (
 
     //check if role id exist
     if (isRoleIDExist === 0) {
-      return res.status(400).json({ message: "Role id does not exist." });
+      return res
+        .status(400)
+        .json({ message: "Role id does not exist.", user_types, employees });
     }
 
     //check if duplicate username
@@ -84,7 +90,6 @@ export const addUser = async (
       email,
       is_active: 1,
       role,
-      current_dpt_id: departmentId,
     });
 
     res.status(201).json(newUser);

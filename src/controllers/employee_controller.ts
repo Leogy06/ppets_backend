@@ -49,9 +49,18 @@ export const addEmployee = async (
       LASTNAME,
       SUFFIX,
       DEPARTMENT_ID,
+      CREATED_BY,
+      UPDATED_BY,
     } = req.body;
 
-    if (!ID_NUMBER || !FIRSTNAME || !LASTNAME || !DEPARTMENT_ID) {
+    if (
+      !ID_NUMBER ||
+      !FIRSTNAME ||
+      !LASTNAME ||
+      !DEPARTMENT_ID ||
+      !CREATED_BY ||
+      !UPDATED_BY
+    ) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
@@ -87,10 +96,10 @@ export const addEmployee = async (
       SUFFIX,
       DEPARTMENT_ID,
       CURRENT_DPT_ID: DEPARTMENT_ID,
-      CREATED_BY: 1, //change this when login for admin is ready
+      CREATED_BY,
       CREATED_WHEN: new Date(),
       UPDATED_WHEN: new Date(),
-      UPDATED_BY: 1,
+      UPDATED_BY,
       DELETED: 0,
     });
 
@@ -116,7 +125,11 @@ export const editEmployee = async (
     DEPARTMENT_ID,
     CURRENT_DPT_ID,
     DELETED,
+    UPDATED_BY,
   } = req.body;
+
+  console.log({ UPDATED_BY });
+
   try {
     if (!ID) {
       return res.status(500).json({ message: "ID is empty." });
@@ -125,8 +138,10 @@ export const editEmployee = async (
     //check if theres employee in that id
     const employee = await Employee.findOne({ where: { ID } });
 
-    if (!employee) {
-      return res.status(400).json({ message: "Employee doesn't exist." });
+    if (!employee || !UPDATED_BY) {
+      return res
+        .status(400)
+        .json({ message: "Missing required fields doesn't" });
     }
 
     //check if new id number is duplicated
@@ -171,7 +186,7 @@ export const editEmployee = async (
 
     //default values
     editEntries.UPDATED_WHEN = new Date();
-    editEntries.UPDATED_BY = 2; // change this into dynamic
+    editEntries.UPDATED_BY = UPDATED_BY; // change this into dynamic
 
     const updatedEmpl = await Employee.update(editEntries, { where: { ID } });
 
@@ -194,9 +209,6 @@ export const deleteEmployee = async (
 ): Promise<any> => {
   const { DELETED } = req.query;
   const { IDs } = req.body;
-
-  console.log("Deleted: ", DELETED);
-  console.log("IDs: ", IDs);
 
   try {
     if (!IDs) {
@@ -266,12 +278,37 @@ export const getEmployeeById = async (
     const foundEmployee = await Employee.findByPk(empId);
 
     if (!foundEmployee) {
-      return res.status(400).json({ message: "Employee does not exist." });
+      return res.status(400).json({ message: "Employee does not exist as." });
     }
 
     res.status(200).json(foundEmployee);
   } catch (error) {
     console.error(`Unable to get employee by ID - ${error}`);
     res.status(500).json({ message: `Unable to get employee by ID -${error}` });
+  }
+};
+
+export const getDeletedEmployees = async (
+  req: express.Request,
+  res: express.Response
+): Promise<any> => {
+  const { departmentId } = req.query;
+
+  if (!departmentId) {
+    return res.status(400).json({ message: "Department id is  required." });
+  }
+  try {
+    const { rows: employees } = await Employee.findAndCountAll({
+      where: departmentId
+        ? { DEPARTMENT_ID: departmentId, DELETED: { [Op.or]: [1, null] } }
+        : { DELETED: { [Op.or]: [1, null] } },
+    });
+
+    res.status(200).json(employees);
+  } catch (error) {
+    console.error("Unable to get deleted employees. ", error);
+    res
+      .status(500)
+      .json({ message: "Unable to get deleted employees. ", error });
   }
 };
