@@ -1,4 +1,5 @@
 import Item from "../models/item.js";
+import ItemCategory from "../models/item_category.js";
 
 export interface EmployeeProps {
   ID: number;
@@ -50,7 +51,7 @@ export interface ItemProps extends Item {
   updatedAt: Date;
 }
 
-export interface ItemCategoryProps {
+export interface ItemCategoryProps extends ItemCategory {
   id: number;
   description: string;
   createdAt: Date;
