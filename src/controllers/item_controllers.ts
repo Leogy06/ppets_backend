@@ -3,6 +3,7 @@ import Item from "../models/item.js";
 import { Op } from "sequelize";
 import { ItemProps } from "../types/types.js";
 import Employee from "../models/employee.js";
+import Department from "../models/department.js";
 
 //get items not deleted
 //and ascend by description
@@ -207,5 +208,58 @@ export const getItemsByOwner = async (
   } catch (error) {
     console.error(`Unable to get items - ${error}`);
     res.status(500).json({ message: `Unable to get items. - ${error} ` });
+  }
+};
+
+//get item by employee's department
+export const getItemByEmployeeDpt = async (
+  req: express.Request,
+  res: express.Response
+): Promise<any> => {
+  const { department } = req.params;
+  if (!department) {
+    return res.status(400).json({ message: "Employee ID is missing." });
+  }
+  try {
+    const isDeptExist = await Department.findByPk(department);
+
+    if (!isDeptExist) {
+      return res.status(404).json({ message: "Employee does not exist" });
+    }
+
+    const items = await Item.findAll({
+      where: { belong_dpt: department },
+      include: [{ model: Employee, as: "itemCustodian" }],
+    });
+
+    res.status(200).json(items);
+  } catch (error) {
+    console.error("Unable to get item by employee department. ", error);
+    res
+      .status(500)
+      .json({ message: "unable to get item by employee. ", error });
+  }
+};
+
+export const getItemById = async (
+  req: express.Request,
+  res: express.Response
+): Promise<any> => {
+  const { itemId } = req.params;
+
+  if (!itemId) {
+    return res.status(400).json({ message: "Item id is required." });
+  }
+  try {
+    const itemFound = await Item.findByPk(itemId);
+
+    if (!itemFound) {
+      return res.status(404).json({ message: "Item does not exist." });
+    }
+
+    res.status(200).json(itemFound);
+  } catch (error) {
+    console.error("Unable to get item by id. ", error);
+    res.status(500).json({ message: "Unable to get item by id. ", error });
   }
 };

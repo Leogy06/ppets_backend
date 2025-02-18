@@ -70,6 +70,10 @@ Item.init(
       type: DataTypes.STRING(100),
       allowNull: true,
     },
+    belong_dpt: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
 
     //item status
     status: {
