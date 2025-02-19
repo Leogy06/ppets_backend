@@ -11,6 +11,7 @@ import item_routes from "./routes/item_routes.js";
 import item_category_routes from "./routes/item_category_routes.js";
 import borrowing_routes from "./routes/borrowing_routes.js";
 import user_type_routes from "./routes/user_type_routes.js";
+import processingStatus_routes from "./routes/processingStatus_routes.js";
 config();
 
 const app = express();
@@ -59,6 +60,9 @@ const startServer = () => {
 
   //user type
   app.use("/user_type", user_type_routes);
+
+  //status process
+  app.use("/status_process", protectRoute, processingStatus_routes);
 
   app.listen(port, () => {
     console.log(`\x1b[32m\x1b[1m✔ App is running on port: ${port}\x1b[0m`);

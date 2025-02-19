@@ -152,7 +152,7 @@ export const getBorrowTransactionByEmployee = async (
       include: [
         {
           model: Item,
-          as: "name",
+          as: "borrowedItemDetails",
         },
         {
           model: Employee,
