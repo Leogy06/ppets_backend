@@ -47,12 +47,17 @@ BorrowingTransaction.init(
 // Define the association
 BorrowingTransaction.belongsTo(Item, {
   foreignKey: "borrowedItem",
-  as: "name",
+  as: "borrowedItemDetails",
 });
 
 BorrowingTransaction.belongsTo(Employee, {
   foreignKey: "owner",
   as: "ownerEmp",
+});
+
+BorrowingTransaction.belongsTo(Employee, {
+  foreignKey: "borrower",
+  as: "borrowerEmp",
 });
 
 export default BorrowingTransaction;

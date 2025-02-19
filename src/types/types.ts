@@ -1,3 +1,4 @@
+import BorrowingTransaction from "../models/borrowing_logs.js";
 import Item from "../models/item.js";
 import ItemCategory from "../models/item_category.js";
 
@@ -76,4 +77,16 @@ export interface UserProps {
   role: number;
   emp_id: number;
   current_dpt_id: number;
+}
+
+export interface BorrowingTransactionProps extends BorrowingTransaction {
+  id: number;
+  borrowedItem: number;
+  borrower: number;
+  owner: number;
+  quantity: number;
+  status: number;
+  remarks: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

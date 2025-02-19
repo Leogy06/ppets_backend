@@ -4,7 +4,7 @@ import Item from "../models/item.js";
 import Employee from "../models/employee.js";
 import { where } from "sequelize";
 import sequelize from "../db/config.js";
-import { ItemProps } from "../types/types.js";
+import { BorrowingTransactionProps, ItemProps } from "../types/types.js";
 
 export const getBorrowTransactions = async (
   req: express.Request,
@@ -15,7 +15,10 @@ export const getBorrowTransactions = async (
     if (!owner) {
       return res.status(400).json({ message: "Owner id is required." });
     }
-    const borrows = await BorrowingTransaction.findAll({ where: { owner } });
+    const borrows = await BorrowingTransaction.findAll({
+      where: { owner },
+      include: [{ model: Employee, as: "borrowerEmp" }],
+    });
 
     if (borrows.length === 0) {
       return res.status(400).json({ message: "No borrow transaction." });
@@ -34,27 +37,28 @@ export const createBorrowTransaction = async (
 ): Promise<express.Response | any> => {
   const { borrowedItems } = req.body;
   const { owner, borrower } = req.query;
+
+  if (!Array.isArray(borrowedItems)) {
+    return res
+      .status(400)
+      .json({ message: "Invalid input, expected an array of items." });
+  }
+
+  if (borrowedItems.length === 0) {
+    return res.status(400).json({ message: "No items has been sent." });
+  }
+
+  if (!owner || !borrower) {
+    return res.status(400).json({ message: "Owner or borrower required." });
+  }
+
   try {
-    if (!Array.isArray(borrowedItems)) {
-      return res
-        .status(400)
-        .json({ message: "Invalid input, expected an array of items." });
-    }
-
-    if (borrowedItems.length === 0) {
-      return res.status(400).json({ message: "No items has been sent." });
-    }
-
-    if (!owner || !borrower) {
-      return res.status(400).json({ message: "Owner or borrower required." });
-    }
-
     const employees = await Employee.findAll({
       where: { id: [borrower, owner] },
       attributes: ["ID"],
     });
 
-    if (employees.length !== 2) {
+    if (employees.length < 1) {
       return res
         .status(404)
         .json({ message: "Owner or borrower does not exist." });
@@ -111,7 +115,7 @@ export const createBorrowTransaction = async (
       });
     }
 
-    res.status(201).json({ message: "Items successfully lend." });
+    res.status(201).json({ message: "Borrowing transaction created." });
   } catch (error) {
     console.error("Unable to create transaction(s). ", error);
     res
@@ -120,6 +124,7 @@ export const createBorrowTransaction = async (
   }
 };
 
+//borrower
 export const getBorrowTransactionByEmployee = async (
   req: express.Request,
   res: express.Response
@@ -163,5 +168,52 @@ export const getBorrowTransactionByEmployee = async (
       message: "Unable to get borrow transaction by employee.",
       error,
     });
+  }
+};
+
+//edit
+
+//could use to update status
+export const editBorrowTransaction = async (
+  req: express.Request,
+  res: express.Response
+): Promise<express.Response | any> => {
+  const borrowId = Number(req.query.borrowId);
+  const { status } = req.body;
+
+  if (!borrowId) {
+    return res.status(400).json({ message: "Borrow id is required." });
+  }
+
+  if (!status) {
+    return res.status(400).json({ message: "Status is missing" });
+  }
+
+  console.log("status: ", status);
+  console.log("borrow id : ", borrowId);
+
+  try {
+    const borrowTransaction = (await BorrowingTransaction.findByPk(
+      borrowId
+    )) as BorrowingTransactionProps;
+
+    if (!borrowTransaction) {
+      return res
+        .status(404)
+        .json({ message: "Borrow transaction does not exist. " });
+    }
+
+    borrowTransaction.status = status;
+
+    borrowTransaction.updatedAt = new Date();
+
+    const result = await borrowTransaction.save();
+
+    res
+      .status(200)
+      .json({ message: "Transaction update successfully.", result });
+  } catch (error) {
+    console.error("Unable to edit transaction. ", error);
+    res.status(500).json({ message: "Unable to edit transaction. ", error });
   }
 };

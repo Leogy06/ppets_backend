@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   createBorrowTransaction,
+  editBorrowTransaction,
   getBorrowTransactionByEmployee,
   getBorrowTransactions,
 } from "../controllers/borrowing_controller.js";
@@ -8,6 +9,7 @@ import {
 const borrowing_routes = Router()
   .get("/", getBorrowTransactions)
   .post("/", createBorrowTransaction)
-  .get("/borrower", getBorrowTransactionByEmployee);
+  .get("/borrower", getBorrowTransactionByEmployee)
+  .put("/update", editBorrowTransaction);
 
 export default borrowing_routes;
