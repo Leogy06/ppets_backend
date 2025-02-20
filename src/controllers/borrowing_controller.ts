@@ -5,6 +5,7 @@ import Employee from "../models/employee.js";
 import { where } from "sequelize";
 import sequelize from "../db/config.js";
 import { BorrowingTransactionProps, ItemProps } from "../types/types.js";
+import { addNotification } from "../services/notificationService.js";
 
 export const getBorrowTransactions = async (
   req: express.Request,
@@ -17,7 +18,10 @@ export const getBorrowTransactions = async (
     }
     const borrows = await BorrowingTransaction.findAll({
       where: { owner },
-      include: [{ model: Employee, as: "borrowerEmp" }, {model:Item, as:"borrowedItemDetails"}],
+      include: [
+        { model: Employee, as: "borrowerEmp" },
+        { model: Item, as: "borrowedItemDetails" },
+      ],
     });
 
     if (borrows.length === 0) {
