@@ -1,6 +1,8 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
 import Employee from "./employee.js";
+import ItemCategory from "./item_category.js";
+import ItemStatus from "./item_status.js";
 class Item extends Model {}
 
 Item.init(
@@ -110,6 +112,16 @@ Item.init(
 Item.belongsTo(Employee, {
   foreignKey: "accountable_emp",
   as: "itemCustodian",
+});
+
+Item.belongsTo(ItemCategory, {
+  foreignKey: "category_item",
+  as: "categoryItemDetails",
+});
+
+Item.belongsTo(ItemStatus, {
+  foreignKey: "status",
+  as: "itemStatusDetails",
 });
 
 export default Item;
