@@ -4,6 +4,8 @@ import { Op } from "sequelize";
 import { ItemProps } from "../@types/types.js";
 import Employee from "../models/employee.js";
 import Department from "../models/department.js";
+import ItemCategory from "../models/item_category.js";
+import ItemStatus from "../models/item_status.js";
 
 //get items not deleted
 //and ascend by description
@@ -83,7 +85,10 @@ export const getItems = async (
     const items = await Item.findAll({
       where: { deleted: 0 },
       order: [["name", "ASC"]],
-      include: [{ model: Employee, as: "itemCustodian" }],
+      include: [
+        { model: Employee, as: "itemCustodian" },
+        { model: ItemCategory, as: "categoryItemDetails" },
+      ],
     });
     response.status(200).json(items);
   } catch (error) {
@@ -202,6 +207,10 @@ export const getItemsByOwner = async (
     }
     const ownedItems = await Item.findAll({
       where: { accountable_emp: empId },
+      include: [
+        { model: ItemCategory, as: "categoryItemDetails" },
+        { model: ItemStatus, as: "itemStatusDetails" },
+      ],
     });
 
     res.status(200).json(ownedItems);
