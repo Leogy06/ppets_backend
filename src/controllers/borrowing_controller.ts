@@ -4,8 +4,7 @@ import Item from "../models/item.js";
 import Employee from "../models/employee.js";
 import { where } from "sequelize";
 import sequelize from "../db/config.js";
-import { BorrowingTransactionProps, ItemProps } from "../types/types.js";
-import { addNotification } from "../services/notificationService.js";
+import { BorrowingTransactionProps, ItemProps } from "../@types/types.js";
 
 export const getBorrowTransactions = async (
   req: express.Request,

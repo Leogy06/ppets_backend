@@ -1,7 +1,7 @@
 import express from "express";
 import Item from "../models/item.js";
 import { Op } from "sequelize";
-import { ItemProps } from "../types/types.js";
+import { ItemProps } from "../@types/types.js";
 import Employee from "../models/employee.js";
 import Department from "../models/department.js";
 

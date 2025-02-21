@@ -7,25 +7,20 @@ Notification.init(
   {
     ID: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-      unique: true,
       primaryKey: true,
       autoIncrement: true,
+      allowNull: false,
+      unique: true,
     },
     MESSAGE: {
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    IS_READ: {
+    READ: {
       type: DataTypes.TINYINT,
-      allowNull: false,
       defaultValue: 0,
     },
-    BORROW_TRANSC_ID: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    SENDING_USER: {
+    FOR_USER: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
@@ -33,7 +28,7 @@ Notification.init(
   {
     sequelize,
     timestamps: true,
-    tableName: "notification_table",
+    tableName: "notification_tbl",
   }
 );
 

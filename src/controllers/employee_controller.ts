@@ -2,7 +2,7 @@ import express from "express";
 import Department from "../models/department.js";
 import Employee from "../models/employee.js";
 import { Op } from "sequelize";
-import { EmployeeProps } from "../types/types.js";
+import { EmployeeProps } from "../@types/types.js";
 
 //for employee page
 //get employee by department
