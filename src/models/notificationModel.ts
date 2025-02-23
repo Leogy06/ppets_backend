@@ -20,7 +20,7 @@ Notification.init(
       type: DataTypes.TINYINT,
       defaultValue: 0,
     },
-    FOR_USER: {
+    FOR_EMP: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
