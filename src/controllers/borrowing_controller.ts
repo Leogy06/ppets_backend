@@ -14,6 +14,8 @@ import {
   handleMessageNotification,
 } from "../functions/borrowingNotification.js";
 import { users } from "../sockets/socketManager.js";
+import Department from "../models/department.js";
+import BorrowingStatus from "../models/borrowing_status.js";
 
 export const getBorrowTransactions = async (
   req: express.Request,
@@ -295,6 +297,7 @@ export const editBorrowTransaction = async (
   }
 };
 
+//get transaction by dpt
 export const getBorrowingTransactionByDpt = async (
   req: express.Request,
   res: express.Response
@@ -307,6 +310,14 @@ export const getBorrowingTransactionByDpt = async (
   try {
     const transactions = await BorrowingTransaction.findAll({
       where: { DPT_ID: departmentId },
+      include: [
+        { model: Employee, as: "borrowerEmp" },
+        { model: Item, as: "borrowedItemDetails" },
+        { model: Employee, as: "ownerEmp" },
+        { model: Department, as: "departmentDetails" },
+        { model: BorrowingStatus, as: "statusDetails" },
+      ],
+      order: [["createdAt", "DESC"]],
     });
 
     res.status(200).json(transactions);

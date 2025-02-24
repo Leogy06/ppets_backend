@@ -3,6 +3,7 @@ import sequelize from "../db/config.js";
 import Item from "./item.js";
 import Employee from "./employee.js";
 import Department from "./department.js";
+import BorrowingStatus from "./borrowing_status.js";
 
 class BorrowingTransaction extends Model {}
 
@@ -69,6 +70,13 @@ BorrowingTransaction.belongsTo(Employee, {
 BorrowingTransaction.belongsTo(Department, {
   foreignKey: "DPT_ID",
   as: "departmentDetails",
+});
+
+//status
+//borrow to department
+BorrowingTransaction.belongsTo(BorrowingStatus, {
+  foreignKey: "status",
+  as: "statusDetails",
 });
 
 export default BorrowingTransaction;
