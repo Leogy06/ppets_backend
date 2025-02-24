@@ -2,6 +2,7 @@ import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
 import Item from "./item.js";
 import Employee from "./employee.js";
+import Department from "./department.js";
 
 class BorrowingTransaction extends Model {}
 
@@ -36,6 +37,10 @@ BorrowingTransaction.init(
       allowNull: false,
       defaultValue: 1,
     },
+    DPT_ID: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     remarks: {
       type: DataTypes.STRING(100),
       allowNull: true,
@@ -58,6 +63,12 @@ BorrowingTransaction.belongsTo(Employee, {
 BorrowingTransaction.belongsTo(Employee, {
   foreignKey: "borrower",
   as: "borrowerEmp",
+});
+
+//borrow to department
+BorrowingTransaction.belongsTo(Department, {
+  foreignKey: "DPT_ID",
+  as: "departmentDetails",
 });
 
 export default BorrowingTransaction;

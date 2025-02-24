@@ -30,6 +30,7 @@ export const getBorrowTransactions = async (
       include: [
         { model: Employee, as: "borrowerEmp" },
         { model: Item, as: "borrowedItemDetails" },
+        { model: Employee, as: "ownerEmp" },
       ],
       order: [["createdAt", "DESC"]],
     });
@@ -291,5 +292,28 @@ export const editBorrowTransaction = async (
   } catch (error) {
     console.error("Unable to edit transaction. ", error);
     res.status(500).json({ message: "Unable to edit transaction. ", error });
+  }
+};
+
+export const getBorrowingTransactionByDpt = async (
+  req: express.Request,
+  res: express.Response
+): Promise<any> => {
+  const { departmentId } = req.query;
+
+  if (!departmentId) {
+    return res.status(400).json({ message: "Department ID is missing. " });
+  }
+  try {
+    const transactions = await BorrowingTransaction.findAll({
+      where: { DPT_ID: departmentId },
+    });
+
+    res.status(200).json(transactions);
+  } catch (error) {
+    console.error("Unable to get all transactions. ", error);
+    res
+      .status(500)
+      .json({ message: "Unable to get all transactions. ", error });
   }
 };
