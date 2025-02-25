@@ -1,8 +1,10 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
 import Employee from "./employee.js";
-import ItemCategory from "./item_category.js";
 import ItemStatus from "./item_status.js";
+import ItemModel from "./itemModel.js";
+
+//mao ni atong item stock
 class Item extends Model {}
 
 Item.init(
@@ -14,33 +16,27 @@ Item.init(
       unique: true,
       primaryKey: true,
     },
-
     name: {
-      type: DataTypes.STRING(45),
-      allowNull: false,
-    },
-    description: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     quantity: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-
+    status: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
     ics: {
       type: DataTypes.STRING(45),
-      allowNull: true,
+      defaultValue: 0,
     },
     are_no: {
       type: DataTypes.STRING(45),
       allowNull: true,
     },
     prop_no: {
-      type: DataTypes.STRING(45),
-      allowNull: true,
-    },
-    serial_no: {
       type: DataTypes.STRING(45),
       allowNull: true,
     },
@@ -62,77 +58,52 @@ Item.init(
     },
     accountable_emp: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
     },
     total_value: {
       type: DataTypes.FLOAT,
-      allowNull: false,
+      allowNull: true,
     },
     remarks: {
-      type: DataTypes.STRING(100),
-      allowNull: true,
-    },
-    belong_dpt: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-
-    //item status
-    status: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING(45),
       allowNull: false,
     },
-
-    //category of the item
-    category_item: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-
-    //check if deleted
     deleted: {
       type: DataTypes.TINYINT,
-      allowNull: false,
       defaultValue: 0,
     },
-
-    //who admin added
-    //emp id
     added_by: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    OWNER_EMP: {
+    belong_dpt: {
       type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    distributedAt: {
+      type: DataTypes.DATE,
       allowNull: true,
     },
   },
   {
     sequelize,
-    tableName: "items",
+    tableName: "distributed_items",
     timestamps: true,
   }
 );
-
-Item.belongsTo(Employee, {
-  foreignKey: "accountable_emp",
-  as: "itemCustodian",
-});
-
-Item.belongsTo(ItemCategory, {
-  foreignKey: "category_item",
-  as: "categoryItemDetails",
-});
 
 Item.belongsTo(ItemStatus, {
   foreignKey: "status",
   as: "itemStatusDetails",
 });
 
-//item owner
 Item.belongsTo(Employee, {
-  foreignKey: "OWNER_EMP",
+  foreignKey: "accountable_emp",
   as: "ownerEmpDetails",
+});
+Item.belongsTo(ItemModel, {
+  foreignKey: "ITEM_ID",
+  as: "itemDetails",
 });
 
 export default Item;

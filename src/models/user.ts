@@ -30,8 +30,9 @@ User.init(
       allowNull: true,
     },
     is_active: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.TINYINT,
       allowNull: false,
+      defaultValue: 1,
     },
     role: {
       type: DataTypes.INTEGER,

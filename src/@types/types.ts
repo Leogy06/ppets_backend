@@ -1,6 +1,7 @@
 import BorrowingTransaction from "../models/borrowing_logs.js";
 import Item from "../models/item.js";
 import ItemCategory from "../models/item_category.js";
+import ItemModel from "../models/itemModel.js";
 import Notification from "../models/notificationModel.js";
 
 export interface EmployeeProps {
@@ -96,4 +97,13 @@ export interface NotificationProps extends Notification {
   ID: number;
   MESSAGE: number;
   READ: number;
+}
+
+//items new
+export interface ItemModelProps extends ItemModel {
+  ID: number;
+  ITEM_ID: number;
+  ITEM_RECIEVER: number;
+  ITEM_QUANTITY: number;
+  RECEIVED_AT: Date;
 }

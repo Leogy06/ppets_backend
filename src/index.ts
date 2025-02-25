@@ -12,12 +12,13 @@ import { Server } from "socket.io";
 import employee_routes from "./routes/employee_routes.js";
 import user_routes from "./routes/user_routes.js";
 import department_routes from "./routes/department_routes.js";
-import item_routes from "./routes/item_routes.js";
 import item_category_routes from "./routes/item_category_routes.js";
 import borrowing_routes from "./routes/borrowing_routes.js";
 import user_type_routes from "./routes/user_type_routes.js";
 import processingStatus_routes from "./routes/processingStatus_routes.js";
 import notification_routes from "./routes/notifcation_routes.js";
+import distributedItem_routes from "./routes/distributedItem_routes.js";
+import item_routes from "./routes/item_routes.js";
 config();
 
 const app = express();
@@ -65,8 +66,8 @@ app.use("/departments", protectRoute, department_routes);
 //user routes
 app.use("/user", user_routes);
 
-//item routes
-app.use("/item", protectRoute, item_routes);
+//item routes // distrivuted item
+app.use("/item", protectRoute, distributedItem_routes);
 
 //item category
 app.use("/item-category", protectRoute, item_category_routes);
@@ -82,6 +83,10 @@ app.use("/status_process", protectRoute, processingStatus_routes);
 
 //notfication
 app.use("/notification", protectRoute, notification_routes);
+
+//item
+
+app.use("/items-stock", protectRoute, item_routes);
 
 const startServer = () => {
   //synchronize model's prop with db's table column

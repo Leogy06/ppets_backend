@@ -1,33 +1,9 @@
 import { Router } from "express";
-import {
-  addItem,
-  deleteItem,
-  editItem,
-  getItemByEmployeeDpt,
-  getItemById,
-  getItems,
-  getItemsByOwner,
-} from "../controllers/item_controllers.js";
+import { createItem, getItems } from "../controllers/items_controller.js";
+import itemValidationRules from "../middlewares/itemValidations.js";
 
 const item_routes = Router()
-  //add item
-  .post("/", addItem)
-
-  //get items
-  .get("/", getItems)
-
-  //get item by id
-  .get("/byId/:itemId", getItemById)
-
-  //edit item
-  .put("/:id", editItem)
-
-  //delete item
-  .delete("/", deleteItem)
-
-  //get items by owned
-  .get("/:empId", getItemsByOwner)
-
-  .get("/byDepartment/:department", getItemByEmployeeDpt);
+  .post("/", itemValidationRules, createItem)
+  .get("/", getItems);
 
 export default item_routes;

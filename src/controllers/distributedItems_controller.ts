@@ -239,12 +239,15 @@ export const getItemByEmployeeDpt = async (
     const isDeptExist = await Department.findByPk(department);
 
     if (!isDeptExist) {
-      return res.status(404).json({ message: "Employee does not exist" });
+      return res.status(404).json({ message: "Department does not exist" });
     }
 
     const items = await Item.findAll({
       where: { belong_dpt: department },
-      include: [{ model: Employee, as: "itemCustodian" }],
+      include: [
+        { model: Employee, as: "ownerEmpDetails" },
+        { model: ItemStatus, as: "itemStatusDetails" },
+      ],
     });
 
     res.status(200).json(items);

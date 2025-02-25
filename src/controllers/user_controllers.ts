@@ -72,9 +72,7 @@ export const addUser = async (
 
     //check if role id exist
     if (isRoleIDExist === 0) {
-      return res
-        .status(400)
-        .json({ message: "Role id does not exist.", user_types, employees });
+      return res.status(400).json({ message: "Role id does not exist." });
     }
 
     //check if duplicate username
