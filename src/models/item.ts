@@ -97,9 +97,14 @@ Item.init(
     },
 
     //who admin added
+    //emp id
     added_by: {
       type: DataTypes.INTEGER,
       allowNull: false,
+    },
+    OWNER_EMP: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
   },
   {
@@ -122,6 +127,12 @@ Item.belongsTo(ItemCategory, {
 Item.belongsTo(ItemStatus, {
   foreignKey: "status",
   as: "itemStatusDetails",
+});
+
+//item owner
+Item.belongsTo(Employee, {
+  foreignKey: "OWNER_EMP",
+  as: "ownerEmpDetails",
 });
 
 export default Item;

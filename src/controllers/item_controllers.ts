@@ -34,6 +34,8 @@ export const addItem = async (
     added_by,
     //added auto generate
     //created auto generate
+    OWNER_EMP,
+    belong_dpt,
   } = request.body;
 
   try {
@@ -43,7 +45,8 @@ export const addItem = async (
       !quantity ||
       !unit_value ||
       !category_item ||
-      !added_by
+      !added_by ||
+      !belong_dpt
     ) {
       return response.status(400).json({ message: "All fields are required." });
     }
@@ -66,6 +69,8 @@ export const addItem = async (
       status: 1,
       category_item,
       added_by,
+      belong_dpt,
+      OWNER_EMP,
     });
     response.status(201).json(newItem);
 
@@ -88,6 +93,7 @@ export const getItems = async (
       include: [
         { model: Employee, as: "itemCustodian" },
         { model: ItemCategory, as: "categoryItemDetails" },
+        { model: Employee, as: "ownerEmpDetails" },
       ],
     });
     response.status(200).json(items);

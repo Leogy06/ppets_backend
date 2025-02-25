@@ -128,8 +128,6 @@ export const editEmployee = async (
     UPDATED_BY,
   } = req.body;
 
-  console.log({ UPDATED_BY });
-
   try {
     if (!ID) {
       return res.status(500).json({ message: "ID is empty." });
