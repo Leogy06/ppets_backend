@@ -1,7 +1,6 @@
 import Express from "express";
 import { validationResult } from "express-validator";
 import ItemModel from "../models/itemModel.js";
-import { ItemModelProps } from "../@types/types.js";
 
 //distributed item
 export const createItem = async (
@@ -14,14 +13,29 @@ export const createItem = async (
     return res.status(400).json(errors);
   }
 
-  const { item_id, item_reciever, item_quantity } = req.body;
+  const {
+    ITEM_NAME,
+    DESCRIPTION,
+    STOCK_QUANTITY,
+    UNIT_VALUE,
+    SERIAL_NO,
+    PROP_NO,
+    REMARKS,
+    DEPARTMENT_ID,
+  } = req.body;
   try {
-    const newItem = (await ItemModel.create({
-      ITEM_ID: item_id,
-      ITEM_RECIEVER: item_reciever,
-      ITEM_QUANTITY: item_quantity,
-      RECEIVED_AT: new Date(),
-    })) as ItemModelProps;
+    const newItem = await ItemModel.create({
+      ITEM_NAME,
+      DESCRIPTION,
+      STOCK_QUANTITY,
+      UNIT_VALUE,
+      TOTAL_VALUE: UNIT_VALUE * STOCK_QUANTITY,
+      SERIAL_NO,
+      PROP_NO,
+      REMARKS,
+      ORIGINAL_STOCK: STOCK_QUANTITY,
+      DEPARTMENT_ID,
+    });
 
     res.status(201).json(newItem);
   } catch (error) {
@@ -30,9 +44,20 @@ export const createItem = async (
   }
 };
 
-export const getItems = async (req: Express.Request, res: Express.Response) => {
+export const getItems = async (
+  req: Express.Request,
+  res: Express.Response
+): Promise<any> => {
+  const { DEPARTMENT_ID } = req.query;
+
+  if (!DEPARTMENT_ID) {
+    return res.status(400).json({ message: "Department ID is required. " });
+  }
   try {
-    const items = (await ItemModel.findAll()) as ItemModelProps[];
+    const items = await ItemModel.findAll({
+      where: { DEPARTMENT_ID },
+      order: [["createdAt", "DESC"]],
+    });
 
     res.status(200).json(items);
   } catch (error) {

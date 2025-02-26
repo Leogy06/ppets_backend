@@ -3,6 +3,7 @@ import sequelize from "../db/config.js";
 import Employee from "./employee.js";
 import ItemStatus from "./item_status.js";
 import ItemModel from "./itemModel.js";
+import ItemCategory from "./item_category.js";
 
 //mao ni atong item stock
 class Item extends Model {}
@@ -15,6 +16,10 @@ Item.init(
       allowNull: false,
       unique: true,
       primaryKey: true,
+    },
+    ITEM_ID: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     name: {
       type: DataTypes.INTEGER,
@@ -91,19 +96,5 @@ Item.init(
     timestamps: true,
   }
 );
-
-Item.belongsTo(ItemStatus, {
-  foreignKey: "status",
-  as: "itemStatusDetails",
-});
-
-Item.belongsTo(Employee, {
-  foreignKey: "accountable_emp",
-  as: "ownerEmpDetails",
-});
-Item.belongsTo(ItemModel, {
-  foreignKey: "ITEM_ID",
-  as: "itemDetails",
-});
 
 export default Item;

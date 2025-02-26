@@ -1,6 +1,6 @@
 import express from "express";
 import BorrowingTransaction from "../models/borrowing_logs.js";
-import Item from "../models/item.js";
+import Item from "../models/distributedItemModel.js";
 import Employee from "../models/employee.js";
 import sequelize from "../db/config.js";
 import {

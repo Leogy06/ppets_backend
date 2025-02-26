@@ -1,7 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
 import Employee from "./employee.js";
-import Item from "./item.js";
+import Item from "./distributedItemModel.js";
 
 //mao ni ang distributed item
 class ItemModel extends Model {}
@@ -15,25 +15,50 @@ ItemModel.init(
       unique: true,
       allowNull: false,
     },
-    ITEM_ID: {
+    ITEM_NAME: {
+      type: DataTypes.STRING(45),
+      allowNull: false,
+    },
+    DESCRIPTION: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
+    UNIT_VALUE: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+    },
+    TOTAL_VALUE: {
+      type: DataTypes.DECIMAL(10, 2),
+    },
+    STOCK_QUANTITY: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    ITEM_RECIEVER: {
+    ORIGINAL_STOCK: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    ITEM_QUANTITY: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    DISTRIBUTED_AT: {
+    RECEIVED_AT: {
       type: DataTypes.DATE,
-      allowNull: false,
+      defaultValue: new Date(),
     },
-    DISTRIBUTED_BY: {
+    PROP_NO: {
+      type: DataTypes.STRING(45),
+      allowNull: false,
+      unique: true,
+    },
+    SERIAL_NO: {
+      type: DataTypes.STRING(45),
+      allowNull: false,
+      unique: true,
+    },
+    DEPARTMENT_ID: {
       type: DataTypes.INTEGER,
       allowNull: false,
+    },
+    REMARKS: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
   },
   {
@@ -42,19 +67,5 @@ ItemModel.init(
     tableName: "items",
   }
 );
-
-ItemModel.belongsTo(Item, {
-  foreignKey: "ITEM_ID",
-  as: "itemDetails",
-});
-
-ItemModel.belongsTo(Employee, {
-  foreignKey: "ITEM_RECIEVER",
-  as: "empReceiverDetails",
-});
-ItemModel.belongsTo(Employee, {
-  foreignKey: "DISTRIBUTED_BY",
-  as: "empDistributorDetails",
-});
 
 export default ItemModel;

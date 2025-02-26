@@ -86,7 +86,7 @@ app.use("/notification", protectRoute, notification_routes);
 
 //item
 
-app.use("/items-stock", protectRoute, item_routes);
+app.use("/api/item", protectRoute, item_routes);
 
 const startServer = () => {
   //synchronize model's prop with db's table column

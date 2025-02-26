@@ -1,5 +1,5 @@
 import BorrowingTransaction from "../models/borrowing_logs.js";
-import Item from "../models/item.js";
+import Item from "../models/distributedItemModel.js";
 import ItemCategory from "../models/item_category.js";
 import ItemModel from "../models/itemModel.js";
 import Notification from "../models/notificationModel.js";
@@ -102,8 +102,9 @@ export interface NotificationProps extends Notification {
 //items new
 export interface ItemModelProps extends ItemModel {
   ID: number;
-  ITEM_ID: number;
-  ITEM_RECIEVER: number;
-  ITEM_QUANTITY: number;
-  RECEIVED_AT: Date;
+  ITEM_NAME: string;
+  DESCRIPTION: string;
+  STOCK_QUANTITY: number;
+  UNIT_VALUE: number;
+  TOTAL_VALUE: number;
 }

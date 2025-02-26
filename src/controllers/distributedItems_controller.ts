@@ -1,5 +1,5 @@
 import express from "express";
-import Item from "../models/item.js";
+import Item from "../models/distributedItemModel.js";
 import { Op } from "sequelize";
 import { ItemProps } from "../@types/types.js";
 import Employee from "../models/employee.js";
@@ -81,7 +81,6 @@ export const addItem = async (
   }
 };
 
-//add items
 export const getItems = async (
   request: express.Request,
   response: express.Response
@@ -90,11 +89,6 @@ export const getItems = async (
     const items = await Item.findAll({
       where: { deleted: 0 },
       order: [["name", "ASC"]],
-      include: [
-        { model: Employee, as: "itemCustodian" },
-        { model: ItemCategory, as: "categoryItemDetails" },
-        { model: Employee, as: "ownerEmpDetails" },
-      ],
     });
     response.status(200).json(items);
   } catch (error) {
@@ -244,10 +238,6 @@ export const getItemByEmployeeDpt = async (
 
     const items = await Item.findAll({
       where: { belong_dpt: department },
-      include: [
-        { model: Employee, as: "ownerEmpDetails" },
-        { model: ItemStatus, as: "itemStatusDetails" },
-      ],
     });
 
     res.status(200).json(items);

@@ -1,6 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
-import Item from "./item.js";
+import Item from "./distributedItemModel.js";
 import Employee from "./employee.js";
 import Department from "./department.js";
 import BorrowingStatus from "./borrowing_status.js";
