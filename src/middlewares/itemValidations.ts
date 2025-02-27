@@ -9,7 +9,8 @@ const itemValidationRules = [
     .withMessage("Invalid stock quantity value. Must be a number"),
   body("SERIAL_NO").notEmpty().withMessage("Serial Number is missing."),
   body("PROP_NO").notEmpty().withMessage("Property Number is missing."),
-  body("DEPARTMENT_ID").notEmpty().withMessage("Department IDe is missing."),
+  body("DEPARTMENT_ID").notEmpty().withMessage("Department ID is missing."),
+  body("RECEIVED_AT").notEmpty().withMessage("Received date is missing."),
 ];
 
 export default itemValidationRules;

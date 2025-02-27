@@ -1,6 +1,7 @@
 import Express from "express";
 import { validationResult } from "express-validator";
 import ItemModel from "../models/itemModel.js";
+import { ItemModelProps } from "../@types/types.js";
 
 //distributed item
 export const createItem = async (
@@ -22,6 +23,7 @@ export const createItem = async (
     PROP_NO,
     REMARKS,
     DEPARTMENT_ID,
+    RECEIVED_AT,
   } = req.body;
   try {
     const newItem = await ItemModel.create({
@@ -35,6 +37,7 @@ export const createItem = async (
       REMARKS,
       ORIGINAL_STOCK: STOCK_QUANTITY,
       DEPARTMENT_ID,
+      RECEIVED_AT,
     });
 
     res.status(201).json(newItem);
@@ -63,5 +66,51 @@ export const getItems = async (
   } catch (error) {
     console.error("Unable to get items. ", error);
     res.status(500).json({ message: "Unable to get items. ", error });
+  }
+};
+
+//set delete to 1
+export const deleteItem = async (
+  req: Express.Request,
+  res: Express.Response
+): Promise<any> => {
+  const { itemId } = req.params;
+
+  const action = Number(req.params.action);
+
+  if (!itemId) {
+    return res.status(400).json({ message: "Item id is required. " });
+  }
+
+  console.log("action ", action);
+
+  if (action === null || action === undefined) {
+    return res.status(400).json({ message: "Action is required. " });
+  }
+
+  if (isNaN(action)) {
+    return res.status(400).json({ message: "Action is not a number" });
+  }
+
+  try {
+    const item = (await ItemModel.findByPk(itemId)) as ItemModelProps;
+
+    if (!item) {
+      return res.status(404).json({ message: "Item does not exist. " });
+    }
+
+    item.DELETE = action;
+    const result = await item.save();
+
+    const message =
+      action === 1
+        ? "Item was deleted"
+        : action === 0
+        ? "Item was restored"
+        : "Unknown action.";
+    res.status(200).json({ message, result });
+  } catch (error) {
+    console.error("Unable to delete item. ", error);
+    res.status(500).json({ message: "unable to delete item. ", error });
   }
 };

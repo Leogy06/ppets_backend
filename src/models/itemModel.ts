@@ -40,7 +40,7 @@ ItemModel.init(
     },
     RECEIVED_AT: {
       type: DataTypes.DATE,
-      defaultValue: new Date(),
+      allowNull: false,
     },
     PROP_NO: {
       type: DataTypes.STRING(45),
@@ -59,6 +59,10 @@ ItemModel.init(
     REMARKS: {
       type: DataTypes.TEXT,
       allowNull: true,
+    },
+    DELETE: {
+      type: DataTypes.TINYINT,
+      defaultValue: 0,
     },
   },
   {
