@@ -69,7 +69,7 @@ export const getItems = async (
   }
 };
 
-//set delete to 1
+//set delete or restore item
 export const deleteItem = async (
   req: Express.Request,
   res: Express.Response
@@ -112,5 +112,30 @@ export const deleteItem = async (
   } catch (error) {
     console.error("Unable to delete item. ", error);
     res.status(500).json({ message: "unable to delete item. ", error });
+  }
+};
+
+export const getUndistributedItem = async (
+  req: Express.Request,
+  res: Express.Response
+): Promise<any> => {
+  const itemId = Number(req.params.itemId);
+
+  if (!itemId) return res.status(400).json({ message: "Item id is required." });
+
+  if (isNaN(itemId))
+    return res.status(400).json({ message: "Item id is not a number." });
+
+  try {
+    const item = await ItemModel.findByPk(itemId);
+
+    if (!item) return res.status(404).json({ message: "Item does not exist." });
+
+    res.status(200).json(item);
+  } catch (error) {
+    console.error("unable to get undistributed item. ", error);
+    res
+      .status(500)
+      .json({ message: "Unable to get undistributed item. ", error });
   }
 };

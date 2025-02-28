@@ -1,9 +1,5 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
-import Employee from "./employee.js";
-import ItemStatus from "./item_status.js";
-import ItemModel from "./itemModel.js";
-import ItemCategory from "./item_category.js";
 
 //mao ni atong item stock
 class Item extends Model {}
@@ -23,7 +19,7 @@ Item.init(
     },
     name: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     quantity: {
       type: DataTypes.INTEGER,
@@ -35,7 +31,7 @@ Item.init(
     },
     ics: {
       type: DataTypes.STRING(45),
-      defaultValue: 0,
+      allowNull: true,
     },
     are_no: {
       type: DataTypes.STRING(45),
@@ -79,15 +75,19 @@ Item.init(
     },
     added_by: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     belong_dpt: {
       type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    DISTRIBUTED_BY: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
-    distributedAt: {
+    DISTRIBUTED_ON: {
       type: DataTypes.DATE,
-      allowNull: true,
+      defaultValue: new Date(),
     },
   },
   {

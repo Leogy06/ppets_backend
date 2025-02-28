@@ -1,11 +1,11 @@
 import express from "express";
 import Item from "../models/distributedItemModel.js";
 import { Op } from "sequelize";
-import { ItemProps } from "../@types/types.js";
-import Employee from "../models/employee.js";
+import { ItemModelProps, ItemProps } from "../@types/types.js";
 import Department from "../models/department.js";
 import ItemCategory from "../models/item_category.js";
 import ItemStatus from "../models/item_status.js";
+import ItemModel from "../models/itemModel.js";
 
 //get items not deleted
 //and ascend by description
@@ -14,64 +14,60 @@ export const addItem = async (
   response: express.Response
 ): Promise<any> => {
   const {
-    name,
-    description,
+    ITEM_ID,
     quantity,
     ics,
-    are_no,
-    prop_no,
-    serial_no,
     pis_no,
-    class_no,
-    acc_code,
-    unit_value,
+    acct_code,
     accountable_emp,
-    //no need total value,
     remarks,
-    //status should be one upon creating
-    category_item,
-    //deleted is 0 ofcourse
-    added_by,
-    //added auto generate
-    //created auto generate
-    OWNER_EMP,
-    belong_dpt,
+    DISTRIBUTED_BY,
+    are_no,
   } = request.body;
 
+  if (!quantity || !accountable_emp || !DISTRIBUTED_BY || !are_no) {
+    return response.status(400).json({ message: "All fields are required." });
+  }
+
+  if (quantity < 0) {
+    return response.status(400).json({ message: "Quantity is negative" });
+  }
+
   try {
-    if (
-      !name ||
-      !description ||
-      !quantity ||
-      !unit_value ||
-      !category_item ||
-      !added_by ||
-      !belong_dpt
-    ) {
-      return response.status(400).json({ message: "All fields are required." });
+    const undistributedItem = (await ItemModel.findByPk(
+      ITEM_ID
+    )) as ItemModelProps;
+
+    if (!undistributedItem)
+      return response.status(404).json({ message: "Item does not exist." });
+
+    if (quantity > undistributedItem.STOCK_QUANTITY) {
+      response
+        .status(400)
+        .json({ message: "Quantity are much more than the stock." });
     }
 
-    const newItem = await Item.create({
-      name,
-      description,
+    const newItem: Partial<Item> = await Item.create({
+      ITEM_ID,
       quantity,
       ics,
-      are_no,
-      prop_no,
-      serial_no,
       pis_no,
-      class_no,
-      acc_code,
-      unit_value,
+      acct_code,
       accountable_emp,
-      total_value: unit_value * quantity,
       remarks,
+      are_no,
+      DISTRIBUTED_ON: new Date(),
+      DISTRIBUTED_BY,
       status: 1,
-      category_item,
-      added_by,
-      belong_dpt,
-      OWNER_EMP,
+      unit_value: undistributedItem.UNIT_VALUE,
+      total_value: undistributedItem.UNIT_VALUE * quantity,
     });
+
+    //deduct the quantity
+    undistributedItem.STOCK_QUANTITY -= quantity;
+
+    await undistributedItem.save();
+
     response.status(201).json(newItem);
 
     // Proceed with adding the item to the database or further processing

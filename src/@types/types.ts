@@ -108,4 +108,5 @@ export interface ItemModelProps extends ItemModel {
   UNIT_VALUE: number;
   TOTAL_VALUE: number;
   DELETE: number;
+  ORIGINAL_STOCK: number;
 }
