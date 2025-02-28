@@ -1,5 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
+import ItemModel from "./itemModel.js";
 
 //mao ni atong item stock
 class Item extends Model {}
@@ -89,6 +90,10 @@ Item.init(
       type: DataTypes.DATE,
       defaultValue: new Date(),
     },
+    ORIGINAL_QUANTITY: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
   },
   {
     sequelize,
@@ -96,5 +101,10 @@ Item.init(
     timestamps: true,
   }
 );
+
+Item.belongsTo(ItemModel, {
+  foreignKey: "ITEM_ID",
+  as: "itemDetails",
+});
 
 export default Item;
