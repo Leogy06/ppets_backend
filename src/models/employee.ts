@@ -1,6 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
-import BorrowingTransaction from "./borrowing_logs.js";
+import BorrowingTransaction from "./transactionModel.js";
 import Department from "./department.js";
 
 class Employee extends Model {}
