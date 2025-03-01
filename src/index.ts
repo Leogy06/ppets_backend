@@ -13,12 +13,14 @@ import employee_routes from "./routes/employee_routes.js";
 import user_routes from "./routes/user_routes.js";
 import department_routes from "./routes/department_routes.js";
 import item_category_routes from "./routes/item_category_routes.js";
-import borrowing_routes from "./routes/borrowing_routes.js";
 import user_type_routes from "./routes/user_type_routes.js";
 import processingStatus_routes from "./routes/processingStatus_routes.js";
 import notification_routes from "./routes/notifcation_routes.js";
 import distributedItem_routes from "./routes/distributedItem_routes.js";
 import item_routes from "./routes/item_routes.js";
+import transactionRoutes from "./routes/transactionRoutes.js";
+
+//env config
 config();
 
 const app = express();
@@ -73,9 +75,9 @@ app.use("/item", protectRoute, distributedItem_routes);
 app.use("/item-category", protectRoute, item_category_routes);
 
 //borrowing
-app.use("/borrowing", protectRoute, borrowing_routes);
+app.use("/transaction", protectRoute, transactionRoutes);
 
-//user type
+//user types
 app.use("/user_type", user_type_routes);
 
 //status process
