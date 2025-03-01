@@ -6,6 +6,8 @@ import Department from "../models/department.js";
 import ItemCategory from "../models/item_category.js";
 import ItemStatus from "../models/item_status.js";
 import ItemModel from "../models/itemModel.js";
+import Notification from "../models/notificationModel.js";
+import BorrowingTransaction from "../models/transactionModel.js";
 
 //get items not deleted
 //and ascend by description
@@ -25,7 +27,7 @@ export const addItem = async (
     are_no,
   } = request.body;
 
-  console.log("item id ", ITEM_ID);
+  console.log("are no ", are_no);
 
   if (!quantity || !accountable_emp || !DISTRIBUTED_BY || !are_no) {
     return response.status(400).json({ message: "All fields are required." });
@@ -49,6 +51,32 @@ export const addItem = async (
         .json({ message: "Quantity are much more than the stock." });
     }
 
+    //check if prop, are # are duplicated
+    const isAreExist = await Item.count({ where: { are_no } });
+
+    if (isAreExist > 0)
+      return response.status(400).json({ message: " Are # already exist." });
+
+    //deduct the quantity
+    undistributedItem.STOCK_QUANTITY -= quantity;
+
+    //create borrow transaction saying the transaction has accomplished.
+
+    await BorrowingTransaction.create({
+      borrowedItem: ITEM_ID,
+      RECEIVED_BY: accountable_emp,
+      status: 1,
+      remarks: remarks,
+      quantity: quantity,
+      DPT_ID: undistributedItem.DEPARTMENT_ID,
+    });
+
+    //create notification saying the item is distributed to the employee
+    await Notification.create({
+      MESSAGE: `The ${undistributedItem.ITEM_NAME} has been distributed`,
+      FOR_EMP: accountable_emp, //distributed employee
+    });
+
     const newItem: Partial<Item> = await Item.create({
       ITEM_ID,
       quantity,
@@ -67,17 +95,14 @@ export const addItem = async (
       belong_dpt: undistributedItem.DEPARTMENT_ID,
     });
 
-    //deduct the quantity
-    undistributedItem.STOCK_QUANTITY -= quantity;
-
     await undistributedItem.save();
 
     response.status(201).json(newItem);
 
     // Proceed with adding the item to the database or further processing
   } catch (error) {
-    console.error(`Unable to add item. - ${error}`);
-    response.status(500).json({ message: `Unable to add item. - ${error}` });
+    console.error(`\x1b[31m\x1b[1m✖ Unable to add item. - ${error}`);
+    response.status(500).json({ message: ` Unable to add item. - ${error}` });
   }
 };
 
