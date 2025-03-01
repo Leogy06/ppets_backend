@@ -6,7 +6,7 @@ import {
   getBorrowingTransactionByDpt,
   getBorrowTransactionByEmployee,
   getBorrowTransactions,
-} from "../controllers/borrowing_controller.js";
+} from "../controllers/transactionController.js";
 
 const transactionRoutes = Router()
   .get("/", getBorrowTransactions)

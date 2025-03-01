@@ -354,14 +354,29 @@ export const createLendTransaction = async (
       .json({ message: "Required fields are empty. " });
   }
 
+  //check if they lend themself
+  if (borrower === owner) {
+    return response.status(400).json({ message: "You can't lend yourself." });
+  }
+
   try {
-    const isItemExist = (await ItemModel.findByPk(
-      borrowedItem
-    )) as ItemModelProps;
+    //check if item exist in distributed items
+    const isItemExist = (await Item.findByPk(borrowedItem, {
+      include: [{ model: ItemModel, as: "itemDetails" }],
+    })) as ItemProps;
+
+    //check if request quantity is more than the stock quantity
+    if (quantity > isItemExist.quantity) {
+      return response.status(400).json({
+        message: "Requesting quantity is more than the stock quantity.",
+      });
+    }
 
     if (!isItemExist) {
       return response.status(404).json({ message: "Item does not exist." });
     }
+
+    console.log("item ", isItemExist);
 
     const empBorrower = (await Employee.findByPk(borrower)) as any;
 
@@ -381,11 +396,11 @@ export const createLendTransaction = async (
       where: { role: 1, DEPARTMENT_USER: DPT_ID },
     })) as any;
 
-    const notification = await Notification.create({
+    await Notification.create({
       MESSAGE: `Owner ${empOwner.FIRSTNAME} ${empOwner.LASTNAME} ${
         empOwner.MIDDLENAME ?? ""
       } ${empOwner.SUFFIX ?? ""} would like to lend the ${
-        isItemExist.ITEM_NAME
+        isItemExist?.itemDetails.ITEM_NAME
       } to ${empBorrower.FIRSTNAME} ${empBorrower.LASTNAME} ${
         empBorrower.MIDDLENAME ?? ""
       } ${empBorrower.SUFFIX ?? ""}`,
