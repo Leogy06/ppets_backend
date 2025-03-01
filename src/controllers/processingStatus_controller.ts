@@ -1,5 +1,5 @@
 import express from "express";
-import BorrowingStatus from "../models/borrowing_status.js";
+import BorrowingStatus from "../models/transactionStatusModel.js";
 
 export const getProcessingStatus = async (
   req: express.Request,
