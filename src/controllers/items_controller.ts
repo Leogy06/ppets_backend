@@ -35,7 +35,7 @@ export const createItem = async (
       SERIAL_NO,
       PROP_NO,
       REMARKS,
-      ORIGINAL_STOCK: STOCK_QUANTITY,
+      ORIGINAL_QUANTITY: STOCK_QUANTITY,
       DEPARTMENT_ID,
       RECEIVED_AT,
     });
