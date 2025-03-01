@@ -1,12 +1,14 @@
 import express from "express";
-import BorrowingTransaction from "../models/borrowing_logs.js";
+import BorrowingTransaction from "../models/transactionModel.js";
 import Item from "../models/distributedItemModel.js";
 import Employee from "../models/employee.js";
 import sequelize from "../db/config.js";
 import {
   BorrowingTransactionProps,
   EmployeeProps,
+  ItemModelProps,
   ItemProps,
+  UserProps,
 } from "../@types/types.js";
 import Notification from "../models/notificationModel.js";
 import {
@@ -15,7 +17,9 @@ import {
 } from "../functions/borrowingNotification.js";
 import { users } from "../sockets/socketManager.js";
 import Department from "../models/department.js";
-import BorrowingStatus from "../models/borrowing_status.js";
+import BorrowingStatus from "../models/transactionStatusModel.js";
+import ItemModel from "../models/itemModel.js";
+import User from "../models/user.js";
 
 export const getBorrowTransactions = async (
   req: express.Request,
@@ -326,5 +330,73 @@ export const getBorrowingTransactionByDpt = async (
     res
       .status(500)
       .json({ message: "Unable to get all transactions. ", error });
+  }
+};
+
+//create lend transaction
+export const createLendTransaction = async (
+  request: express.Request,
+  response: express.Response
+): Promise<any> => {
+  const {
+    borrowedItem,
+    borrower,
+    owner,
+    quantity,
+    status = 2,
+    DPT_ID,
+    remarks,
+  } = request.body;
+
+  if (!borrowedItem || !borrower || !owner || !quantity || !DPT_ID) {
+    return response
+      .status(400)
+      .json({ message: "Required fields are empty. " });
+  }
+
+  try {
+    const isItemExist = (await ItemModel.findByPk(
+      borrowedItem
+    )) as ItemModelProps;
+
+    if (!isItemExist) {
+      return response.status(404).json({ message: "Item does not exist." });
+    }
+
+    const empBorrower = (await Employee.findByPk(borrower)) as any;
+
+    const empOwner = (await Employee.findByPk(owner)) as any;
+
+    await BorrowingTransaction.create({
+      borrowedItem,
+      borrower,
+      owner,
+      quantity,
+      status,
+      DPT_ID,
+      remarks,
+    });
+
+    const user = (await User.findOne({
+      where: { role: 1, DEPARTMENT_USER: DPT_ID },
+    })) as any;
+
+    const notification = await Notification.create({
+      MESSAGE: `Owner ${empOwner.FIRSTNAME} ${empOwner.LASTNAME} ${
+        empOwner.MIDDLENAME ?? ""
+      } ${empOwner.SUFFIX ?? ""} would like to lend the ${
+        isItemExist.ITEM_NAME
+      } to ${empBorrower.FIRSTNAME} ${empBorrower.LASTNAME} ${
+        empBorrower.MIDDLENAME ?? ""
+      } ${empBorrower.SUFFIX ?? ""}`,
+      FOR_EMP: user.id,
+    });
+
+    response.status(201).json("Successfully create the lend transaction.");
+  } catch (error) {
+    console.error("Unexpected error occured. ", error);
+    response
+      .status(500)
+      .json({ message: "Unexpected error occurred. ", error });
   }
 };
