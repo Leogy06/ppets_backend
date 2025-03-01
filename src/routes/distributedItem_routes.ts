@@ -7,6 +7,7 @@ import {
   getItemById,
   getItems,
   getItemsByOwner,
+  getNotOwnedItems,
 } from "../controllers/distributedItems_controller.js";
 
 const distributedItem_routes = Router()
@@ -28,6 +29,10 @@ const distributedItem_routes = Router()
   //get items by owned
   .get("/:empId", getItemsByOwner)
 
-  .get("/byDepartment/:department", getItemByEmployeeDpt);
+  .get("/byDepartment/:department", getItemByEmployeeDpt)
+
+  // not owned items
+
+  .get("/notOwned/:empId", getNotOwnedItems);
 
 export default distributedItem_routes;

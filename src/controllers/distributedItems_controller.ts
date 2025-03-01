@@ -25,6 +25,8 @@ export const addItem = async (
     are_no,
   } = request.body;
 
+  console.log("item id ", ITEM_ID);
+
   if (!quantity || !accountable_emp || !DISTRIBUTED_BY || !are_no) {
     return response.status(400).json({ message: "All fields are required." });
   }
@@ -61,6 +63,8 @@ export const addItem = async (
       status: 1,
       unit_value: undistributedItem.UNIT_VALUE,
       total_value: undistributedItem.UNIT_VALUE * quantity,
+      ORIGINAL_QUANTITY: quantity,
+      belong_dpt: undistributedItem.DEPARTMENT_ID,
     });
 
     //deduct the quantity
@@ -203,16 +207,37 @@ export const getItemsByOwner = async (
     }
     const ownedItems = await Item.findAll({
       where: { accountable_emp: empId },
-      include: [
-        { model: ItemCategory, as: "categoryItemDetails" },
-        { model: ItemStatus, as: "itemStatusDetails" },
-      ],
+      include: [{ model: ItemModel, as: "itemDetails" }],
     });
 
     res.status(200).json(ownedItems);
   } catch (error) {
     console.error(`Unable to get items - ${error}`);
     res.status(500).json({ message: `Unable to get items. - ${error} ` });
+  }
+};
+
+//get items not owned
+export const getNotOwnedItems = async (
+  req: express.Request,
+  res: express.Response
+): Promise<any> => {
+  const { empId } = req.params;
+  const { departmentId } = req.query;
+
+  if (!empId) return res.status(400).json({ message: "Emp id is required." });
+  if (!departmentId)
+    return res.status(400).json({ message: "Department id is required." });
+  try {
+    const items = await Item.findAll({
+      where: { accountable_emp: { [Op.ne]: empId }, belong_dpt: departmentId },
+      include: [{ model: ItemModel, as: "itemDetails" }],
+    });
+
+    res.status(200).json(items);
+  } catch (error) {
+    console.error("Unexpected error. ", error);
+    res.status(500).json({ message: "Unexpected error. ", error });
   }
 };
 
@@ -255,7 +280,9 @@ export const getItemById = async (
     return res.status(400).json({ message: "Item id is required." });
   }
   try {
-    const itemFound = await Item.findByPk(itemId);
+    const itemFound = await Item.findByPk(itemId, {
+      include: [{ model: ItemModel, as: "itemDetails" }],
+    });
 
     if (!itemFound) {
       return res.status(404).json({ message: "Item does not exist." });
