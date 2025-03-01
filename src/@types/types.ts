@@ -1,4 +1,4 @@
-import BorrowingTransaction from "../models/borrowing_logs.js";
+import BorrowingTransaction from "../models/transactionModel.js";
 import Item from "../models/distributedItemModel.js";
 import ItemCategory from "../models/item_category.js";
 import ItemModel from "../models/itemModel.js";
