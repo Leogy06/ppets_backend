@@ -1,7 +1,5 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
-import Employee from "./employee.js";
-import Item from "./distributedItemModel.js";
 
 //mao ni ang distributed item
 class ItemModel extends Model {}
@@ -34,7 +32,7 @@ ItemModel.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    ORIGINAL_STOCK: {
+    ORIGINAL_QUANTITY: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
