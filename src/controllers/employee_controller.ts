@@ -23,6 +23,7 @@ export const getEmployees = async (
       where: department
         ? { DEPARTMENT_ID: department, DELETED: { [Op.or]: [0, null] } }
         : { DELETED: { [Op.or]: [0, null] } },
+      include: [{ model: Department, as: "departmentDetails" }],
     });
 
     employees.sort((a: any, b: any) =>
