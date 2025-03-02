@@ -98,6 +98,7 @@ export interface NotificationProps extends Notification {
   ID: number;
   MESSAGE: number;
   READ: number;
+  TRANSACTION_ID: number | null;
 }
 
 //items new

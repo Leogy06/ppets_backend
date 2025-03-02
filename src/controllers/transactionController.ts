@@ -8,6 +8,7 @@ import {
   EmployeeProps,
   ItemModelProps,
   ItemProps,
+  NotificationProps,
   UserProps,
 } from "../@types/types.js";
 import Notification from "../models/notificationModel.js";
@@ -316,7 +317,7 @@ export const getBorrowingTransactionByDpt = async (
       where: { DPT_ID: departmentId },
       include: [
         { model: Employee, as: "borrowerEmp" },
-        { model: Item, as: "borrowedItemDetails" },
+        { model: ItemModel, as: "itemDetails" },
         { model: Employee, as: "ownerEmp" },
         { model: Department, as: "departmentDetails" },
         { model: BorrowingStatus, as: "statusDetails" },
@@ -348,6 +349,8 @@ export const createLendTransaction = async (
     remarks,
   } = request.body;
 
+  console.log("body ", request.body);
+
   if (!borrowedItem || !borrower || !owner || !quantity || !DPT_ID) {
     return response
       .status(400)
@@ -361,12 +364,16 @@ export const createLendTransaction = async (
 
   try {
     //check if item exist in distributed items
-    const isItemExist = (await Item.findByPk(borrowedItem, {
-      include: [{ model: ItemModel, as: "itemDetails" }],
+    const isItemExist = (await ItemModel.findByPk(
+      borrowedItem
+    )) as ItemModelProps;
+
+    const itemDistribute = (await Item.findOne({
+      where: { ITEM_ID: borrowedItem },
     })) as ItemProps;
 
     //check if request quantity is more than the stock quantity
-    if (quantity > isItemExist.quantity) {
+    if (quantity > itemDistribute.quantity) {
       return response.status(400).json({
         message: "Requesting quantity is more than the stock quantity.",
       });
@@ -376,13 +383,13 @@ export const createLendTransaction = async (
       return response.status(404).json({ message: "Item does not exist." });
     }
 
-    console.log("item ", isItemExist);
+    console.log("Item details/....", isItemExist);
 
     const empBorrower = (await Employee.findByPk(borrower)) as any;
 
     const empOwner = (await Employee.findByPk(owner)) as any;
 
-    await BorrowingTransaction.create({
+    const transaction = (await BorrowingTransaction.create({
       borrowedItem,
       borrower,
       owner,
@@ -390,21 +397,33 @@ export const createLendTransaction = async (
       status,
       DPT_ID,
       remarks,
-    });
+    })) as BorrowingTransactionProps;
 
     const user = (await User.findOne({
       where: { role: 1, DEPARTMENT_USER: DPT_ID },
     })) as any;
 
+    //sending notification to the admin
     await Notification.create({
       MESSAGE: `Owner ${empOwner.FIRSTNAME} ${empOwner.LASTNAME} ${
         empOwner.MIDDLENAME ?? ""
       } ${empOwner.SUFFIX ?? ""} would like to lend the ${
-        isItemExist?.itemDetails.ITEM_NAME
+        isItemExist?.ITEM_NAME
       } to ${empBorrower.FIRSTNAME} ${empBorrower.LASTNAME} ${
         empBorrower.MIDDLENAME ?? ""
       } ${empBorrower.SUFFIX ?? ""}`,
-      FOR_EMP: user.id,
+      FOR_EMP: user.emp_id,
+      TRANSACTION_ID: transaction.id,
+    });
+
+    //sending notification to borrower
+    await Notification.create({
+      MESSAGE: `You are requesting to lend the ${isItemExist.ITEM_NAME} from ${
+        empOwner.FIRSTNAME
+      } ${empOwner.LASTNAME} ${empOwner.MIDDLENAME ?? ""} ${
+        empOwner.SUFFIX ?? ""
+      }`,
+      FOR_EMP: empBorrower.ID,
     });
 
     response.status(201).json("Successfully create the lend transaction.");
@@ -413,5 +432,108 @@ export const createLendTransaction = async (
     response
       .status(500)
       .json({ message: "Unexpected error occurred. ", error });
+  }
+};
+
+export const approvedLendTransaction = async (
+  request: express.Request,
+  response: express.Response
+): Promise<any> => {
+  const { transactionId } = request.params;
+
+  if (!transactionId) {
+    return response
+      .status(400)
+      .json({ message: "Transaction Id was missing." });
+  }
+  try {
+    const transaction = (await BorrowingTransaction.findByPk(
+      transactionId
+    )) as BorrowingTransactionProps;
+
+    if (!transaction) {
+      return response.status(404).json({ message: "Transaction not found." });
+    }
+
+    transaction.status = 1;
+
+    //create a notification sending to borrower and owner about the rejected transaction
+
+    //transaction for the borrower
+    const notification = (await Notification.create({
+      MESSAGE: "",
+      FOR_EMP: transaction.borrower,
+      TRANSACTION_ID: transaction.id,
+    })) as NotificationProps;
+
+    //saving the transaction
+    const result = await transaction.save();
+
+    response.status(200).json({
+      message: "Transaction approved successfully. ",
+      result,
+      notification,
+    });
+  } catch (error) {
+    console.error("\x1b[32m\x1b[1m✔ Unexpecter error occured. ", error);
+    response
+      .status(500)
+      .json({ message: "Unexpecter error occurred. ", error });
+  }
+};
+
+//Reject transaction
+export const rejectTransaction = async (
+  request: express.Request,
+  response: express.Response
+): Promise<any> => {
+  const { transactionId } = request.params;
+
+  if (!transactionId) {
+    return response
+      .status(400)
+      .json({ message: "Transaction Id was missing." });
+  }
+  try {
+    const transaction = (await BorrowingTransaction.findByPk(
+      transactionId
+    )) as BorrowingTransactionProps;
+
+    if (!transaction) {
+      return response.status(404).json({ message: "Transaction not found." });
+    }
+
+    transaction.status = 4; //reject transaction
+
+    //create notification about the rejected transaction
+
+    //notification for borrower
+    const notificationForBorrower = await Notification.create({
+      MESSAGE: "Transaction has been REJECTED.",
+      FOR_EMP: transaction.borrower,
+      TRANSACTION_ID: transaction.id,
+    });
+
+    //notification for owner
+    const notificationForOwner = await Notification.create({
+      MESSAGE: "The request has been REJECTED.",
+      FOR_EMP: transaction.owner,
+      TRANSACTION_ID: transaction.id,
+    });
+
+    //saving the transaction
+    const result = await transaction.save();
+
+    response.status(200).json({
+      message: "Transaction was rejected. ",
+      result,
+      notificationForOwner,
+      notificationForBorrower,
+    });
+  } catch (error) {
+    console.error("\x1b[32m\x1b[1m✔ Unexpecter error occured. ", error);
+    response
+      .status(500)
+      .json({ message: "Unexpecter error occurred. ", error });
   }
 };

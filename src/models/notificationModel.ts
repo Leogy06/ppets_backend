@@ -24,6 +24,10 @@ Notification.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    TRANSACTION_ID: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
   },
   {
     sequelize,

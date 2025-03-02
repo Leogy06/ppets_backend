@@ -1,9 +1,9 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
-import Item from "./distributedItemModel.js";
 import Employee from "./employee.js";
 import Department from "./department.js";
 import BorrowingStatus from "./transactionStatusModel.js";
+import ItemModel from "./itemModel.js";
 
 class BorrowingTransaction extends Model {}
 
@@ -55,9 +55,9 @@ BorrowingTransaction.init(
 );
 
 // Define the association
-BorrowingTransaction.belongsTo(Item, {
+BorrowingTransaction.belongsTo(ItemModel, {
   foreignKey: "borrowedItem",
-  as: "borrowedItemDetails",
+  as: "itemDetails",
 });
 
 BorrowingTransaction.belongsTo(Employee, {
