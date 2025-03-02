@@ -27,8 +27,6 @@ export const addItem = async (
     are_no,
   } = request.body;
 
-  console.log("are no ", are_no);
-
   if (!quantity || !accountable_emp || !DISTRIBUTED_BY || !are_no) {
     return response.status(400).json({ message: "All fields are required." });
   }

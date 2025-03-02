@@ -34,11 +34,7 @@ export const getBorrowTransactions = async (
 
     const borrows = await BorrowingTransaction.findAll({
       where: { owner },
-      include: [
-        { model: Employee, as: "borrowerEmp" },
-        { model: Item, as: "borrowedItemDetails" },
-        { model: Employee, as: "ownerEmp" },
-      ],
+
       order: [["createdAt", "DESC"]],
     });
 
