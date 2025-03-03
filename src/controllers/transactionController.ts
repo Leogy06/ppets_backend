@@ -203,10 +203,6 @@ export const getBorrowTransactionByEmployee = async (
       where: { borrower: empIdNo },
       include: [
         {
-          model: Item,
-          as: "borrowedItemDetails",
-        },
-        {
           model: Employee,
           as: "ownerEmp",
         },
