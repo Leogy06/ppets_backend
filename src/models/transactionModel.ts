@@ -49,6 +49,7 @@ BorrowingTransaction.init(
     RECEIVED_BY: {
       type: DataTypes.INTEGER,
       allowNull: true,
+      defaultValue: null,
     },
   },
   { sequelize, timestamps: true, tableName: "borrowing_transaction" }

@@ -22,6 +22,7 @@ import BorrowingStatus from "../models/transactionStatusModel.js";
 import ItemModel from "../models/itemModel.js";
 import User from "../models/user.js";
 
+//get borrow transaciton by owner
 export const getBorrowTransactions = async (
   req: express.Request,
   res: express.Response
@@ -36,11 +37,11 @@ export const getBorrowTransactions = async (
       where: { owner },
 
       order: [["createdAt", "DESC"]],
+      include: [
+        { model: ItemModel, as: "itemDetails" },
+        { model: BorrowingStatus, as: "statusDetails" },
+      ],
     });
-
-    if (borrows.length === 0) {
-      return res.status(400).json({ message: "No borrow transaction." });
-    }
 
     res.status(200).json(borrows);
   } catch (error) {
@@ -176,7 +177,7 @@ export const createBorrowTransaction = async (
   }
 };
 
-//borrower
+//borrower get trabsaction by borrower
 export const getBorrowTransactionByEmployee = async (
   req: express.Request,
   res: express.Response
@@ -339,6 +340,7 @@ export const createLendTransaction = async (
     status = 2,
     DPT_ID,
     remarks,
+    RECEIVED_BY,
   } = request.body;
 
   console.log("body ", request.body);
@@ -389,6 +391,7 @@ export const createLendTransaction = async (
       status,
       DPT_ID,
       remarks,
+      RECEIVED_BY,
     })) as BorrowingTransactionProps;
 
     const user = (await User.findOne({
