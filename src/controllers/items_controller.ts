@@ -26,6 +26,24 @@ export const createItem = async (
     RECEIVED_AT,
   } = req.body;
   try {
+    //check if prop and srn is duplicated
+    const [isSrnExist, isPropExist] = await Promise.all([
+      await ItemModel.count({ where: { SERIAL_NO } }),
+      await ItemModel.count({ where: { PROP_NO } }),
+    ]);
+
+    if (isSrnExist > 0) {
+      return res
+        .status(400)
+        .json({ message: "Serial number was already in used." });
+    }
+
+    if (isPropExist > 0) {
+      return res
+        .status(400)
+        .json({ message: "Prop number was already in used." });
+    }
+
     const newItem = await ItemModel.create({
       ITEM_NAME,
       DESCRIPTION,
