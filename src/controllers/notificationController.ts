@@ -76,13 +76,6 @@ export const editNotification = async (
     return res.status(400).json({ message: "Notif id is missing." });
   }
 
-  if (editEntries) {
-    console.log("/////edit entries", editEntries);
-  }
-
-  if (req.body) {
-    console.log("///req body: ", req.body);
-  }
   try {
     const isNotifExist = (await Notification.findByPk(
       notifId

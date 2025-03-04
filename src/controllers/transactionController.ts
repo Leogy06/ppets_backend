@@ -51,6 +51,7 @@ export const getBorrowTransactions = async (
 };
 
 //creating borrowing transaction
+//array of items , but we will not use this
 export const createBorrowTransaction = async (
   req: express.Request,
   res: express.Response
@@ -177,7 +178,7 @@ export const createBorrowTransaction = async (
   }
 };
 
-//borrower get trabsaction by borrower
+//borrower get transaction by borrower
 export const getBorrowTransactionByEmployee = async (
   req: express.Request,
   res: express.Response
@@ -395,7 +396,7 @@ export const createLendTransaction = async (
     })) as any;
 
     //sending notification to the admin
-    await Notification.create({
+    const adminNotification = await Notification.create({
       MESSAGE: `Owner ${empOwner.FIRSTNAME} ${empOwner.LASTNAME} ${
         empOwner.MIDDLENAME ?? ""
       } ${empOwner.SUFFIX ?? ""} would like to lend the ${
@@ -408,7 +409,7 @@ export const createLendTransaction = async (
     });
 
     //sending notification to borrower
-    await Notification.create({
+    const borrowerNotification = await Notification.create({
       MESSAGE: `You are requesting to lend the ${isItemExist.ITEM_NAME} from ${
         empOwner.FIRSTNAME
       } ${empOwner.LASTNAME} ${empOwner.MIDDLENAME ?? ""} ${
@@ -416,6 +417,12 @@ export const createLendTransaction = async (
       }`,
       FOR_EMP: empBorrower.ID,
     });
+
+    //emit admin notficatiom
+    request.io.emit("notification", adminNotification);
+
+    //emit borrower notfication
+    request.io.emit("notification", borrowerNotification);
 
     response.status(201).json("Successfully create the lend transaction.");
   } catch (error) {
