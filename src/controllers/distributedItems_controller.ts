@@ -67,6 +67,7 @@ export const addItem = async (
       remarks: remarks,
       quantity: quantity,
       DPT_ID: undistributedItem.DEPARTMENT_ID,
+      owner: accountable_emp,
     });
 
     //create notification saying the item is distributed to the employee

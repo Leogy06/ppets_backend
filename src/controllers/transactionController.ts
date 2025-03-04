@@ -343,8 +343,6 @@ export const createLendTransaction = async (
     RECEIVED_BY,
   } = request.body;
 
-  console.log("body ", request.body);
-
   if (!borrowedItem || !borrower || !owner || !quantity || !DPT_ID) {
     return response
       .status(400)
@@ -376,8 +374,6 @@ export const createLendTransaction = async (
     if (!isItemExist) {
       return response.status(404).json({ message: "Item does not exist." });
     }
-
-    console.log("Item details/....", isItemExist);
 
     const empBorrower = (await Employee.findByPk(borrower)) as any;
 

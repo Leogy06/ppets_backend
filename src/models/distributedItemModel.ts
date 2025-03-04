@@ -2,7 +2,7 @@ import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
 import ItemModel from "./itemModel.js";
 
-//mao ni atong item stock
+//mao ni distributed item
 class Item extends Model {}
 
 Item.init(
