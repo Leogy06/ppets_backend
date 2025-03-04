@@ -3,14 +3,12 @@ import Item from "../models/distributedItemModel.js";
 import { Op } from "sequelize";
 import { ItemModelProps, ItemProps } from "../@types/types.js";
 import Department from "../models/department.js";
-import ItemCategory from "../models/item_category.js";
-import ItemStatus from "../models/item_status.js";
 import ItemModel from "../models/itemModel.js";
 import Notification from "../models/notificationModel.js";
 import BorrowingTransaction from "../models/transactionModel.js";
+import Employee from "../models/employee.js";
 
-//get items not deleted
-//and ascend by description
+//distribute item to employee by the admin
 export const addItem = async (
   request: express.Request,
   response: express.Response
@@ -25,10 +23,15 @@ export const addItem = async (
     remarks,
     DISTRIBUTED_BY,
     are_no,
+    addedBy,
   } = request.body;
 
   if (!quantity || !accountable_emp || !DISTRIBUTED_BY || !are_no) {
     return response.status(400).json({ message: "All fields are required." });
+  }
+
+  if (!addedBy) {
+    return response.status(400).json({ message: "Added by is empty" });
   }
 
   if (quantity < 0) {

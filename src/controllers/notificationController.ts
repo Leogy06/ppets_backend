@@ -1,35 +1,7 @@
 import Express from "express";
-import { validationResult } from "express-validator";
 import Notification from "../models/notificationModel.js";
 import Employee from "../models/employee.js";
 import { NotificationProps } from "../@types/types.js";
-
-export const createNotification = async (
-  req: Express.Request,
-  res: Express.Response
-): Promise<any> => {
-  const errors = validationResult(req);
-
-  if (!errors.isEmpty()) {
-    return res.status(400).json(errors);
-  }
-
-  const { message, for_emp } = req.body;
-
-  try {
-    const notification = await Notification.create({
-      MESSAGE: message,
-      FOR_EMP: for_emp,
-    });
-
-    req.io.emit("notification", notification);
-
-    res.status(201).json(notification);
-  } catch (error) {
-    console.error("Unable to create notification. ", error);
-    res.status(500).json({ message: "Unable to create notification. ", error });
-  }
-};
 
 export const getNotification = async (
   request: Express.Request,

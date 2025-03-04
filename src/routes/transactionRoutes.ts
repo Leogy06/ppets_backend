@@ -1,7 +1,6 @@
 import { Router } from "express";
 import {
   approvedLendTransaction,
-  createBorrowTransaction,
   createLendTransaction,
   editBorrowTransaction,
   getBorrowingTransactionByDpt,
@@ -12,7 +11,6 @@ import {
 
 const transactionRoutes = Router()
   .get("/", getBorrowTransactions)
-  .post("/", createBorrowTransaction)
   .get("/borrower", getBorrowTransactionByEmployee)
   .put("/update", editBorrowTransaction)
   //get all borrowing transaction by department

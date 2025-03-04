@@ -2,25 +2,18 @@ import express from "express";
 import BorrowingTransaction from "../models/transactionModel.js";
 import Item from "../models/distributedItemModel.js";
 import Employee from "../models/employee.js";
-import sequelize from "../db/config.js";
 import {
   BorrowingTransactionProps,
-  EmployeeProps,
   ItemModelProps,
   ItemProps,
   NotificationProps,
-  UserProps,
 } from "../@types/types.js";
 import Notification from "../models/notificationModel.js";
-import {
-  forUser,
-  handleMessageNotification,
-} from "../functions/borrowingNotification.js";
-import { users } from "../sockets/socketManager.js";
 import Department from "../models/department.js";
 import BorrowingStatus from "../models/transactionStatusModel.js";
 import ItemModel from "../models/itemModel.js";
 import User from "../models/user.js";
+import { users } from "../sockets/socketManager.js";
 
 //get borrow transaciton by owner
 export const getBorrowTransactions = async (
@@ -47,134 +40,6 @@ export const getBorrowTransactions = async (
   } catch (error) {
     console.error("Unable to get borrows: ", error);
     res.status(500).json({ message: "Unable to get borrows. ", error });
-  }
-};
-
-//creating borrowing transaction
-//array of items , but we will not use this
-export const createBorrowTransaction = async (
-  req: express.Request,
-  res: express.Response
-): Promise<express.Response | any> => {
-  const { borrowedItems } = req.body;
-  const owner = Number(req.query.owner);
-  const borrower = Number(req.query.borrower);
-
-  if (!Array.isArray(borrowedItems) || borrowedItems.length === 0) {
-    return res
-      .status(400)
-      .json({ message: "Invalid or empty items of array." });
-  }
-
-  if (borrowedItems.length === 0) {
-    return res.status(400).json({ message: "No items has been sent." });
-  }
-
-  if (!owner || !borrower) {
-    return res.status(400).json({ message: "Owner or borrower required." });
-  }
-
-  try {
-    const [empBorrower, empOwner] = await Promise.all([
-      (await Employee.findByPk(borrower)) as EmployeeProps | null,
-      (await Employee.findByPk(owner)) as EmployeeProps | null,
-    ]);
-
-    if (!empBorrower || !empOwner) {
-      return res
-        .status(404)
-        .json({ message: "Borrower or owner does not exist." });
-    }
-
-    //check if all items exist
-    let invalidItems: number[] = [];
-
-    let insufficientQuantity: {
-      id: number;
-      available: number;
-      requested: number;
-    }[] = [];
-
-    for (const item of borrowedItems) {
-      const foundItem = (await Item.findByPk(item.id)) as ItemProps;
-      if (!foundItem) {
-        invalidItems.push(item.id);
-      } else if (foundItem.quantity < item.quantity) {
-        insufficientQuantity.push({
-          id: item.id,
-          available: foundItem.quantity,
-          requested: item.quantity,
-        });
-      }
-    }
-
-    if (invalidItems.length > 0) {
-      return res
-        .status(404)
-        .json({ message: "Some items do not exist.", invalidItems });
-    }
-
-    if (insufficientQuantity.length > 0) {
-      return res.status(400).json({
-        message: "Insufficient stock for some items",
-        insufficientQuantity,
-      });
-    }
-
-    for (const item of borrowedItems) {
-      //if the status was 1 (approved), deduct the quantity
-      if (item.status === 1) {
-        await Item.update(
-          { quantity: sequelize.literal(`quantity - ${item.quantity}`) },
-          { where: { id: item.id } }
-        );
-      }
-
-      const notification = await Notification.create({
-        MESSAGE: handleMessageNotification({
-          statusProcess: item.status,
-          itemOwner: `${empOwner.LASTNAME} ${empOwner.FIRSTNAME}`,
-          itemBorrower: `${empBorrower?.LASTNAME ?? ""} ${
-            empBorrower.FIRSTNAME
-          }`,
-          itemName: item.name,
-        }),
-        FOR_EMP: forUser({ status_process: item.status, owner, borrower }),
-      });
-
-      const recipientUserId = forUser({
-        status_process: item.status,
-        owner,
-        borrower,
-      });
-
-      if (recipientUserId) {
-        const recipientSocketId = users.get(recipientUserId);
-        if (recipientSocketId) {
-          req.io.to(recipientSocketId).emit("notification", notification);
-        } else {
-          console.log(
-            `⚠️  No active socket found for user ${recipientSocketId}`
-          );
-        }
-      }
-
-      await BorrowingTransaction.create({
-        borrowedItem: item.id,
-        borrower,
-        owner,
-        quantity: item.quantity,
-        status: item.status,
-        remarks: item.remarks,
-      });
-    }
-
-    res.status(201).json({ message: "Borrowing transaction created." });
-  } catch (error) {
-    console.error("Unable to create transaction(s). ", error);
-    res
-      .status(500)
-      .json({ message: "Unable to create transaction(s). ", error });
   }
 };
 
@@ -408,6 +273,13 @@ export const createLendTransaction = async (
       TRANSACTION_ID: transaction.id,
     });
 
+    //sending to admin notifcation
+    const socketId = users.get(user.emp_id);
+
+    request.io.to(socketId).emit("send-notification", {
+      adminNotification,
+    });
+
     //sending notification to borrower
     const borrowerNotification = await Notification.create({
       MESSAGE: `You are requesting to lend the ${isItemExist.ITEM_NAME} from ${
@@ -416,13 +288,28 @@ export const createLendTransaction = async (
         empOwner.SUFFIX ?? ""
       }`,
       FOR_EMP: empBorrower.ID,
+      TRANSACTION_ID: transaction.id,
     });
 
-    //emit admin notficatiom
-    request.io.emit("notification", adminNotification);
+    //send notifcation to borrower
+    const borrowerSocketId = users.get(empBorrower.ID);
 
-    //emit borrower notfication
-    request.io.emit("notification", borrowerNotification);
+    request.io.to(borrowerSocketId).emit("send-notification", {
+      borrowerNotification,
+    });
+
+    //send notifaciton to item owner
+    const ownerNotification = await Notification.create({
+      MESSAGE: `Your Item ${isItemExist.ITEM_NAME} ${quantity} pc(s) has been requested to be lend by ${empBorrower.FIRSTNAME}`,
+      FOR_EMP: empOwner.ID,
+      TRANSACTION_ID: transaction.id,
+    });
+
+    const ownerSocketId = users.get(empOwner.ID);
+
+    request.io.to(ownerSocketId).emit("send-notification", {
+      ownerNotification,
+    });
 
     response.status(201).json("Successfully create the lend transaction.");
   } catch (error) {
@@ -444,6 +331,7 @@ export const approvedLendTransaction = async (
       .status(400)
       .json({ message: "Transaction Id was missing." });
   }
+
   try {
     const transaction = (await BorrowingTransaction.findByPk(
       transactionId
@@ -456,7 +344,6 @@ export const approvedLendTransaction = async (
     transaction.status = 1;
 
     //create a notification sending to borrower and owner about the rejected transaction
-
     //transaction for the borrower
     const notification = (await Notification.create({
       MESSAGE: "",
@@ -466,6 +353,8 @@ export const approvedLendTransaction = async (
 
     //saving the transaction
     const result = await transaction.save();
+
+    request.io.emit("notification", notification);
 
     response.status(200).json({
       message: "Transaction approved successfully. ",
