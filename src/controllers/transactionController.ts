@@ -176,7 +176,7 @@ export const getBorrowingTransactionByDpt = async (
       where: { DPT_ID: departmentId },
       include: [
         { model: Employee, as: "borrowerEmp" },
-        { model: ItemModel, as: "itemDetails" },
+        { model: ItemModel, as: "itemDetails" }, //distributed to get the distribute date
         { model: Employee, as: "ownerEmp" },
         { model: Department, as: "departmentDetails" },
         { model: BorrowingStatus, as: "statusDetails" },

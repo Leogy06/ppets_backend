@@ -6,7 +6,6 @@ import Department from "../models/department.js";
 import ItemModel from "../models/itemModel.js";
 import Notification from "../models/notificationModel.js";
 import BorrowingTransaction from "../models/transactionModel.js";
-import Employee from "../models/employee.js";
 
 //distribute item to employee by the admin
 export const addItem = async (
@@ -286,6 +285,7 @@ export const getItemByEmployeeDpt = async (
 
     const items = await Item.findAll({
       where: { belong_dpt: department },
+      include: [{ model: ItemModel, as: "itemDetails" }],
     });
 
     res.status(200).json(items);

@@ -84,4 +84,6 @@ BorrowingTransaction.belongsTo(BorrowingStatus, {
   as: "statusDetails",
 });
 
+//distributed item
+
 export default BorrowingTransaction;

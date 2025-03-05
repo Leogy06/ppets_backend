@@ -40,6 +40,10 @@ ItemModel.init(
       type: DataTypes.DATE,
       allowNull: false,
     },
+    PIC_NO: {
+      type: DataTypes.STRING(45),
+      allowNull: true,
+    },
     PROP_NO: {
       type: DataTypes.STRING(45),
       allowNull: false,
