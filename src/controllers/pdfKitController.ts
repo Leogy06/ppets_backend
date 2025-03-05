@@ -38,3 +38,36 @@ export const downloadPdf = (req: Express.Request, res: Express.Response) => {
     res.status(500).json({ message: "Unable to download PDF. ", error });
   }
 };
+
+export const renderRequestPDF = (
+  req: Express.Request,
+  res: Express.Response
+) => {
+  const { requestRows } = req.body;
+
+  try {
+    const doc = new PDFDocument({ layout: "landscape" });
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "attachment; filename=report.pdf");
+
+    doc.pipe(res);
+
+    //table request report
+
+    doc.fontSize(20).text("Requests Report", {
+      align: "center",
+    });
+
+    //columns
+
+    doc.text("Item");
+
+    doc.moveDown();
+
+    doc.end();
+  } catch (error) {
+    console.error("Unable to render request PDF. ", error);
+    res.status(500).json({ message: "Unable to render request PDF. ", error });
+  }
+};
