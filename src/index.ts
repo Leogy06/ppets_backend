@@ -19,6 +19,7 @@ import notification_routes from "./routes/notifcation_routes.js";
 import distributedItem_routes from "./routes/distributedItem_routes.js";
 import item_routes from "./routes/item_routes.js";
 import transactionRoutes from "./routes/transactionRoutes.js";
+import pdfKitRoutes from "./routes/pdfKitRoutes.js";
 
 //env config
 config();
@@ -89,6 +90,9 @@ app.use("/notification", protectRoute, notification_routes);
 //item
 
 app.use("/api/item", protectRoute, item_routes);
+
+//pdf kit
+app.use("/api/pdfkit", pdfKitRoutes);
 
 const startServer = () => {
   //synchronize model's prop with db's table column
