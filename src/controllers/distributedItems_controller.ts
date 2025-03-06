@@ -22,15 +22,10 @@ export const addItem = async (
     remarks,
     DISTRIBUTED_BY,
     are_no,
-    addedBy,
   } = request.body;
 
   if (!quantity || !accountable_emp || !DISTRIBUTED_BY || !are_no) {
     return response.status(400).json({ message: "All fields are required." });
-  }
-
-  if (!addedBy) {
-    return response.status(400).json({ message: "Added by is empty" });
   }
 
   if (quantity < 0) {
@@ -46,7 +41,7 @@ export const addItem = async (
       return response.status(404).json({ message: "Item does not exist." });
 
     if (quantity > undistributedItem.STOCK_QUANTITY) {
-      response
+      return response
         .status(400)
         .json({ message: "Quantity are much more than the stock." });
     }
