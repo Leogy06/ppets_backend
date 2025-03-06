@@ -28,8 +28,19 @@ export const addItem = async (
     return response.status(400).json({ message: "All fields are required." });
   }
 
-  if (quantity < 0) {
-    return response.status(400).json({ message: "Quantity is negative" });
+  //check if quantity is below zero
+  if (quantity <= 0) {
+    return response
+      .status(400)
+      .json({ message: "Quantity should below or equal to zero." });
+  }
+
+  const isQtyDecimal = Number(quantity);
+
+  if (!Number.isInteger(isQtyDecimal)) {
+    return response
+      .status(400)
+      .json({ message: "Quantity should NOT be Decimal." });
   }
 
   try {
@@ -52,11 +63,10 @@ export const addItem = async (
     if (isAreExist > 0)
       return response.status(400).json({ message: " Are # already exist." });
 
-    //deduct the quantity
+    //deduct the quantity in the undistributed
     undistributedItem.STOCK_QUANTITY -= quantity;
 
     //create borrow transaction saying the transaction has accomplished.
-
     await BorrowingTransaction.create({
       borrowedItem: ITEM_ID,
       RECEIVED_BY: accountable_emp,
@@ -68,6 +78,7 @@ export const addItem = async (
     });
 
     //create notification saying the item is distributed to the employee
+
     await Notification.create({
       MESSAGE: `The ${undistributedItem.ITEM_NAME} has been distributed`,
       FOR_EMP: accountable_emp, //distributed employee
