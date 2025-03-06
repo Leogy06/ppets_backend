@@ -65,6 +65,7 @@ export const addEmployee = async (
       return res.status(400).json({ message: "Missing required fields" });
     }
 
+    //check if id number is less than 5 length characters
     if (ID_NUMBER && String(ID_NUMBER).length < 5) {
       // Do something if ID_NUMBER has at least 5 characters
       return res
@@ -79,6 +80,16 @@ export const addEmployee = async (
 
     if (isIDNumberExist) {
       return res.status(400).json({ message: "ID number is duplicated." });
+    }
+
+    const numericIDNumber = Number(ID_NUMBER);
+
+    //check if id number is a whole number
+    if (!Number.isInteger(numericIDNumber)) {
+      return res.status(400).json({
+        message:
+          "ID number must be a whole number. Avoid decimals or fractions.",
+      });
     }
 
     const department = await Department.findOne({
