@@ -226,6 +226,10 @@ export const createLendTransaction = async (
       borrowedItem
     )) as ItemModelProps;
 
+    if (!isItemExist) {
+      return response.status(404).json({ message: "Item does not exist." });
+    }
+
     const itemDistribute = (await Item.findOne({
       where: { ITEM_ID: borrowedItem },
     })) as ItemProps;
@@ -237,9 +241,12 @@ export const createLendTransaction = async (
       });
     }
 
-    if (!isItemExist) {
-      return response.status(404).json({ message: "Item does not exist." });
+    //check if lending quantity is negative
+    if (quantity < 0) {
+      return response.status(400);
     }
+
+    //check if it has special characters
 
     const empBorrower = (await Employee.findByPk(borrower)) as any;
 
