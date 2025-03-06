@@ -77,4 +77,14 @@ Employee.belongsTo(Department, {
   as: "departmentDetails",
 });
 
+Employee.belongsTo(Employee, {
+  foreignKey: "CREATED_BY",
+  as: "creator",
+});
+
+Employee.belongsTo(Employee, {
+  foreignKey: "UPDATED_BY",
+  as: "updater",
+});
+
 export default Employee;
