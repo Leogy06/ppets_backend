@@ -45,6 +45,40 @@ export const createItem = async (
         .json({ message: "Prop number was already in used." });
     }
 
+    //validate stock quantity
+    //if quantity is negative
+
+    const stockNumber = Number(STOCK_QUANTITY);
+
+    if (stockNumber <= 0) {
+      return res
+        .status(400)
+        .json({ message: "Quantity are equal to zero or below. " });
+    }
+
+    //check if quantity is decimal
+    if (!Number.isInteger(stockNumber)) {
+      return res
+        .status(400)
+        .json({ message: "Stock quantity must be a whole number." });
+    }
+
+    if (UNIT_VALUE <= 0) {
+      return res
+        .status(400)
+        .json({ message: "Unit value are equal to zero or below." });
+    }
+
+    //checking received at, it should be in the past
+    const receivedAtDate = new Date(RECEIVED_AT);
+    const today = new Date();
+
+    if (receivedAtDate > today) {
+      return res
+        .status(400)
+        .json({ message: "Received date should be pass by today's date." });
+    }
+
     const newItem = await ItemModel.create({
       ITEM_NAME,
       DESCRIPTION,
