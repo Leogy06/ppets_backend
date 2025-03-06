@@ -194,6 +194,7 @@ export const getBorrowingTransactionByDpt = async (
 };
 
 //create lend transaction
+//by employee
 export const createLendTransaction = async (
   request: express.Request,
   response: express.Response
@@ -218,6 +219,21 @@ export const createLendTransaction = async (
   //check if they lend themself
   if (borrower === owner) {
     return response.status(400).json({ message: "You can't lend yourself." });
+  }
+
+  //check if quantity is negative
+  const isQuantityValid = Number(quantity);
+
+  if (!Number.isInteger(isQuantityValid)) {
+    return response
+      .status(400)
+      .json({ message: "Quantity is should NOT be decimal." });
+  }
+
+  if (isQuantityValid <= 0) {
+    return response
+      .status(400)
+      .json({ message: "Quantity should not below or equal to zero. " });
   }
 
   try {
