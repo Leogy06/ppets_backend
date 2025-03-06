@@ -19,9 +19,9 @@ export const getEmployees = async (
   }
 
   try {
-    const { rows: employees } = await Employee.findAndCountAll({
+    const employees = await Employee.findAll({
       where: department
-        ? { DEPARTMENT_ID: department, DELETED: { [Op.or]: [0, null] } }
+        ? { CURRENT_DPT_ID: department, DELETED: { [Op.or]: [0, null] } }
         : { DELETED: { [Op.or]: [0, null] } },
       include: [{ model: Department, as: "departmentDetails" }],
     });
