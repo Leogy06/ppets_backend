@@ -47,21 +47,20 @@ export const createItem = async (
 
     //validate stock quantity
     //if quantity is negative
-
     const stockNumber = Number(STOCK_QUANTITY);
-
     if (stockNumber <= 0) {
       return res
         .status(400)
         .json({ message: "Quantity are equal to zero or below. " });
     }
-
     //check if quantity is decimal
     if (!Number.isInteger(stockNumber)) {
       return res
         .status(400)
         .json({ message: "Stock quantity must be a whole number." });
     }
+
+    //put a regex here for qauntity because user can add ++ in number
 
     if (UNIT_VALUE <= 0) {
       return res

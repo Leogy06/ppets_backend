@@ -53,6 +53,7 @@ export interface ItemProps extends Item {
   createdAt: Date;
   updatedAt: Date;
   itemDetails: ItemModelProps;
+  ITEM_ID: number;
 }
 
 export interface ItemCategoryProps extends ItemCategory {

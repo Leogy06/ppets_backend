@@ -238,20 +238,14 @@ export const createLendTransaction = async (
 
   try {
     //check if item exist in distributed items
-    const isItemExist = (await ItemModel.findByPk(
-      borrowedItem
-    )) as ItemModelProps;
+    const isItemExist = (await Item.findByPk(borrowedItem)) as ItemProps;
 
     if (!isItemExist) {
       return response.status(404).json({ message: "Item does not exist." });
     }
 
-    const itemDistribute = (await Item.findOne({
-      where: { ITEM_ID: borrowedItem },
-    })) as ItemProps;
-
     //check if request quantity is more than the stock quantity
-    if (quantity > itemDistribute.quantity) {
+    if (quantity > isItemExist.quantity) {
       return response.status(400).json({
         message: "Requesting quantity is more than the stock quantity.",
       });
@@ -262,8 +256,18 @@ export const createLendTransaction = async (
       return response.status(400);
     }
 
-    //check if it has special characters
+    //check if item exist in the undistributed item
+    const itemUndistributed = (await ItemModel.findByPk(
+      isItemExist.ITEM_ID
+    )) as ItemModelProps;
 
+    if (!itemUndistributed) {
+      return response
+        .status(404)
+        .json({ message: "Item in the undistributed was not found." });
+    }
+
+    //check if it has special characters
     const empBorrower = (await Employee.findByPk(borrower)) as any;
 
     const empOwner = (await Employee.findByPk(owner)) as any;
@@ -288,7 +292,7 @@ export const createLendTransaction = async (
       MESSAGE: `Owner ${empOwner.FIRSTNAME} ${empOwner.LASTNAME} ${
         empOwner.MIDDLENAME ?? ""
       } ${empOwner.SUFFIX ?? ""} would like to lend the ${
-        isItemExist?.ITEM_NAME
+        itemUndistributed?.ITEM_NAME
       } to ${empBorrower.FIRSTNAME} ${empBorrower.LASTNAME} ${
         empBorrower.MIDDLENAME ?? ""
       } ${empBorrower.SUFFIX ?? ""}`,
@@ -305,11 +309,11 @@ export const createLendTransaction = async (
 
     //sending notification to borrower
     const borrowerNotification = await Notification.create({
-      MESSAGE: `You are requesting to lend the ${isItemExist.ITEM_NAME} from ${
-        empOwner.FIRSTNAME
-      } ${empOwner.LASTNAME} ${empOwner.MIDDLENAME ?? ""} ${
-        empOwner.SUFFIX ?? ""
-      }`,
+      MESSAGE: `You are requesting to lend the ${
+        itemUndistributed.ITEM_NAME
+      } from ${empOwner.FIRSTNAME} ${empOwner.LASTNAME} ${
+        empOwner.MIDDLENAME ?? ""
+      } ${empOwner.SUFFIX ?? ""}`,
       FOR_EMP: empBorrower.ID,
       TRANSACTION_ID: transaction.id,
     });
@@ -323,7 +327,7 @@ export const createLendTransaction = async (
 
     //send notifaciton to item owner
     const ownerNotification = await Notification.create({
-      MESSAGE: `Your Item ${isItemExist.ITEM_NAME} ${quantity} pc(s) has been requested to be lend by ${empBorrower.FIRSTNAME}`,
+      MESSAGE: `Your Item ${itemUndistributed.ITEM_NAME} ${quantity} pc(s) has been requested to be lend by ${empBorrower.FIRSTNAME}`,
       FOR_EMP: empOwner.ID,
       TRANSACTION_ID: transaction.id,
     });
@@ -364,6 +368,30 @@ export const approvedLendTransaction = async (
       return response.status(404).json({ message: "Transaction not found." });
     }
 
+    //deduc the quantity of that item
+
+    //first find the item in distributed item
+
+    const distributedItem = (await Item.findByPk(
+      transaction.borrowedItem
+    )) as ItemProps;
+
+    if (!distributedItem) {
+      return response.status(404).json({ message: "Item does not exist. " });
+    }
+
+    //check if transaction quantity has more than distributed item quantity
+    if (transaction.quantity > distributedItem.quantity) {
+      return response.status(400).json({
+        message:
+          "Transaction quantity has more than stocked item. Please cancel this transaction.",
+      });
+    }
+
+    //reduciing the stock quantity of the item.
+    distributedItem.quantity -= transaction.quantity;
+
+    //setting the status to approve (1)
     transaction.status = 1;
 
     //create a notification sending to borrower and owner about the rejected transaction
@@ -377,12 +405,16 @@ export const approvedLendTransaction = async (
     //saving the transaction
     const result = await transaction.save();
 
-    request.io.emit("notification", notification);
+    //saving item
+    const itemResult = await distributedItem.save();
+
+    //notification here
 
     response.status(200).json({
       message: "Transaction approved successfully. ",
       result,
       notification,
+      itemResult,
     });
   } catch (error) {
     console.error("\x1b[32m\x1b[1m✔ Unexpecter error occured. ", error);
