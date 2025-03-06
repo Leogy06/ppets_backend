@@ -89,6 +89,20 @@ export const addEmployee = async (
       return res.status(400).json({ message: "Department doesn't exist." });
     }
 
+    //lets check if first, middle last and suffix has special characters
+    const specialCharRegex = /[^a-zA-Z\s-]/;
+
+    if (
+      specialCharRegex.test(FIRSTNAME) ||
+      specialCharRegex.test(MIDDLENAME) ||
+      specialCharRegex.test(LASTNAME) ||
+      specialCharRegex.test(SUFFIX)
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Names must not contain special characters" });
+    }
+
     const newEmployee = await Employee.create({
       ID_NUMBER,
       FIRSTNAME,
