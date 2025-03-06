@@ -1,6 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
 import ItemModel from "./itemModel.js";
+import Employee from "./employee.js";
 
 //mao ni distributed item
 class Item extends Model {}
@@ -105,6 +106,11 @@ Item.init(
 Item.belongsTo(ItemModel, {
   foreignKey: "ITEM_ID",
   as: "itemDetails",
+});
+
+Item.belongsTo(Employee, {
+  foreignKey: "accountable_emp",
+  as: "accountableEmpDetails",
 });
 
 export default Item;
