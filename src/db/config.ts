@@ -1,5 +1,5 @@
 import { config } from "dotenv";
-import { ConnectionTimedOutError, Dialect, Sequelize } from "sequelize";
+import { Dialect, Sequelize } from "sequelize";
 
 // Determine which .env file to load
 const envFile = process.env.NODE_ENV === "production" ? ".env" : ".env.local";
