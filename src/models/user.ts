@@ -40,7 +40,7 @@ User.init(
     },
     DEPARTMENT_USER: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
   },
   {
