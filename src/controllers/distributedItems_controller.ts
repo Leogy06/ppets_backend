@@ -75,7 +75,7 @@ export const addItem = async (
       remarks: remarks,
       quantity: quantity,
       DPT_ID: undistributedItem.DEPARTMENT_ID,
-      owner: accountable_emp,
+      owner_emp_id: accountable_emp,
     });
 
     //create notification saying the item is distributed to the employee
@@ -100,7 +100,7 @@ export const addItem = async (
       unit_value: undistributedItem.UNIT_VALUE,
       total_value: undistributedItem.UNIT_VALUE * quantity,
       ORIGINAL_QUANTITY: quantity,
-      belong_dpt: undistributedItem.DEPARTMENT_ID,
+      current_dpt_id: undistributedItem.DEPARTMENT_ID,
     });
 
     await undistributedItem.save();

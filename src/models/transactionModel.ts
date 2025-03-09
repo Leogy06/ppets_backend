@@ -62,12 +62,12 @@ BorrowingTransaction.belongsTo(ItemModel, {
 });
 
 BorrowingTransaction.belongsTo(Employee, {
-  foreignKey: "owner",
+  foreignKey: "owner_emp_id",
   as: "ownerEmp",
 });
 
 BorrowingTransaction.belongsTo(Employee, {
-  foreignKey: "borrower",
+  foreignKey: "borrower_emp_id",
   as: "borrowerEmp",
 });
 

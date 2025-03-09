@@ -202,7 +202,7 @@ export const createLendTransaction = async (
   const {
     item_id,
     borrower_emp_id,
-    owner,
+    owner_emp_id,
     quantity,
     status = 2,
     DPT_ID,
@@ -210,14 +210,14 @@ export const createLendTransaction = async (
     RECEIVED_BY,
   } = request.body;
 
-  if (!item_id || !borrower_emp_id || !owner || !quantity || !DPT_ID) {
+  if (!item_id || !borrower_emp_id || !owner_emp_id || !quantity || !DPT_ID) {
     return response
       .status(400)
       .json({ message: "Required fields are empty. " });
   }
 
   //check if they lend themself
-  if (borrower_emp_id === owner) {
+  if (borrower_emp_id === owner_emp_id) {
     return response.status(400).json({ message: "You can't lend yourself." });
   }
 
@@ -270,12 +270,12 @@ export const createLendTransaction = async (
     //check if it has special characters
     const empBorrower = (await Employee.findByPk(borrower_emp_id)) as any;
 
-    const empOwner = (await Employee.findByPk(owner)) as any;
+    const empOwner = (await Employee.findByPk(owner_emp_id)) as any;
 
     const transaction = (await BorrowingTransaction.create({
       item_id,
       borrower_emp_id,
-      owner,
+      owner_emp_id,
       quantity,
       status,
       DPT_ID,
@@ -459,7 +459,7 @@ export const rejectTransaction = async (
     //notification for owner
     const notificationForOwner = await Notification.create({
       MESSAGE: "The request has been REJECTED.",
-      FOR_EMP: transaction.owner,
+      FOR_EMP: transaction.owner_emp_id,
       TRANSACTION_ID: transaction.id,
     });
 

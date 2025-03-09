@@ -79,7 +79,7 @@ Item.init(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    belong_dpt: {
+    current_dpt_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
