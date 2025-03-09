@@ -67,7 +67,7 @@ export const getBorrowTransactionByEmployee = async (
     }
 
     const borrowTransactions = await BorrowingTransaction.findAll({
-      where: { borrower: empIdNo },
+      where: { borrower_emp_id: empIdNo },
       include: [
         {
           model: Employee,
@@ -116,7 +116,7 @@ export const editBorrowTransaction = async (
 
     //find item
     const isItemExist = (await Item.findByPk(
-      borrowTransaction.borrowedItem
+      borrowTransaction.item_id
     )) as ItemProps;
 
     if (!isItemExist) {
@@ -200,8 +200,8 @@ export const createLendTransaction = async (
   response: express.Response
 ): Promise<any> => {
   const {
-    borrowedItem,
-    borrower,
+    item_id,
+    borrower_emp_id,
     owner,
     quantity,
     status = 2,
@@ -210,14 +210,14 @@ export const createLendTransaction = async (
     RECEIVED_BY,
   } = request.body;
 
-  if (!borrowedItem || !borrower || !owner || !quantity || !DPT_ID) {
+  if (!item_id || !borrower_emp_id || !owner || !quantity || !DPT_ID) {
     return response
       .status(400)
       .json({ message: "Required fields are empty. " });
   }
 
   //check if they lend themself
-  if (borrower === owner) {
+  if (borrower_emp_id === owner) {
     return response.status(400).json({ message: "You can't lend yourself." });
   }
 
@@ -238,7 +238,7 @@ export const createLendTransaction = async (
 
   try {
     //check if item exist in distributed items
-    const isItemExist = (await Item.findByPk(borrowedItem)) as ItemProps;
+    const isItemExist = (await Item.findByPk(item_id)) as ItemProps;
 
     if (!isItemExist) {
       return response.status(404).json({ message: "Item does not exist." });
@@ -268,13 +268,13 @@ export const createLendTransaction = async (
     }
 
     //check if it has special characters
-    const empBorrower = (await Employee.findByPk(borrower)) as any;
+    const empBorrower = (await Employee.findByPk(borrower_emp_id)) as any;
 
     const empOwner = (await Employee.findByPk(owner)) as any;
 
     const transaction = (await BorrowingTransaction.create({
-      borrowedItem,
-      borrower,
+      item_id,
+      borrower_emp_id,
       owner,
       quantity,
       status,
@@ -373,7 +373,7 @@ export const approvedLendTransaction = async (
     //first find the item in distributed item
 
     const distributedItem = (await Item.findByPk(
-      transaction.borrowedItem
+      transaction.item_id
     )) as ItemProps;
 
     if (!distributedItem) {
@@ -398,7 +398,7 @@ export const approvedLendTransaction = async (
     //transaction for the borrower
     const notification = (await Notification.create({
       MESSAGE: "",
-      FOR_EMP: transaction.borrower,
+      FOR_EMP: transaction.borrower_emp_id,
       TRANSACTION_ID: transaction.id,
     })) as NotificationProps;
 
@@ -452,7 +452,7 @@ export const rejectTransaction = async (
     //notification for borrower
     const notificationForBorrower = await Notification.create({
       MESSAGE: "Transaction has been REJECTED.",
-      FOR_EMP: transaction.borrower,
+      FOR_EMP: transaction.borrower_emp_id,
       TRANSACTION_ID: transaction.id,
     });
 

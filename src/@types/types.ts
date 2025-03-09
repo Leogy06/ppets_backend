@@ -85,8 +85,8 @@ export interface UserProps {
 
 export interface BorrowingTransactionProps extends BorrowingTransaction {
   id: number;
-  borrowedItem: number;
-  borrower: number;
+  item_id: number;
+  borrower_emp_id: number;
   owner: number;
   quantity: number;
   status: number;
