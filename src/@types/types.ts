@@ -93,6 +93,7 @@ export interface BorrowingTransactionProps extends BorrowingTransaction {
   remarks: string;
   createdAt: Date;
   updatedAt: Date;
+  APPROVED_BY: number;
 }
 
 export interface NotificationProps extends Notification {

@@ -33,6 +33,9 @@ export const getBorrowTransactions = async (
       include: [
         { model: ItemModel, as: "itemDetails" },
         { model: BorrowingStatus, as: "statusDetails" },
+        { model: Employee, as: "ownerEmp" },
+        { model: Employee, as: "borrowerEmp" },
+        { model: Employee, as: "approvedByEmpDetails" },
       ],
     });
 
@@ -351,12 +354,16 @@ export const approvedLendTransaction = async (
   request: express.Request,
   response: express.Response
 ): Promise<any> => {
-  const { transactionId } = request.params;
+  const { transactionId, approverId } = request.params;
 
   if (!transactionId) {
     return response
       .status(400)
       .json({ message: "Transaction Id was missing." });
+  }
+
+  if (!approverId) {
+    return response.status(400).json({ message: "Approver Id was missing." });
   }
 
   try {
@@ -393,6 +400,9 @@ export const approvedLendTransaction = async (
 
     //setting the status to approve (1)
     transaction.status = 1;
+
+    //inserting the approver id to transaction
+    transaction.APPROVED_BY = Number(approverId);
 
     //create a notification sending to borrower and owner about the rejected transaction
     //transaction for the borrower

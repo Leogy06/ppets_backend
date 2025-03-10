@@ -46,6 +46,13 @@ BorrowingTransaction.init(
       type: DataTypes.STRING(100),
       allowNull: true,
     },
+
+    APPROVED_BY: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: null,
+    },
+
     RECEIVED_BY: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -64,6 +71,12 @@ BorrowingTransaction.belongsTo(ItemModel, {
 BorrowingTransaction.belongsTo(Employee, {
   foreignKey: "owner_emp_id",
   as: "ownerEmp",
+});
+
+//approved by
+BorrowingTransaction.belongsTo(Employee, {
+  foreignKey: "APPROVED_BY",
+  as: "approvedByEmpDetails",
 });
 
 BorrowingTransaction.belongsTo(Employee, {
