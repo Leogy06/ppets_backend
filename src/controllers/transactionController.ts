@@ -4,6 +4,7 @@ import Item from "../models/distributedItemModel.js";
 import Employee from "../models/employee.js";
 import {
   BorrowingTransactionProps,
+  EmployeeProps,
   ItemModelProps,
   ItemProps,
   NotificationProps,
@@ -357,6 +358,9 @@ export const createLendTransaction = async (
   }
 };
 
+//reduce item's quantity
+//create notification
+//update transaction status
 export const approvedLendTransaction = async (
   request: express.Request,
   response: express.Response
@@ -398,12 +402,15 @@ export const approvedLendTransaction = async (
     if (transaction.quantity > distributedItem.quantity) {
       return response.status(400).json({
         message:
-          "Transaction quantity has more than stocked item. Please cancel this transaction.",
+          "The item quantity stocked has more than requested. Please cancel this transaction.",
       });
     }
 
     //reduciing the stock quantity of the item.
     distributedItem.quantity -= transaction.quantity;
+
+    //adding remarks in distributed items for tracking of their items
+    // to do -
 
     //setting the status to approve (1)
     transaction.status = 1;
@@ -411,13 +418,61 @@ export const approvedLendTransaction = async (
     //inserting the approver id to transaction
     transaction.APPROVED_BY = Number(approverId);
 
+    //find if the item exist in undistribute items
+    const undistributedItem = (await ItemModel.findByPk(
+      distributedItem.ITEM_ID
+    )) as ItemModelProps;
+
+    if (!undistributedItem) {
+      return response
+        .status(404)
+        .json({ message: "Item not found in undistributed item lists." });
+    }
+
+    //find the borrower if exist
+    const empBorrower = (await Employee.findByPk(
+      transaction.borrower_emp_id
+    )) as any;
+
+    if (!empBorrower) {
+      return response
+        .status(404)
+        .json({ messag: "Employee borrower does'nt exist. ", empBorrower });
+    }
+
     //create a notification sending to borrower and owner about the rejected transaction
     //transaction for the borrower
     const notification = (await Notification.create({
-      MESSAGE: "",
-      FOR_EMP: transaction.borrower_emp_id,
+      MESSAGE: `Item ${undistributedItem.ITEM_NAME} item has been approved by the admin. You can now claim the item if it's not in your custody.`,
+      FOR_EMP: empBorrower.ID,
       TRANSACTION_ID: transaction.id,
     })) as NotificationProps;
+
+    //owner notification
+
+    //find owner
+    const ownerEmp = (await Employee.findByPk(transaction.owner_emp_id)) as any;
+
+    if (!ownerEmp) {
+      return response
+        .status(404)
+        .json({ message: "Employee owner does'nt exist. ", ownerEmp });
+    }
+    //
+    const notificationForOwner = await Notification.create({
+      MESSAGE: `**Subject: APPROVAL Item Request **
+      Dear, ${ownerEmp.LASTNAME} ${ownerEmp.FIRSTNAME} ${
+        ownerEmp.MIDDLENAME ?? ""
+      } ${ownerEmp.SUFFIX ?? ""} your item ${
+        undistributedItem.ITEM_NAME
+      } has been lent to ${empBorrower.LASTNAME} ${empBorrower.FIRSTNAME} ${
+        empBorrower.MIDDLENAME ?? ""
+      } ${
+        empBorrower.SUFFIX ?? ""
+      } and is ready to give to borrower if not given yet.`,
+    });
+
+    //
 
     //saving the transaction
     const result = await transaction.save();
@@ -426,6 +481,15 @@ export const approvedLendTransaction = async (
     const itemResult = await distributedItem.save();
 
     //notification here
+    //sending notificaiton to borrower
+    request.io
+      .to(String(empBorrower.ID))
+      .emit("send-notification", { notification });
+
+    //sending notificaiton to owner
+    request.io
+      .to(String(ownerEmp.ID))
+      .emit("send-notification", { notificationForOwner });
 
     response.status(200).json({
       message: "Transaction approved successfully. ",
@@ -437,7 +501,7 @@ export const approvedLendTransaction = async (
     console.error("\x1b[32m\x1b[1m✔ Unexpecter error occured. ", error);
     response
       .status(500)
-      .json({ message: "Unexpecter error occurred. ", error });
+      .json({ message: "Unexpected error occurred. ", error });
   }
 };
 

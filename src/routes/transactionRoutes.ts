@@ -18,7 +18,7 @@ const transactionRoutes = Router()
   //create lend transaction
   .post("/lend", createLendTransaction)
   //approve
-  .put("/approve/:transactionId", approvedLendTransaction)
+  .put("/approve/:transactionId/:approverId", approvedLendTransaction)
   //reject
   .put("/reject/:transactionId", rejectTransaction);
 
