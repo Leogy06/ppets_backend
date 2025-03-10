@@ -104,6 +104,10 @@ export const addItem = async (
       total_value: undistributedItem.UNIT_VALUE * quantity,
       ORIGINAL_QUANTITY: quantity,
       current_dpt_id: undistributedItem.DEPARTMENT_ID,
+
+      //data from undistributed item
+      name: undistributedItem.ITEM_NAME,
+      description: remarks,
     });
 
     //saving the quantity

@@ -15,6 +15,7 @@ Item.init(
       unique: true,
       primaryKey: true,
     },
+
     ITEM_ID: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -22,6 +23,11 @@ Item.init(
     name: {
       type: DataTypes.INTEGER,
       allowNull: true,
+    },
+    description: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: null,
     },
     quantity: {
       type: DataTypes.INTEGER,
