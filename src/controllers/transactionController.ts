@@ -179,7 +179,7 @@ export const getBorrowingTransactionByDpt = async (
       where: { DPT_ID: departmentId },
       include: [
         { model: Employee, as: "borrowerEmp" },
-        { model: ItemModel, as: "itemDetails" }, //distributed to get the distribute date
+        { model: ItemModel, as: "itemDetails" }, //undistributed to get the distribute date
         { model: Employee, as: "ownerEmp" },
         { model: Department, as: "departmentDetails" },
         { model: BorrowingStatus, as: "statusDetails" },
@@ -203,7 +203,7 @@ export const createLendTransaction = async (
   response: express.Response
 ): Promise<any> => {
   const {
-    item_id,
+    distributed_item_id,
     borrower_emp_id,
     owner_emp_id,
     quantity,
@@ -213,10 +213,16 @@ export const createLendTransaction = async (
     RECEIVED_BY,
   } = request.body;
 
-  if (!item_id || !borrower_emp_id || !owner_emp_id || !quantity || !DPT_ID) {
+  if (
+    !distributed_item_id ||
+    !borrower_emp_id ||
+    !owner_emp_id ||
+    !quantity ||
+    !DPT_ID
+  ) {
     return response
       .status(400)
-      .json({ message: "Required fields are empty. " });
+      .json({ message: "Required fields are empty binuang naman ni. " });
   }
 
   //check if they lend themself
@@ -241,7 +247,7 @@ export const createLendTransaction = async (
 
   try {
     //check if item exist in distributed items
-    const isItemExist = (await Item.findByPk(item_id)) as ItemProps;
+    const isItemExist = (await Item.findByPk(distributed_item_id)) as ItemProps;
 
     if (!isItemExist) {
       return response.status(404).json({ message: "Item does not exist." });
@@ -261,7 +267,7 @@ export const createLendTransaction = async (
 
     //check if item exist in the undistributed item
     const itemUndistributed = (await ItemModel.findByPk(
-      isItemExist.ITEM_ID
+      distributed_item_id
     )) as ItemModelProps;
 
     if (!itemUndistributed) {
@@ -275,8 +281,9 @@ export const createLendTransaction = async (
 
     const empOwner = (await Employee.findByPk(owner_emp_id)) as any;
 
+    //create the transaction
     const transaction = (await BorrowingTransaction.create({
-      distributed_item_id: item_id,
+      distributed_item_id,
       borrower_emp_id,
       owner_emp_id,
       quantity,
@@ -299,7 +306,7 @@ export const createLendTransaction = async (
       } to ${empBorrower.FIRSTNAME} ${empBorrower.LASTNAME} ${
         empBorrower.MIDDLENAME ?? ""
       } ${empBorrower.SUFFIX ?? ""}`,
-      FOR_EMP: user.emp_id,
+      FOR_EMP: user?.emp_id,
       TRANSACTION_ID: transaction.id,
     });
 

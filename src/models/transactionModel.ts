@@ -49,7 +49,7 @@ BorrowingTransaction.init(
 
     APPROVED_BY: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       defaultValue: null,
     },
 

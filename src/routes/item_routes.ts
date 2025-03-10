@@ -10,7 +10,7 @@ import itemValidationRules from "../middlewares/itemValidations.js";
 //undistributed items
 const item_routes = Router()
   .post("/", itemValidationRules, createItem)
-  .get("/:itemId", getUndistributedItem)
+  .get("/:itemId", getUndistributedItem) // by item id
   .get("/", getItems)
   .delete("/:itemId/:action", deleteItem);
 
