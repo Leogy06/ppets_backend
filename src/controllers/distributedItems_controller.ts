@@ -7,6 +7,7 @@ import ItemModel from "../models/itemModel.js";
 import Notification from "../models/notificationModel.js";
 import BorrowingTransaction from "../models/transactionModel.js";
 import Employee from "../models/employee.js";
+import { users } from "../sockets/socketManager.js";
 
 //distribute item to employee by the admin
 export const addItem = async (
@@ -80,7 +81,7 @@ export const addItem = async (
 
     //create notification saying the item is distributed to the employee
 
-    await Notification.create({
+    const notificationOwner = await Notification.create({
       MESSAGE: `The ${undistributedItem.ITEM_NAME} has been distributed`,
       FOR_EMP: accountable_emp, //distributed employee
     });
@@ -103,7 +104,17 @@ export const addItem = async (
       current_dpt_id: undistributedItem.DEPARTMENT_ID,
     });
 
+    //saving the quantity
     await undistributedItem.save();
+
+    //sending to owner that distributed
+
+    const ownerSocketId = users.get(accountable_emp);
+
+    //send notification to owner
+    request.io
+      .to(ownerSocketId)
+      .emit("send-notification", { notificationOwner });
 
     response.status(201).json(newItem);
 
