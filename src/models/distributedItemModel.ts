@@ -113,4 +113,9 @@ Item.belongsTo(Employee, {
   as: "accountableEmpDetails",
 });
 
+Item.belongsTo(Employee, {
+  foreignKey: "DISTRIBUTED_BY",
+  as: "distributedByEmpDetails",
+});
+
 export default Item;

@@ -251,7 +251,10 @@ export const getItemsByOwner = async (
     }
     const ownedItems = await Item.findAll({
       where: { accountable_emp: empId },
-      include: [{ model: ItemModel, as: "itemDetails" }],
+      include: [
+        { model: ItemModel, as: "itemDetails" },
+        { model: Employee, as: "distributedByEmpDetails" },
+      ],
     });
 
     res.status(200).json(ownedItems);
