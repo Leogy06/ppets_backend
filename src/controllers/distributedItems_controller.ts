@@ -69,7 +69,7 @@ export const addItem = async (
 
     //create borrow transaction saying the transaction has accomplished.
     await BorrowingTransaction.create({
-      item_id: ITEM_ID,
+      distributed_item_id: ITEM_ID,
       RECEIVED_BY: accountable_emp,
       status: 1,
       remarks: remarks,

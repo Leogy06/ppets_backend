@@ -16,7 +16,7 @@ BorrowingTransaction.init(
       unique: true,
       autoIncrement: true,
     },
-    item_id: {
+    distributed_item_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       unique: false,
@@ -57,7 +57,7 @@ BorrowingTransaction.init(
 
 // Define the association
 BorrowingTransaction.belongsTo(ItemModel, {
-  foreignKey: "item_id",
+  foreignKey: "distributed_item_id",
   as: "itemDetails",
 });
 

@@ -27,7 +27,7 @@ export const getBorrowTransactions = async (
     }
 
     const borrows = await BorrowingTransaction.findAll({
-      where: { owner },
+      where: { owner_emp_id: owner },
 
       order: [["createdAt", "DESC"]],
       include: [
@@ -116,7 +116,7 @@ export const editBorrowTransaction = async (
 
     //find item
     const isItemExist = (await Item.findByPk(
-      borrowTransaction.item_id
+      borrowTransaction.distributed_item_id
     )) as ItemProps;
 
     if (!isItemExist) {
@@ -273,7 +273,7 @@ export const createLendTransaction = async (
     const empOwner = (await Employee.findByPk(owner_emp_id)) as any;
 
     const transaction = (await BorrowingTransaction.create({
-      item_id,
+      distributed_item_id: item_id,
       borrower_emp_id,
       owner_emp_id,
       quantity,
@@ -373,7 +373,7 @@ export const approvedLendTransaction = async (
     //first find the item in distributed item
 
     const distributedItem = (await Item.findByPk(
-      transaction.item_id
+      transaction.distributed_item_id
     )) as ItemProps;
 
     if (!distributedItem) {
