@@ -4,6 +4,7 @@ import fs from "fs";
 import PDFDocument from "pdfkit";
 import { fileURLToPath } from "url";
 import { logger } from "../logger/logger.js";
+import { dateFormatter } from "../utils/dateFormatter.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,10 +41,10 @@ export const downloadPdf = (req: Express.Request, res: Express.Response) => {
   }
 };
 
-export const renderRequestPDF = (
+export const renderRequestPDF = async (
   req: Express.Request,
   res: Express.Response
-) => {
+): Promise<any> => {
   const { requestRows } = req.body; // array of objects
 
   if (!Array.isArray(requestRows)) {
@@ -54,7 +55,11 @@ export const renderRequestPDF = (
   }
 
   try {
-    const doc = new PDFDocument({ layout: "landscape", margin: 30 });
+    const doc = new PDFDocument({
+      layout: "landscape",
+      margin: 30,
+      size: [612, 936],
+    });
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", "attachment; filename=report.pdf");
@@ -62,69 +67,142 @@ export const renderRequestPDF = (
     doc.pipe(res);
 
     //title
-    doc.fontSize(20).text("Request Report", { align: "center" }).moveDown(2);
+    const addHeader = () => {
+      const currentDate = new Date().toString();
+
+      doc
+        .fontSize(9)
+        .text("Republic of the Philippines", { align: "center" })
+        .moveDown(0.5);
+      doc
+        .fontSize(12)
+        .text("CITY ACCOUNTANT'S OFFICE", { align: "center" })
+        .moveDown(0.2);
+      doc
+        .fontSize(9)
+        .text("General Santos City", { align: "center" })
+        .moveDown(0.5);
+      doc
+        .fontSize(16)
+        .text("ITEM REQUESTS LOGS", { align: "center" })
+        .moveDown(2);
+
+      // Current Date at the top right corner
+      doc
+        .fontSize(10)
+        .text(dateFormatter(currentDate, "yyyy-MM-dd hh:mm a"), 740, 40, {
+          align: "right",
+        }) // Adjust the X and Y position
+        .moveDown(6);
+    };
 
     //table header
+    const addTableHeader = () => {
+      const headers = [
+        "Item",
+        "Quantity",
+        "Status",
+        "Accountable Employee",
+        "Borrower",
+        "Requested on",
+      ];
+      const columnWidths = [170, 80, 100, 180, 180, 180]; // Adjusted for long bond paper
 
-    const headers = [
-      "Item",
-      "Quantity",
-      "Status",
-      "Accountable Employee",
-      "Borrower",
-      "Requested on",
-    ];
-    const columnWidths = [150, 250, 100, 150];
+      let y = doc.y;
+      doc.font("Helvetica-Bold").fontSize(12);
+
+      headers.forEach((header, i) => {
+        doc.text(
+          header,
+          50 + columnWidths.slice(0, i).reduce((a, b) => a + b, 0),
+          y
+        );
+      });
+
+      doc.moveDown(0.5);
+
+      doc.font("Helvetica").fontSize(10);
+    };
+
+    //add first page header and table header
+    addHeader();
+    addTableHeader();
 
     let y = doc.y;
-    doc.font("Helvetica-Bold").fontSize(12);
+    const pageHeight = 612 - 60; // total height of the page minus margis
 
-    headers.forEach((header, i) => {
+    //loop
+    requestRows.forEach((row: any, index: number) => {
+      const rowHeight = 20;
+      const startX = 50;
+      const columnWidths = [170, 80, 100, 180, 180, 180];
+
+      if (y + rowHeight > pageHeight) {
+        doc.addPage(); //add new page pdfkit
+        addHeader(); //re-add header
+        addTableHeader(); //re-add table header
+        y = doc.y; //reset position
+      }
+
+      if (index % 2 === 0) {
+        doc
+          .rect(
+            startX - 5,
+            y - 2,
+            columnWidths.reduce((a, b) => a + b, 0),
+            rowHeight
+          )
+          .fill("#f2f2f2") // light gray background
+          .fillColor("black"); //reset text color
+      }
+
+      let cellX = startX;
+
+      //item name cell
+      doc.text(row?.itemDetails?.ITEM_NAME ?? "", cellX, y);
+      cellX += columnWidths[0];
+
+      //item quantity requested
+      doc.text(`${row.quantity}`, cellX, y);
+      cellX += columnWidths[1];
+
+      //transaction status
+      doc.text(row?.statusDetails.description.toUpperCase(), cellX, y);
+      cellX += columnWidths[2];
+
+      //owner cell
       doc.text(
-        header,
-        50 + columnWidths.slice(0, i).reduce((a, b) => a + b, 0),
+        `${row?.ownerEmp?.FIRSTNAME ?? ""} ${row?.ownerEmp?.LASTNAME ?? ""} ${
+          row?.ownerEmp?.MIDDLENAME ?? ""
+        } ${row?.ownerEmp?.SUFFIX ?? ""}`,
+        cellX,
         y
       );
-    });
+      cellX += columnWidths[3];
 
-    doc.moveDown(0.5);
-
-    doc.font("Helvetica").fontSize(10);
-
-    requestRows.forEach((row: any) => {
-      y = doc.y;
-      //for the item name
-      doc.text(row.itemDetails.ITEM_NAME, 50, y);
-
-      //for the quantity of the requested item
-      doc.text(row.quantity.toString(), 50, y);
-
-      //status if approved, pending or not
-      doc.text(row.statusDetails, 200, y);
-
-      //the accountable person name
+      //borrower cell
       doc.text(
-        `${row.ownerEmp.FIRSTNAME} ${row.ownerEmp.LASTNAME} ${
-          row.ownerEmp?.MIDDLENAME
-        } ${row.ownerEmp?.SUFFIX ?? ""}`,
-        450,
+        `${row.borrowerEmp?.FIRSTNAME ?? "--"} ${
+          row.borrowerEmp?.LASTNAME ?? ""
+        } ${row.borrowerEmp?.MIDDLENAME ?? ""} ${
+          row.borrowerEmp?.SUFFIX ?? ""
+        }`,
+        cellX,
         y
       );
 
-      //t
-      doc.text(
-        `${row.borrowerEmp.FIRSTNAME} ${row.borrowerEmp.LASTNAME} ${
-          row.borrowerEmp?.MIDDLENAME ?? ""
-        } ${row.borrowerEmp?.SUFFIX ?? ""}`,
-        550,
-        y
-      );
-      doc.moveDown(0.5);
+      //created transaction date
+      cellX += columnWidths[4];
+      doc.text(row.createdAt ? dateFormatter(row.createdAt) : "", cellX, y);
+
+      y += rowHeight; //move y position own for next row
     });
 
     doc.end();
   } catch (error) {
     console.error("Unable to render request PDF. ", error);
-    res.status(500).json({ message: "Unable to render request PDF. ", error });
+    res
+      .status(500)
+      .json({ message: "Unable to render request PDF. ", error, requestRows });
   }
 };
