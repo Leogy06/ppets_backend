@@ -73,7 +73,7 @@ export const addItem = async (
       distributed_item_id: ITEM_ID,
       RECEIVED_BY: accountable_emp,
       status: 1,
-      remarks: 3,
+      remarks: 3, //this is distribution
       quantity: quantity,
       DPT_ID: undistributedItem.DEPARTMENT_ID,
       owner_emp_id: accountable_emp,
@@ -117,9 +117,7 @@ export const addItem = async (
     const ownerSocketId = users.get(accountable_emp);
 
     //send notification to owner
-    request.io
-      .to(ownerSocketId)
-      .emit("send-notification", { notificationOwner });
+    request.io.to(ownerSocketId).emit("send-notification", notificationOwner);
 
     response.status(201).json(newItem);
 
