@@ -1,6 +1,9 @@
 import { Router } from "express";
-import { downloadPdf } from "../controllers/pdfKitController.js";
+import {
+  downloadPdf,
+  renderRequestPDF,
+} from "../controllers/pdfKitController.js";
 
-const pdfKitRoutes = Router().get("/", downloadPdf);
+const pdfKitRoutes = Router().get("/", downloadPdf).post("/", renderRequestPDF);
 
 export default pdfKitRoutes;
