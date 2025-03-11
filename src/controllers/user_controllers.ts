@@ -8,6 +8,7 @@ import Roles from "../models/user_type.js";
 import { CustomRequest, generateToken } from "../middlewares/auth.js";
 import jwt from "jsonwebtoken";
 import User_type from "../models/user_type.js";
+import Department from "../models/department.js";
 
 configDotenv({ path: ".env.local" });
 
@@ -243,7 +244,9 @@ export const checkUser = async (
       where: { id: decoded.id },
     })) as UserProps | null;
 
-    const empDetails = await Employee.findByPk(user?.emp_id);
+    const empDetails = await Employee.findByPk(user?.emp_id, {
+      include: [{ model: Department, as: "departmentDetails" }],
+    });
 
     if (!user) {
       return res.status(404).json({ message: "User not found." });

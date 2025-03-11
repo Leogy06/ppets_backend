@@ -51,6 +51,5 @@ User.init(
 );
 
 User.belongsTo(Employee, { foreignKey: "emp_id" });
-Employee.hasMany(User, { foreignKey: "emp_id", as: "empDetails" });
 
 export default User;
