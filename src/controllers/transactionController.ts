@@ -325,9 +325,7 @@ export const createLendTransaction = async (
     //sending to admin notifcation
     const socketId = users.get(user.emp_id);
 
-    request.io.to(socketId).emit("send-notification", {
-      adminNotification,
-    });
+    request.io.to(socketId).emit("send-notification", adminNotification);
 
     //sending notification to borrower
     const borrowerNotification = await Notification.create({
