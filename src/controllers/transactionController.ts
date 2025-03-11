@@ -186,6 +186,7 @@ export const getBorrowingTransactionByDpt = async (
         { model: Department, as: "departmentDetails" },
         { model: BorrowingStatus, as: "statusDetails" },
         { model: TransactionRemarks, as: "transactionRemarksDetails" },
+        { model: Employee, as: "approvedByEmpDetails" },
       ],
       order: [["createdAt", "DESC"]],
     });
