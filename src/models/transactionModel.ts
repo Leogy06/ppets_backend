@@ -4,6 +4,7 @@ import Employee from "./employee.js";
 import Department from "./department.js";
 import BorrowingStatus from "./transactionStatusModel.js";
 import ItemModel from "./itemModel.js";
+import TransactionRemarks from "./btRemarksModel.js";
 
 class BorrowingTransaction extends Model {}
 
@@ -43,7 +44,7 @@ BorrowingTransaction.init(
       allowNull: true,
     },
     remarks: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
 
@@ -95,6 +96,11 @@ BorrowingTransaction.belongsTo(Department, {
 BorrowingTransaction.belongsTo(BorrowingStatus, {
   foreignKey: "status",
   as: "statusDetails",
+});
+
+BorrowingTransaction.belongsTo(TransactionRemarks, {
+  foreignKey: "remarks",
+  as: "transactionRemarksDetails",
 });
 
 //distributed item
