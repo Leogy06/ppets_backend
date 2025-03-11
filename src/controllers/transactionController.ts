@@ -15,6 +15,7 @@ import BorrowingStatus from "../models/transactionStatusModel.js";
 import ItemModel from "../models/itemModel.js";
 import User from "../models/user.js";
 import { users } from "../sockets/socketManager.js";
+import TransactionRemarks from "../models/btRemarksModel.js";
 
 //get borrow transaciton by owner
 export const getBorrowTransactions = async (
@@ -184,6 +185,7 @@ export const getBorrowingTransactionByDpt = async (
         { model: Employee, as: "ownerEmp" },
         { model: Department, as: "departmentDetails" },
         { model: BorrowingStatus, as: "statusDetails" },
+        { model: TransactionRemarks, as: "transactionRemarksDetails" },
       ],
       order: [["createdAt", "DESC"]],
     });
@@ -221,9 +223,14 @@ export const createLendTransaction = async (
     !quantity ||
     !DPT_ID
   ) {
-    return response
-      .status(400)
-      .json({ message: "Required fields are empty binuang naman ni. " });
+    return response.status(400).json({
+      message: "Required fields are empty. ",
+      distributed_item_id,
+      borrower_emp_id,
+      owner_emp_id,
+      quantity,
+      DPT_ID,
+    });
   }
 
   //check if they lend themself
@@ -251,7 +258,11 @@ export const createLendTransaction = async (
     const isItemExist = (await Item.findByPk(distributed_item_id)) as ItemProps;
 
     if (!isItemExist) {
-      return response.status(404).json({ message: "Item does not exist." });
+      return response.status(404).json({
+        message: "Item does not exist.",
+        isItemExist,
+        distributed_item_id,
+      });
     }
 
     //check if request quantity is more than the stock quantity
@@ -290,8 +301,8 @@ export const createLendTransaction = async (
       quantity,
       status,
       DPT_ID,
-      remarks,
       RECEIVED_BY,
+      remarks: 2,
     })) as BorrowingTransactionProps;
 
     const user = (await User.findOne({
@@ -390,12 +401,20 @@ export const approvedLendTransaction = async (
 
     //first find the item in distributed item
 
-    const distributedItem = (await Item.findByPk(
-      transaction.distributed_item_id
-    )) as ItemProps;
+    const distributedItem = (await Item.findOne({
+      where: {
+        ITEM_ID: transaction.distributed_item_id,
+        accountable_emp: transaction.owner_emp_id,
+      },
+    })) as ItemProps;
 
     if (!distributedItem) {
-      return response.status(404).json({ message: "Item does not exist. " });
+      return response.status(404).json({
+        message: "Item does not exist. ",
+        distributedItem,
+        ITEM_ID: transaction.distributed_item_id,
+        accountable_emp: transaction.owner_emp_id,
+      });
     }
 
     //check if transaction quantity has more than distributed item quantity
@@ -406,11 +425,44 @@ export const approvedLendTransaction = async (
       });
     }
 
+    //find the borrower if exist
+    const empBorrower = (await Employee.findByPk(
+      transaction.borrower_emp_id
+    )) as any;
+
+    if (!empBorrower) {
+      return response
+        .status(404)
+        .json({ messag: "Employee borrower does'nt exist. ", empBorrower });
+    }
+
+    //find owner
+    const ownerEmp = (await Employee.findByPk(transaction.owner_emp_id)) as any;
+
+    if (!ownerEmp) {
+      return response
+        .status(404)
+        .json({ message: "Employee owner does'nt exist. ", ownerEmp });
+    }
+
     //reduciing the stock quantity of the item.
     distributedItem.quantity -= transaction.quantity;
 
     //adding remarks in distributed items for tracking of their items
-    // to do -
+
+    //ensure this is a string so concat function properly
+    const currentRemarks = distributedItem.remarks ?? "";
+
+    //join full name
+    const fullName = [
+      empBorrower.LASTNAME,
+      empBorrower.FISTNAME,
+      empBorrower.MIDDLENAME,
+      empBorrower.SUFFIX,
+    ]
+      .filter(Boolean) // removes null, undefined and ""
+      .join(" "); //join names with a sing space
+    distributedItem.remarks = `${currentRemarks}, Lend to ${fullName}`;
 
     //setting the status to approve (1)
     transaction.status = 1;
@@ -429,17 +481,6 @@ export const approvedLendTransaction = async (
         .json({ message: "Item not found in undistributed item lists." });
     }
 
-    //find the borrower if exist
-    const empBorrower = (await Employee.findByPk(
-      transaction.borrower_emp_id
-    )) as any;
-
-    if (!empBorrower) {
-      return response
-        .status(404)
-        .json({ messag: "Employee borrower does'nt exist. ", empBorrower });
-    }
-
     //create a notification sending to borrower and owner about the rejected transaction
     //transaction for the borrower
     const notification = (await Notification.create({
@@ -449,16 +490,6 @@ export const approvedLendTransaction = async (
     })) as NotificationProps;
 
     //owner notification
-
-    //find owner
-    const ownerEmp = (await Employee.findByPk(transaction.owner_emp_id)) as any;
-
-    if (!ownerEmp) {
-      return response
-        .status(404)
-        .json({ message: "Employee owner does'nt exist. ", ownerEmp });
-    }
-    //
     const notificationForOwner = await Notification.create({
       MESSAGE: `**Subject: APPROVAL Item Request **
       Dear, ${ownerEmp.LASTNAME} ${ownerEmp.FIRSTNAME} ${
@@ -470,10 +501,11 @@ export const approvedLendTransaction = async (
       } ${
         empBorrower.SUFFIX ?? ""
       } and is ready to give to borrower if not given yet.`,
+      FOR_EMP: ownerEmp.ID,
+      TRANSACTION_ID: transaction.id,
     });
 
     //
-
     //saving the transaction
     const result = await transaction.save();
 
@@ -484,12 +516,12 @@ export const approvedLendTransaction = async (
     //sending notificaiton to borrower
     request.io
       .to(String(empBorrower.ID))
-      .emit("send-notification", { notification });
+      .emit("send-notification", notification);
 
     //sending notificaiton to owner
     request.io
       .to(String(ownerEmp.ID))
-      .emit("send-notification", { notificationForOwner });
+      .emit("send-notification", notificationForOwner);
 
     response.status(200).json({
       message: "Transaction approved successfully. ",
@@ -498,7 +530,7 @@ export const approvedLendTransaction = async (
       itemResult,
     });
   } catch (error) {
-    console.error("\x1b[32m\x1b[1m✔ Unexpecter error occured. ", error);
+    console.error("\x1b[31m\x1b[1m✖ Unexpecter error occured. ", error);
     response
       .status(500)
       .json({ message: "Unexpected error occurred. ", error });

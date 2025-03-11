@@ -90,10 +90,10 @@ export interface BorrowingTransactionProps extends BorrowingTransaction {
   owner_emp_id: number;
   quantity: number;
   status: number;
-  remarks: string;
   createdAt: Date;
   updatedAt: Date;
   APPROVED_BY: number;
+  remarks: number;
 }
 
 export interface NotificationProps extends Notification {

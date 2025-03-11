@@ -21,9 +21,9 @@ export const addItem = async (
     pis_no,
     acct_code,
     accountable_emp,
-    remarks,
     DISTRIBUTED_BY,
     are_no,
+    remarks,
   } = request.body;
 
   if (!quantity || !accountable_emp || !DISTRIBUTED_BY || !are_no) {
@@ -73,7 +73,7 @@ export const addItem = async (
       distributed_item_id: ITEM_ID,
       RECEIVED_BY: accountable_emp,
       status: 1,
-      remarks: remarks,
+      remarks: 3,
       quantity: quantity,
       DPT_ID: undistributedItem.DEPARTMENT_ID,
       owner_emp_id: accountable_emp,
@@ -113,8 +113,7 @@ export const addItem = async (
     //saving the quantity
     await undistributedItem.save();
 
-    //sending to owner that distributed
-
+    //receiver of the item distributed
     const ownerSocketId = users.get(accountable_emp);
 
     //send notification to owner
