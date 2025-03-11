@@ -27,7 +27,9 @@ export const addItem = async (
   } = request.body;
 
   if (!quantity || !accountable_emp || !DISTRIBUTED_BY || !are_no) {
-    return response.status(400).json({ message: "All fields are required." });
+    return response
+      .status(400)
+      .json({ message: "All fields are required.", request: request.body });
   }
 
   //check if quantity is below zero
@@ -308,7 +310,7 @@ export const getItemByEmployeeDpt = async (
     }
 
     const items = await Item.findAll({
-      where: { belong_dpt: department },
+      where: { current_dpt_id: department },
       include: [
         { model: ItemModel, as: "itemDetails" },
         {
