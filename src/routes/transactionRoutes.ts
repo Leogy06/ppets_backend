@@ -7,6 +7,7 @@ import {
   getBorrowTransactionByEmployee,
   getBorrowTransactions,
   getCountAllTimeRequestDepartment,
+  getCountTodayRequestDepartment,
   getTransactionApprovedOwnerDepartment,
   rejectTransaction,
 } from "../controllers/transactionController.js";
@@ -28,6 +29,7 @@ const transactionRoutes = Router()
   .get("/get/approved/:ownerEmpId", getTransactionApprovedOwnerDepartment)
 
   //counts for dashboard
-  .get("/count/all_time/:DPT_ID", getCountAllTimeRequestDepartment);
+  .get("/count/all_time/:DPT_ID", getCountAllTimeRequestDepartment)
+  .get("/count/today/:DPT_ID", getCountTodayRequestDepartment);
 
 export default transactionRoutes;

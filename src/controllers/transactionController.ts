@@ -648,9 +648,47 @@ export const getCountAllTimeRequestDepartment = async (
   }
 
   try {
-    const transactionCount = await BorrowingStatus.count({ where: { DPT_ID } });
+    const transactionCount = await BorrowingTransaction.count({
+      where: { DPT_ID },
+    });
 
     res.status(200).json(transactionCount);
+  } catch (error) {
+    console.error("Unable to get the count of transactions. ", error);
+    res
+      .status(500)
+      .json({ message: "Unable to get the count of transactions." });
+  }
+};
+
+//get count transaction request today by department
+export const getCountTodayRequestDepartment = async (
+  req: express.Request,
+  res: express.Response
+): Promise<any> => {
+  const { DPT_ID } = req.params;
+
+  if (!DPT_ID) {
+    return res.status(400).json({ message: "Department ID is missing. " });
+  }
+
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); //start of the day
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1); // start of next day
+
+    const transactionCount = await BorrowingTransaction.count({
+      where: {
+        DPT_ID,
+        createdAt: {
+          [Op.gte]: today,
+          [Op.lt]: tomorrow,
+        },
+      },
+    });
+
+    return res.status(200).json(transactionCount);
   } catch (error) {
     console.error("Unable to get the count of transactions. ", error);
     res
