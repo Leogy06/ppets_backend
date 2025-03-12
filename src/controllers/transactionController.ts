@@ -16,6 +16,7 @@ import ItemModel from "../models/itemModel.js";
 import User from "../models/user.js";
 import { users } from "../sockets/socketManager.js";
 import TransactionRemarks from "../models/btRemarksModel.js";
+import { Op } from "sequelize";
 
 //get borrow transaciton by owner
 export const getBorrowTransactions = async (
@@ -589,5 +590,48 @@ export const rejectTransaction = async (
     response
       .status(500)
       .json({ message: "Unexpecter error occurred. ", error });
+  }
+};
+
+//get the transactions approved and by owner in the transaction
+export const getTransactionApprovedOwnerDepartment = async (
+  req: express.Request,
+  res: express.Response
+): Promise<any> => {
+  const { ownerEmpId } = req.params;
+
+  if (!ownerEmpId) {
+    return res.status(400).json({
+      message: "Department ID or Owner Employee ID was missing. ",
+      ownerEmpId,
+    });
+  }
+
+  try {
+    //get transaction by owner and approved status
+    //in order to track their items that has been borrowed
+    const transactions = await BorrowingTransaction.findAll({
+      where: {
+        owner_emp_id: ownerEmpId,
+        status: 1,
+        borrower_emp_id: { [Op.ne]: null },
+      },
+      include: [
+        { model: Employee, as: "borrowerEmp" },
+        { model: ItemModel, as: "itemDetails" },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.status(200).json(transactions);
+  } catch (error) {
+    console.error(
+      "Unable to get approved, owwner and department transaction. ",
+      error
+    );
+    res.status(500).json({
+      message: "Unable to get approved, owwner and department transaction. ",
+      error,
+    });
   }
 };
