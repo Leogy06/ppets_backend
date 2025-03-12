@@ -41,6 +41,7 @@ export const downloadPdf = (req: Express.Request, res: Express.Response) => {
   }
 };
 
+//render requests pdf
 export const renderRequestPDF = async (
   req: Express.Request,
   res: Express.Response
@@ -207,7 +208,7 @@ export const renderRequestPDF = async (
   }
 };
 
-//render items
+//render items pdf's
 export const renderItemPDF = async (
   req: Express.Request,
   res: Express.Response
@@ -224,7 +225,7 @@ export const renderItemPDF = async (
   try {
     const doc = new PDFDocument({
       layout: "landscape",
-      margin: 30,
+      margin: 20,
       size: [612, 936],
     });
 
@@ -233,7 +234,10 @@ export const renderItemPDF = async (
 
     doc.pipe(res);
 
-    //title
+    // Define consistent column widths
+    const columnWidths = [110, 50, 100, 70, 70, 50, 50, 70, 70, 70, 120];
+
+    //title page header
     const addHeader = () => {
       const currentDate = new Date().toString();
 
@@ -251,7 +255,7 @@ export const renderItemPDF = async (
         .moveDown(0.5);
       doc
         .fontSize(16)
-        .text("ITEM REQUESTS LOGS", { align: "center" })
+        .text("PROPERTY ACCOUNTABILITY", { align: "center" })
         .moveDown(2);
 
       // Current Date at the top right corner
@@ -268,26 +272,27 @@ export const renderItemPDF = async (
       const headers = [
         "Item",
         "Quantity",
-        "Status",
-        "Accountable Employee",
-        "Borrower",
-        "Requested on",
+        "Date Acquired",
+        "Are No.",
+        "ICS No.",
+        "PROP No.",
+        "Serial No.",
+        "Class No.",
+        "Unit Value.",
+        "Total Value.",
+        "Accountable Person No.",
       ];
-      const columnWidths = [170, 80, 100, 180, 180, 180]; // Adjusted for long bond paper
 
+      let x = 50;
       let y = doc.y;
       doc.font("Helvetica-Bold").fontSize(12);
 
       headers.forEach((header, i) => {
-        doc.text(
-          header,
-          50 + columnWidths.slice(0, i).reduce((a, b) => a + b, 0),
-          y
-        );
+        doc.text(header, x, y, { width: columnWidths[i], align: "center" });
+        x += columnWidths[i];
       });
 
       doc.moveDown(0.5);
-
       doc.font("Helvetica").fontSize(10);
     };
 
@@ -296,73 +301,67 @@ export const renderItemPDF = async (
     addTableHeader();
 
     let y = doc.y;
-    const pageHeight = 612 - 60; // total height of the page minus margis
+    const pageHeight = 612 - 20; // total height of the page minus margis
 
-    //loop
+    // Loop through items
     items.forEach((row: any, index: number) => {
-      const rowHeight = 20;
       const startX = 50;
-      const columnWidths = [170, 80, 100, 180, 180, 180];
+      let cellX = startX;
+      let maxRowHeight = 20; // Default row height
 
-      if (y + rowHeight > pageHeight) {
-        doc.addPage(); //add new page pdfkit
-        addHeader(); //re-add header
-        addTableHeader(); //re-add table header
-        y = doc.y; //reset position
+      // Get row data
+      const rowData = [
+        row?.itemDetails?.ITEM_NAME ?? "",
+        `${row.quantity}`,
+        dateFormatter(row.DISTRIBUTED_ON),
+        row?.are_no ?? "",
+        row?.ics ?? "",
+        row?.itemDetails?.PROP_NO ?? "",
+        row?.itemDetails?.SERIAL_NO ?? "",
+        row?.class_no ?? "",
+        row?.unit_value ?? "",
+        row?.total_value ?? "",
+        `${row?.accountableEmpDetails?.FIRSTNAME ?? ""} ${
+          row?.accountableEmpDetails?.LASTNAME ?? ""
+        } ${row?.accountableEmpDetails?.MIDDLENAME ?? ""} ${
+          row?.accountableEmpDetails?.SUFFIX ?? ""
+        }`,
+      ];
+
+      // Determine max row height based on text wrapping
+      rowData.forEach((text, i) => {
+        const textHeight = doc.heightOfString(text, { width: columnWidths[i] });
+        maxRowHeight = Math.max(maxRowHeight, textHeight + 5); // Add padding
+      });
+
+      // Create new page if needed
+      if (y + maxRowHeight > pageHeight) {
+        doc.addPage();
+        addHeader();
+        addTableHeader();
+        y = doc.y;
       }
 
+      // Alternate row shading
       if (index % 2 === 0) {
         doc
           .rect(
             startX - 5,
             y - 2,
             columnWidths.reduce((a, b) => a + b, 0),
-            rowHeight
+            maxRowHeight
           )
-          .fill("#f2f2f2") // light gray background
-          .fillColor("black"); //reset text color
+          .fill("#f2f2f2")
+          .fillColor("black");
       }
 
-      let cellX = startX;
+      // Render text in each cell
+      rowData.forEach((text, i) => {
+        doc.text(text, cellX, y, { width: columnWidths[i], align: "left" });
+        cellX += columnWidths[i];
+      });
 
-      //item name cell
-      doc.text(row?.itemDetails?.ITEM_NAME ?? "", cellX, y);
-      cellX += columnWidths[0];
-
-      //item quantity requested
-      doc.text(`${row.quantity}`, cellX, y);
-      cellX += columnWidths[1];
-
-      //transaction status
-      doc.text(row?.statusDetails.description.toUpperCase(), cellX, y);
-      cellX += columnWidths[2];
-
-      //owner cell
-      doc.text(
-        `${row?.ownerEmp?.FIRSTNAME ?? ""} ${row?.ownerEmp?.LASTNAME ?? ""} ${
-          row?.ownerEmp?.MIDDLENAME ?? ""
-        } ${row?.ownerEmp?.SUFFIX ?? ""}`,
-        cellX,
-        y
-      );
-      cellX += columnWidths[3];
-
-      //borrower cell
-      doc.text(
-        `${row.borrowerEmp?.FIRSTNAME ?? "--"} ${
-          row.borrowerEmp?.LASTNAME ?? ""
-        } ${row.borrowerEmp?.MIDDLENAME ?? ""} ${
-          row.borrowerEmp?.SUFFIX ?? ""
-        }`,
-        cellX,
-        y
-      );
-
-      //created transaction date
-      cellX += columnWidths[4];
-      doc.text(row.createdAt ? dateFormatter(row.createdAt) : "", cellX, y);
-
-      y += rowHeight; //move y position own for next row
+      y += maxRowHeight; // Move to next row position
     });
 
     doc.end();
