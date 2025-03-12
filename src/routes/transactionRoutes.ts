@@ -6,6 +6,7 @@ import {
   getBorrowingTransactionByDpt,
   getBorrowTransactionByEmployee,
   getBorrowTransactions,
+  getTransactionApprovedOwnerDepartment,
   rejectTransaction,
 } from "../controllers/transactionController.js";
 
@@ -20,6 +21,9 @@ const transactionRoutes = Router()
   //approve
   .put("/approve/:transactionId/:approverId", approvedLendTransaction)
   //reject
-  .put("/reject/:transactionId", rejectTransaction);
+  .put("/reject/:transactionId", rejectTransaction)
+  //get transaction by owner and approved status
+  //in order to track their items that has been borrowed
+  .get("/get/approved/:ownerEmpId", getTransactionApprovedOwnerDepartment);
 
 export default transactionRoutes;
