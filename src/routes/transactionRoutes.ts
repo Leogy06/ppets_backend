@@ -6,6 +6,7 @@ import {
   getBorrowingTransactionByDpt,
   getBorrowTransactionByEmployee,
   getBorrowTransactions,
+  getCountAllTimeRequestDepartment,
   getTransactionApprovedOwnerDepartment,
   rejectTransaction,
 } from "../controllers/transactionController.js";
@@ -24,6 +25,9 @@ const transactionRoutes = Router()
   .put("/reject/:transactionId", rejectTransaction)
   //get transaction by owner and approved status
   //in order to track their items that has been borrowed
-  .get("/get/approved/:ownerEmpId", getTransactionApprovedOwnerDepartment);
+  .get("/get/approved/:ownerEmpId", getTransactionApprovedOwnerDepartment)
+
+  //counts for dashboard
+  .get("/count/all_time/:DPT_ID", getCountAllTimeRequestDepartment);
 
 export default transactionRoutes;
