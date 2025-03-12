@@ -49,18 +49,21 @@ export const addUser = async (
     const employees = await Employee.findAll();
 
     //checking if empl id and role does not exist
-    const [isEmpIDExist, isRoleIDExist, isEmailExist, isUsernameExist] =
-      await Promise.all([
-        //this should be in order
-        Employee.count({ where: { ID: emp_id } }),
-        Roles.count({ where: { id: role } }),
-        User.count({ where: { email } }),
-        User.count({ where: { username } }),
-      ]);
+    const [isRoleIDExist, isEmailExist, isUsernameExist] = await Promise.all([
+      //this should be in order
+      Roles.count({ where: { id: role } }),
+      User.count({ where: { email } }),
+      User.count({ where: { username } }),
+    ]);
 
     //check emp_id exist
     //emp id should exist in emp tbl
-    if (isEmpIDExist === 0) {
+
+    const isEmpIDExist = (await Employee.findOne({
+      where: { ITEM_ID: emp_id },
+    })) as any;
+
+    if (!isEmpIDExist) {
       return res
         .status(400)
         .json({ message: "Employee does not register in list of employee." });
@@ -83,7 +86,7 @@ export const addUser = async (
 
     //creatin new user
     const newUser = await User.create({
-      emp_id,
+      emp_id: isEmpIDExist.ID,
       username,
       password: hashedPassword,
       email,
