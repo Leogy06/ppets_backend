@@ -652,7 +652,32 @@ export const getCountAllTimeRequestDepartment = async (
       where: { DPT_ID },
     });
 
-    res.status(200).json(transactionCount);
+    //today's trasaction
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); //start of the day
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1); // start of next day
+
+    const transactionCountToday = await BorrowingTransaction.count({
+      where: {
+        DPT_ID,
+        createdAt: {
+          [Op.gte]: today,
+          [Op.lt]: tomorrow,
+        },
+      },
+    });
+
+    //item count not quantity
+    const itemCountDepartment = await ItemModel.count({
+      where: {
+        DEPARTMENT_ID: DPT_ID,
+      },
+    });
+
+    res
+      .status(200)
+      .json({ transactionCount, transactionCountToday, itemCountDepartment });
   } catch (error) {
     console.error("Unable to get the count of transactions. ", error);
     res

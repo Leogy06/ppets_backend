@@ -153,7 +153,13 @@ export const login = async (
         .json({ message: "User password is missing in db" });
     }
 
-    const empDetails = await Employee.findByPk(user.emp_id);
+    const empDetails = await Employee.findByPk(
+      user.emp_id,
+
+      {
+        include: [{ model: Department, as: "departmentDetails" }],
+      }
+    );
 
     if (!empDetails) {
       return res.status(400).json({ message: "Employee does not exist." });
