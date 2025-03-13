@@ -145,8 +145,8 @@ export const editEmployee = async (
   req: express.Request,
   res: express.Response
 ): Promise<any> => {
-  const { ID } = req.query;
   const {
+    ID,
     ID_NUMBER,
     FIRSTNAME,
     MIDDLENAME,
@@ -167,12 +167,11 @@ export const editEmployee = async (
     const employee = await Employee.findOne({ where: { ID } });
 
     if (!employee || !UPDATED_BY) {
-      return res
-        .status(400)
-        .json({ message: "Missing required fields doesn't" });
+      return res.status(400).json({ message: "Required fields are missing." });
     }
 
     //check if new id number is duplicated
+    //chec everyone except the employee editing
     if (ID_NUMBER) {
       const isIDExist = await Employee.findOne({
         where: { ID_NUMBER, ID: { [Op.ne]: ID } },
