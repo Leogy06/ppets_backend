@@ -675,9 +675,19 @@ export const getCountAllTimeRequestDepartment = async (
       },
     });
 
-    res
-      .status(200)
-      .json({ transactionCount, transactionCountToday, itemCountDepartment });
+    //employee counts
+    //and also not deleted
+
+    const employeeDptCount = await Employee.count({
+      where: { CURRENT_DPT_ID: DPT_ID, DELETED: 0 },
+    });
+
+    res.status(200).json({
+      transactionCount,
+      transactionCountToday,
+      itemCountDepartment,
+      employeeDptCount,
+    });
   } catch (error) {
     console.error("Unable to get the count of transactions. ", error);
     res
