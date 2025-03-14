@@ -2,9 +2,10 @@ import jwt from "jsonwebtoken";
 import { configDotenv } from "dotenv";
 import express, { Request } from "express";
 
-configDotenv({ path: ".env.local" });
+configDotenv();
 
 const secret_token = process.env.JWT_SECRET;
+
 if (!secret_token) {
   throw new Error(
     "JWT_SECRET token is not defined in the environment variables"
@@ -21,7 +22,7 @@ interface User {
 }
 export const generateToken = (user: Partial<User>) => {
   return jwt.sign({ id: user.id, username: user.username }, secret_token, {
-    expiresIn: "7d",
+    expiresIn: "8h",
   });
 };
 
