@@ -40,7 +40,7 @@ ItemModel.init(
       type: DataTypes.DATE,
       allowNull: false,
     },
-    PIC_NO: {
+    PIS_NO: {
       type: DataTypes.STRING(45),
       allowNull: true,
     },
@@ -53,6 +53,21 @@ ItemModel.init(
       type: DataTypes.STRING(45),
       allowNull: false,
       unique: true,
+    },
+    PAR_NO: {
+      type: DataTypes.STRING(45),
+      allowNull: false,
+      unique: true,
+    },
+    MR_NO: {
+      type: DataTypes.STRING(45),
+      allowNull: false,
+      unique: true,
+    },
+    ACCOUNT_CODE: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      unique: false,
     },
     DEPARTMENT_ID: {
       type: DataTypes.INTEGER,

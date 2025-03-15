@@ -79,7 +79,7 @@ app.use("/departments", protectRoute, department_routes);
 //user routes
 app.use("/user", user_routes);
 
-//item routes // distrivuted item
+//item routes // distributed item
 app.use("/item", protectRoute, distributedItem_routes);
 
 //item category

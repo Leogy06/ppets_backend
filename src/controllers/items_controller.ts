@@ -2,6 +2,7 @@ import Express from "express";
 import { validationResult } from "express-validator";
 import ItemModel from "../models/itemModel.js";
 import { ItemModelProps } from "../@types/types.js";
+import { Op } from "sequelize";
 
 //distributed item
 export const createItem = async (
@@ -22,6 +23,8 @@ export const createItem = async (
     SERIAL_NO,
     PROP_NO,
     REMARKS,
+    ARE_NO,
+    PAR_NO,
     DEPARTMENT_ID,
     RECEIVED_AT,
     PIC_NO,
@@ -73,9 +76,10 @@ export const createItem = async (
     const today = new Date();
 
     if (receivedAtDate > today) {
-      return res
-        .status(400)
-        .json({ message: "Received date should be pass by today's date." });
+      return res.status(400).json({
+        message:
+          "Received date should be pass by today's date. Since its impossible to receive this item ahead of item.",
+      });
     }
 
     const newItem = await ItemModel.create({
@@ -86,6 +90,8 @@ export const createItem = async (
       TOTAL_VALUE: UNIT_VALUE * STOCK_QUANTITY,
       SERIAL_NO,
       PROP_NO,
+      PAR_NO,
+      ARE_NO,
       REMARKS,
       ORIGINAL_QUANTITY: STOCK_QUANTITY,
       DEPARTMENT_ID,
@@ -122,46 +128,100 @@ export const getItems = async (
   }
 };
 
-//set delete or restore item
+//set delete item
 export const deleteItem = async (
   req: Express.Request,
   res: Express.Response
 ): Promise<any> => {
-  const { itemId } = req.params;
+  const { ids } = req.body;
 
-  const action = Number(req.params.action);
-
-  if (!itemId) {
-    return res.status(400).json({ message: "Item id is required. " });
-  }
-
-  console.log("action ", action);
-
-  if (action === null || action === undefined) {
-    return res.status(400).json({ message: "Action is required. " });
-  }
-
-  if (isNaN(action)) {
-    return res.status(400).json({ message: "Action is not a number" });
-  }
+  const itemIds = Array.isArray(ids) ? ids : [ids];
 
   try {
-    const item = (await ItemModel.findByPk(itemId)) as ItemModelProps;
+    //find item with ids
+    const itemExist = await ItemModel.findAll({
+      where: { ID: { [Op.in]: itemIds } },
+    });
 
-    if (!item) {
-      return res.status(404).json({ message: "Item does not exist. " });
+    //check if the item are exists
+    if (!itemExist.length) {
+      return res
+        .status(400)
+        .json({ message: "Item does not exists. Can't proceed the action." });
     }
 
-    item.DELETE = action;
-    const result = await item.save();
+    //check if items has already deleted
+    const alreadyDeleted = itemExist.every(
+      (item) => item.getDataValue("DELETE") === 1
+    );
 
-    const message =
-      action === 1
-        ? "Item was deleted"
-        : action === 0
-        ? "Item was restored"
-        : "Unknown action.";
-    res.status(200).json({ message, result });
+    if (alreadyDeleted) {
+      return res
+        .status(400)
+        .json({ message: "There was an item deleted already." });
+    }
+
+    //deleting the items
+    const result = await ItemModel.update(
+      { DELETE: 1 },
+      { where: { ID: { [Op.in]: itemIds } } }
+    );
+
+    res.status(200).json({
+      message: "Item(s) deleted successfully.",
+      affectedRows: result[0],
+      result,
+    });
+  } catch (error) {
+    console.error("Unable to delete item. ", error);
+    res.status(500).json({ message: "unable to delete item. ", error });
+  }
+};
+
+//set restore item
+export const restoreItem = async (
+  req: Express.Request,
+  res: Express.Response
+): Promise<any> => {
+  const { ids } = req.body;
+
+  const itemIds = Array.isArray(ids) ? ids : [ids];
+
+  try {
+    //find item with ids
+    const itemExist = await ItemModel.findAll({
+      where: { ID: { [Op.in]: itemIds } },
+    });
+
+    //check if the item are exists
+    if (!itemExist.length) {
+      return res
+        .status(400)
+        .json({ message: "Item does not exists. Can't proceed the action." });
+    }
+
+    //check if items has already deleted
+    const alreadyRestore = itemExist.every(
+      (item) => item.getDataValue("DELETE") === 0
+    );
+
+    if (alreadyRestore) {
+      return res
+        .status(400)
+        .json({ message: "There was an item has not deleted." });
+    }
+
+    //deleting the items
+    const result = await ItemModel.update(
+      { DELETE: 0 },
+      { where: { ID: { [Op.in]: itemIds } } }
+    );
+
+    res.status(200).json({
+      message: "Item(s) restored successfully.",
+      affectedRows: result[0],
+      result,
+    });
   } catch (error) {
     console.error("Unable to delete item. ", error);
     res.status(500).json({ message: "unable to delete item. ", error });
