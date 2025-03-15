@@ -3,6 +3,7 @@ import { validationResult } from "express-validator";
 import ItemModel from "../models/itemModel.js";
 import { ItemModelProps } from "../@types/types.js";
 import { Op } from "sequelize";
+import AccountItem from "../models/accountItemModel.js";
 
 //distributed item
 export const createItem = async (
@@ -125,6 +126,7 @@ export const getItems = async (
     const items = await ItemModel.findAll({
       where: { DEPARTMENT_ID },
       order: [["createdAt", "DESC"]],
+      include: [{ model: AccountItem, as: "accountCodeDetails" }],
     });
 
     res.status(200).json(items);
