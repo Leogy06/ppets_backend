@@ -13,6 +13,7 @@ const itemValidationRules = [
   body("RECEIVED_AT").notEmpty().withMessage("Received date is missing."),
   body("PAR_NO").notEmpty().withMessage("Received date is missing."),
   body("ARE_NO").notEmpty().withMessage("Received date is missing."),
+  body("MR_NO").notEmpty().withMessage("Mr no is missing."),
 ];
 
 export default itemValidationRules;

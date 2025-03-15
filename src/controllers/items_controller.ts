@@ -27,7 +27,9 @@ export const createItem = async (
     PAR_NO,
     DEPARTMENT_ID,
     RECEIVED_AT,
-    PIC_NO,
+    PIS_NO,
+    MR_NO,
+    ACCOUNT_CODE,
   } = req.body;
   try {
     //check if prop and srn is duplicated
@@ -96,7 +98,9 @@ export const createItem = async (
       ORIGINAL_QUANTITY: STOCK_QUANTITY,
       DEPARTMENT_ID,
       RECEIVED_AT,
-      PIC_NO,
+      PIS_NO,
+      MR_NO,
+      ACCOUNT_CODE,
     });
 
     res.status(201).json(newItem);

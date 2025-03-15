@@ -1,5 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
+import AccountItem from "./accountItem.js";
 
 //mao ni ang distributed item
 class ItemModel extends Model {}
@@ -88,5 +89,10 @@ ItemModel.init(
     tableName: "items",
   }
 );
+
+ItemModel.belongsTo(AccountItem, {
+  foreignKey: "ACCOUNT_CODE",
+  as: "accountCodeDetails",
+});
 
 export default ItemModel;
