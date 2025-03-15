@@ -12,7 +12,7 @@ AccountItem.init(
       unique: true,
     },
     ACCOUNT_CODE: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(45),
       allowNull: false,
       unique: true,
     },
