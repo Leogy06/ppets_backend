@@ -30,6 +30,7 @@ export const createItem = async (
     PIS_NO,
     MR_NO,
     ACCOUNT_CODE,
+    ADDED_BY,
   } = req.body;
   try {
     //check if prop and srn is duplicated
@@ -101,6 +102,7 @@ export const createItem = async (
       PIS_NO,
       MR_NO,
       ACCOUNT_CODE,
+      ADDED_BY,
     });
 
     res.status(201).json(newItem);

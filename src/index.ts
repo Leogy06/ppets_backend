@@ -7,6 +7,7 @@ import { protectRoute } from "./middlewares/auth.js";
 import { createServer } from "http";
 import socketManager from "./sockets/socketManager.js";
 import { Server } from "socket.io";
+import { logger } from "./logger/logger.js";
 
 //import routes
 import employee_routes from "./routes/employee_routes.js";
@@ -20,7 +21,7 @@ import distributedItem_routes from "./routes/distributedItem_routes.js";
 import item_routes from "./routes/item_routes.js";
 import transactionRoutes from "./routes/transactionRoutes.js";
 import pdfKitRoutes from "./routes/pdfKitRoutes.js";
-import { logger } from "./logger/logger.js";
+import accountItemRoutes from "./routes/accountItem_routes.js";
 
 //env config
 config();
@@ -102,7 +103,11 @@ app.use("/notification", protectRoute, notification_routes);
 app.use("/api/item", protectRoute, item_routes);
 
 //pdf kit
-app.use("/api/pdfkit", pdfKitRoutes);
+app.use("/api/pdfkit", protectRoute, pdfKitRoutes);
+
+//account codes
+
+app.use("/account_code", protectRoute, accountItemRoutes);
 
 const startServer = () => {
   //synchronize model's prop with db's table column

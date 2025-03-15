@@ -1,6 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
-import AccountItem from "./accountItem.js";
+import AccountItem from "./accountItemModel.js";
 
 //mao ni ang distributed item
 class ItemModel extends Model {}
@@ -81,6 +81,10 @@ ItemModel.init(
     DELETE: {
       type: DataTypes.TINYINT,
       defaultValue: 0,
+    },
+    ADDED_BY: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
   },
   {
