@@ -302,7 +302,13 @@ export const getEmployeeById = async (
       return res.status(400).json({ message: "Employee ID is required." });
     }
 
-    const foundEmployee = await Employee.findByPk(empId);
+    const foundEmployee = await Employee.findByPk(empId, {
+      include: [
+        { model: Department, as: "departmentDetails" },
+        { model: Employee, as: "creator" },
+        { model: Employee, as: "updater" },
+      ],
+    });
 
     if (!foundEmployee) {
       return res.status(400).json({ message: "Employee does not exist as." });

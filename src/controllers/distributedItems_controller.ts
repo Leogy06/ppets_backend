@@ -8,28 +8,21 @@ import Notification from "../models/notificationModel.js";
 import BorrowingTransaction from "../models/transactionModel.js";
 import Employee from "../models/employee.js";
 import { users } from "../sockets/socketManager.js";
+import AccountItem from "../models/accountItemModel.js";
 
 //distribute item to employee by the admin
 export const addItem = async (
   request: express.Request,
   response: express.Response
 ): Promise<any> => {
-  const {
-    ITEM_ID,
-    quantity,
-    ics,
-    pis_no,
-    acct_code,
-    accountable_emp,
-    DISTRIBUTED_BY,
-    are_no,
-    remarks,
-  } = request.body;
+  const { ITEM_ID, quantity, accountable_emp, DISTRIBUTED_BY, remarks } =
+    request.body;
 
-  if (!quantity || !accountable_emp || !DISTRIBUTED_BY || !are_no) {
-    return response
-      .status(400)
-      .json({ message: "All fields are required.", request: request.body });
+  if (!ITEM_ID || !quantity || !accountable_emp || !DISTRIBUTED_BY) {
+    return response.status(400).json({
+      message: "All fields are required 23123.",
+      request: request.body,
+    });
   }
 
   //check if quantity is below zero
@@ -48,6 +41,7 @@ export const addItem = async (
   }
 
   try {
+    //check if the item is exist in undistributed items
     const undistributedItem = (await ItemModel.findByPk(
       ITEM_ID
     )) as ItemModelProps;
@@ -62,10 +56,10 @@ export const addItem = async (
     }
 
     //check if prop, are # are duplicated
-    const isAreExist = await Item.count({ where: { are_no } });
+    // const isAreExist = await Item.count({ where: { are_no } });
 
-    if (isAreExist > 0)
-      return response.status(400).json({ message: " Are # already exist." });
+    // if (isAreExist > 0)
+    //   return response.status(400).json({ message: " Are # already exist." });
 
     //deduct the quantity in the undistributed
     undistributedItem.STOCK_QUANTITY -= quantity;
@@ -75,8 +69,8 @@ export const addItem = async (
       distributed_item_id: ITEM_ID,
       RECEIVED_BY: accountable_emp,
       status: 1,
-      remarks: 3, //this is distribution
-      quantity: quantity,
+      remarks: 3, //this is distribution type
+      quantity,
       DPT_ID: undistributedItem.DEPARTMENT_ID,
       owner_emp_id: accountable_emp,
 
@@ -93,12 +87,8 @@ export const addItem = async (
     const newItem: Partial<Item> = await Item.create({
       ITEM_ID,
       quantity,
-      ics,
-      pis_no,
-      acct_code,
       accountable_emp,
       remarks,
-      are_no,
       DISTRIBUTED_ON: new Date(),
       DISTRIBUTED_BY,
       status: 1,
@@ -257,8 +247,13 @@ export const getItemsByOwner = async (
     const ownedItems = await Item.findAll({
       where: { accountable_emp: empId },
       include: [
-        { model: ItemModel, as: "itemDetails" },
+        {
+          model: ItemModel,
+          as: "itemDetails",
+          include: [{ model: AccountItem, as: "accountCodeDetails" }],
+        },
         { model: Employee, as: "distributedByEmpDetails" },
+        { model: Employee, as: "accountableEmpDetails" },
       ],
     });
 

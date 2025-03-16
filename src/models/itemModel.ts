@@ -86,6 +86,10 @@ ItemModel.init(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
+    ICS_NO: {
+      type: DataTypes.STRING(45),
+      allowNull: true,
+    },
   },
   {
     sequelize,
