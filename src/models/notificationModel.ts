@@ -1,5 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
+import BorrowingTransaction from "./transactionModel.js";
 
 class Notification extends Model {}
 
@@ -35,5 +36,10 @@ Notification.init(
     tableName: "notification_tbl",
   }
 );
+
+Notification.belongsTo(BorrowingTransaction, {
+  foreignKey: "TRANSACTION_ID",
+  as: "borrowingTransactionDetails",
+});
 
 export default Notification;

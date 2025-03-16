@@ -2,6 +2,7 @@ import Express from "express";
 import Notification from "../models/notificationModel.js";
 import Employee from "../models/employee.js";
 import { NotificationProps } from "../@types/types.js";
+import BorrowingTransaction from "../models/transactionModel.js";
 
 export const getNotification = async (
   request: Express.Request,
@@ -22,6 +23,9 @@ export const getNotification = async (
 
     const notification = await Notification.findAll({
       where: { FOR_EMP: empId },
+      include: [
+        { model: BorrowingTransaction, as: "borrowingTransactionDetails" },
+      ],
       order: [["createdAt", "DESC"]],
       limit,
     });
