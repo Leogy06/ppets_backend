@@ -278,7 +278,14 @@ export const getNotOwnedItems = async (
   try {
     const items = await Item.findAll({
       where: { accountable_emp: { [Op.ne]: empId }, belong_dpt: departmentId },
-      include: [{ model: ItemModel, as: "itemDetails" }],
+      include: [
+        {
+          model: ItemModel,
+          as: "itemDetails",
+          include: [{ model: AccountItem, as: "accountCodeDetails" }],
+        },
+        { model: Employee, as: "accountableEmpDetails" },
+      ],
     });
 
     res.status(200).json(items);

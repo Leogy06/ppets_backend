@@ -20,15 +20,6 @@ Item.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    name: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    description: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      defaultValue: null,
-    },
     quantity: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -36,30 +27,6 @@ Item.init(
     status: {
       type: DataTypes.INTEGER,
       allowNull: false,
-    },
-    ics: {
-      type: DataTypes.STRING(45),
-      allowNull: true,
-    },
-    are_no: {
-      type: DataTypes.STRING(45),
-      allowNull: true,
-    },
-    prop_no: {
-      type: DataTypes.STRING(45),
-      allowNull: true,
-    },
-    pis_no: {
-      type: DataTypes.STRING(45),
-      allowNull: true,
-    },
-    class_no: {
-      type: DataTypes.STRING(45),
-      allowNull: true,
-    },
-    acct_code: {
-      type: DataTypes.STRING(45),
-      allowNull: true,
     },
     unit_value: {
       type: DataTypes.FLOAT,
