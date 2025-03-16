@@ -45,9 +45,6 @@ export const addUser = async (
     const salt = await bcrypt.genSalt(Number(process.env.BCRYPT_SALT_ROUNDS));
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const user_types = await User_type.findAll();
-    const employees = await Employee.findAll();
-
     //checking if empl id and role does not exist
     const [isRoleIDExist, isEmailExist, isUsernameExist] = await Promise.all([
       //this should be in order
@@ -60,7 +57,7 @@ export const addUser = async (
     //emp id should exist in emp tbl
 
     const isEmpIDExist = (await Employee.findOne({
-      where: { ITEM_ID: emp_id },
+      where: { ID_NUMBER: emp_id },
     })) as any;
 
     if (!isEmpIDExist) {
@@ -153,22 +150,22 @@ export const login = async (
         .json({ message: "User password is missing in db" });
     }
 
-    const empDetails = await Employee.findByPk(
-      user.emp_id,
+    //populate employee details
+    const empDetails = await Employee.findByPk(user.emp_id, {
+      include: [{ model: Department, as: "departmentDetails" }],
+    });
 
-      {
-        include: [{ model: Department, as: "departmentDetails" }],
-      }
-    );
-
+    //check if employee does not exist
     if (!empDetails) {
       return res.status(400).json({ message: "Employee does not exist." });
     }
 
+    //checking password
     const isPasswordMatch = await bcrypt.compare(password, user.password);
 
+    //if password does not match
     if (!isPasswordMatch) {
-      return res.status(400).json({ message: "Invalid password." });
+      return res.status(400).json({ message: "Password does not match." });
     }
     const token = generateToken(user);
 
@@ -271,5 +268,41 @@ export const checkUser = async (
   } catch (error) {
     console.error(`Unable to check user - ${error}`);
     res.status(500).json({ message: `Unable to check user - ${error}` });
+  }
+};
+
+export const firstTimeLogin = async (
+  req: express.Request,
+  res: express.Response
+): Promise<any> => {
+  const { ID_NUMBER } = req.body;
+
+  if (!ID_NUMBER) {
+    return res.status(400).json({ message: "ID number is required." });
+  }
+
+  try {
+    const employee = await Employee.findOne({
+      where: { ID_NUMBER },
+    });
+
+    if (!employee) {
+      return res.status(400).json({ message: "Employee does not exist." });
+    }
+
+    const user = await User.findOne({
+      where: { emp_id: employee.getDataValue("ID"), role: 2 },
+    });
+
+    if (user) {
+      return res.status(400).json({ message: "You are already a user." });
+    }
+
+    res
+      .status(200)
+      .json({ message: "First time login.", firstTimeLogin: true });
+  } catch (error) {
+    console.error(`Unable to check first time login - ${error}`);
+    return false;
   }
 };

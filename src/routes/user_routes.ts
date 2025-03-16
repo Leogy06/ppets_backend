@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   addUser,
   checkUser,
+  firstTimeLogin,
   login,
   logout,
   viewUsers,
@@ -16,6 +17,9 @@ const user_routes = Router()
   .post("/auth/api/logout", logout)
 
   //check user
-  .get("/auth/api/checkuser", checkUser);
+  .get("/auth/api/checkuser", checkUser)
+
+  //first time login
+  .post("/auth/api/first_time_login", firstTimeLogin);
 
 export default user_routes;
