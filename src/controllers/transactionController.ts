@@ -597,8 +597,6 @@ export const rejectTransaction = async (
 /**
  * Create a new borrow transaction.
  *
- * @param {express.Request} request - The request object.
- * @param {express.Response} response - The response object.
  */
 export const createBorrowTransaction = async (
   request: express.Request,

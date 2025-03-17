@@ -289,6 +289,7 @@ export const getNotOwnedItems = async (
         accountable_emp: { [Op.ne]: empId },
         current_dpt_id: departmentId,
       },
+      order: [["createdAt", "DESC"]],
       include: [
         {
           model: ItemModel,
@@ -296,6 +297,7 @@ export const getNotOwnedItems = async (
           include: [{ model: AccountItem, as: "accountCodeDetails" }],
         },
         { model: Employee, as: "accountableEmpDetails" },
+        { model: Employee, as: "distributedByEmpDetails" },
       ],
     });
 
