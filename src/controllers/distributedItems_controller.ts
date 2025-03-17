@@ -265,6 +265,14 @@ export const getItemsByOwner = async (
 };
 
 //get items not owned
+/**
+ * Get all items that are not owned by the given employee
+ * @param {express.Request} req - The request object.
+ * @param {express.Response} res - The response object.
+ * @param {string} req.params.empId - The employee id.
+ * @param {string} req.query.departmentId - The department id.
+ * @returns {Promise<express.Response>} The response object.
+ */
 export const getNotOwnedItems = async (
   req: express.Request,
   res: express.Response
@@ -277,7 +285,10 @@ export const getNotOwnedItems = async (
     return res.status(400).json({ message: "Department id is required." });
   try {
     const items = await Item.findAll({
-      where: { accountable_emp: { [Op.ne]: empId }, belong_dpt: departmentId },
+      where: {
+        accountable_emp: { [Op.ne]: empId },
+        current_dpt_id: departmentId,
+      },
       include: [
         {
           model: ItemModel,
@@ -342,7 +353,17 @@ export const getItemById = async (
   }
   try {
     const itemFound = await Item.findByPk(itemId, {
-      include: [{ model: ItemModel, as: "itemDetails" }],
+      include: [
+        {
+          model: ItemModel,
+          as: "itemDetails",
+          include: [{ model: AccountItem, as: "accountCodeDetails" }],
+        },
+        {
+          model: Employee,
+          as: "accountableEmpDetails",
+        },
+      ],
     });
 
     if (!itemFound) {

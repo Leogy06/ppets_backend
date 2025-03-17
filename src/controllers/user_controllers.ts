@@ -277,6 +277,8 @@ export const firstTimeLogin = async (
 ): Promise<any> => {
   const { ID_NUMBER } = req.body;
 
+  console.log("ID_NUMBER ", ID_NUMBER);
+
   if (!ID_NUMBER) {
     return res.status(400).json({ message: "ID number is required." });
   }

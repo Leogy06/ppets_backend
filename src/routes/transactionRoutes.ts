@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   approvedLendTransaction,
+  createBorrowTransaction,
   createLendTransaction,
   editBorrowTransaction,
   getBorrowingTransactionByDpt,
@@ -11,6 +12,7 @@ import {
   getTransactionApprovedOwnerDepartment,
   rejectTransaction,
 } from "../controllers/transactionController.js";
+import transactionValidationRules from "../middlewares/transactionValidation.js";
 
 const transactionRoutes = Router()
   .get("/", getBorrowTransactions)
@@ -30,6 +32,9 @@ const transactionRoutes = Router()
 
   //counts for dashboard
   .get("/count/all_time/:DPT_ID", getCountAllTimeRequestDepartment)
-  .get("/count/today/:DPT_ID", getCountTodayRequestDepartment);
+  .get("/count/today/:DPT_ID", getCountTodayRequestDepartment)
+
+  //create borrow transaction route
+  .post("/borrow", transactionValidationRules, createBorrowTransaction);
 
 export default transactionRoutes;

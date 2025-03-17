@@ -17,6 +17,7 @@ import User from "../models/user.js";
 import { users } from "../sockets/socketManager.js";
 import TransactionRemarks from "../models/btRemarksModel.js";
 import { Op } from "sequelize";
+import { validationResult } from "express-validator";
 
 //get borrow transaciton by owner
 export const getBorrowTransactions = async (
@@ -590,6 +591,113 @@ export const rejectTransaction = async (
     response
       .status(500)
       .json({ message: "Unexpecter error occurred. ", error });
+  }
+};
+
+/**
+ * Create a new borrow transaction.
+ *
+ * @param {express.Request} request - The request object.
+ * @param {express.Response} response - The response object.
+ */
+export const createBorrowTransaction = async (
+  request: express.Request,
+  response: express.Response
+): Promise<any> => {
+  console.log("createBorrowTransaction was called.");
+
+  const errors = validationResult(request);
+  if (!errors.isEmpty()) {
+    return response.status(400).json({ errors: errors.array() });
+  }
+
+  const {
+    distributed_item_id,
+    borrower_emp_id,
+    owner_emp_id,
+    quantity,
+    DPT_ID,
+    remarks,
+  } = request.body;
+
+  try {
+    // Retrieve the item, item distributed, borrower, and owner.
+    const [item, itemDistributed, borrower, owner, dpt] = await Promise.all([
+      ItemModel.findByPk(distributed_item_id),
+      Item.findOne({
+        where: { accountable_emp: owner_emp_id, ITEM_ID: distributed_item_id },
+      }),
+      Employee.findByPk(borrower_emp_id),
+      Employee.findByPk(owner_emp_id),
+      Department.findByPk(DPT_ID),
+    ]);
+
+    // Validate the existance of the item, item distributed, borrower, and owner.
+    if (!item) {
+      console.error("Item not found.");
+      return response.status(404).json({ message: "Item not found." });
+    }
+    if (!itemDistributed) {
+      console.log("item distributed not found.");
+
+      return response
+        .status(404)
+        .json({ message: "Item distributed not found." });
+    }
+    if (!borrower) {
+      console.log("Borrower not found.");
+
+      return response.status(404).json({ message: "Borrower not found." });
+    }
+    if (!owner) {
+      console.log("Owner not found.");
+
+      return response.status(404).json({ message: "Owner not found." });
+    }
+    if (!dpt) {
+      console.log("Department not found.", dpt);
+
+      return response.status(404).json({ message: "Department not found." });
+    }
+
+    //check if quantity is zero or negative
+    if (quantity <= 0) {
+      return response.status(400).json({ message: "Quantity is not valid." });
+    }
+
+    //check if quantity is available in item undistributed
+    if (quantity > itemDistributed.getDataValue("quantity")) {
+      console.log(
+        "item distributed quantity: ",
+        itemDistributed.getDataValue("quantity")
+      );
+      console.log("Quantity inputted: ", quantity);
+
+      return response.status(400).json({
+        message: "Quantity is more than stocked quantity of the item.",
+      });
+    }
+
+    // Create a new borrow transaction.
+    const transaction = await BorrowingTransaction.create({
+      distributed_item_id,
+      borrower_emp_id,
+      owner_emp_id,
+      quantity,
+      DPT_ID,
+      remarks,
+      status: 1,
+    });
+
+    response.status(200).json({
+      message: "Transaction created successfully.",
+      transaction,
+    });
+  } catch (error) {
+    console.error("Unable to create borrow transaction.", error);
+    response
+      .status(500)
+      .json({ message: "Unable to create borrow transaction." });
   }
 };
 
