@@ -59,6 +59,11 @@ BorrowingTransaction.init(
       allowNull: true,
       defaultValue: null,
     },
+    TRANSACTION_DESCRIPTION: {
+      type: DataTypes.STRING(45),
+      allowNull: true,
+      defaultValue: null,
+    },
   },
   { sequelize, timestamps: true, tableName: "borrowing_transaction" }
 );

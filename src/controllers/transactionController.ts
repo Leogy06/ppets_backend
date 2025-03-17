@@ -683,8 +683,9 @@ export const createBorrowTransaction = async (
       owner_emp_id,
       quantity,
       DPT_ID,
-      remarks,
-      status: 1,
+      remarks: 1, //1 is borrowing (transaction type)
+      status: 2, //2 is pending (status of the process)
+      TRANSACTION_DESCRIPTION: remarks,
     });
 
     response.status(200).json({
