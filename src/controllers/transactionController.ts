@@ -939,3 +939,17 @@ export const getBorrowedItems = async (
     res.status(500).json({ message: "Unable to get borrowed items.", error });
   }
 };
+
+//create a transfer of item transaction
+export const createTransferTransaction = async (
+  req: express.Request,
+  res: express.Response
+): Promise<any> => {
+  try {
+  } catch (error) {
+    console.error("Unable to create transfer transaction. ", error);
+    res
+      .status(500)
+      .json({ message: "Unable to create transfer transaction.", error });
+  }
+};
