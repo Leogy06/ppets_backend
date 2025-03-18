@@ -16,6 +16,8 @@ import {
 } from "../controllers/transactionController.js";
 import transactionValidationRules from "../middlewares/transactionValidation.js";
 
+//root route : /transaction
+
 const transactionRoutes = Router()
   .get("/", getBorrowTransactions)
   .get("/borrower", getBorrowTransactionByEmployee)

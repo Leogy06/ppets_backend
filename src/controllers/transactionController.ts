@@ -16,7 +16,7 @@ import ItemModel from "../models/itemModel.js";
 import User from "../models/user.js";
 import { users } from "../sockets/socketManager.js";
 import TransactionRemarks from "../models/btRemarksModel.js";
-import { Op } from "sequelize";
+import { Op, where } from "sequelize";
 import { validationResult } from "express-validator";
 
 //get borrow transaciton by owner
@@ -953,3 +953,73 @@ export const createTransferTransaction = async (
       .json({ message: "Unable to create transfer transaction.", error });
   }
 };
+
+
+//approve return item
+export const approveReturnItemTransaction = async (req:express.Request, res:express.Response) => {
+  const {id:transactionId} = req.body
+
+  if (!transactionId) {
+    return res.status(400).json({ message: "Transaction ID is missing. " });
+  }
+
+
+  try {
+
+    const transaction = (await BorrowingTransaction.findByPk(
+      transactionId
+    )) as BorrowingTransactionProps;
+
+    if (!transaction) {
+      return res.status(404).json({ message: "Transaction not found." });
+    }
+
+    //check if transaction is pending
+    if (transaction.getDataValue("status") !== 2) {
+      return res.status(400).json({ message: "Transaction is not pending return." });
+    }
+
+    //check if transaction is a return
+    if (transaction.getDataValue("remarks") !== 5) {
+      return res
+        .status(400)
+        .json({ message: "Transaction is not requesting return." });
+    }
+
+    //distributed item
+    const item = await Item.findOne({where:{
+      ITEM_ID:transaction.getDataValue("distributed_item_id"),
+      accountable_emp:transaction.getDataValue("owner_emp_id"),
+    }}) as ItemProps
+
+
+    if (!item) {
+      return res.status(404).json({ message: "Item not found." });
+    }
+
+    //updating the item quantity
+    //adding the borrowed quantity as it returns
+    item.quantity += transaction.getDataValue("quantity");
+
+
+    //updating the transaction (approving)
+    transaction.status = 1; //approved
+
+    //saving the transaction
+    const newTransaction = await transaction.save();
+
+    //saving the item
+    const newItem = await item.save();
+
+    res.status(200).json({newTransaction,newItem});
+
+    
+  } catch (error) {
+    console.error("Unable to approve return item transaction. ", error);
+    res
+      .status(500)
+      .json({ message: "Unable to approve return item transaction.", error });
+
+    
+  }
+}
