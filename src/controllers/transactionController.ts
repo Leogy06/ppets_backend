@@ -974,6 +974,13 @@ export const approveReturnItemTransaction = async (
       return res.status(404).json({ message: "Transaction not found." });
     }
 
+    if (
+      transaction.getDataValue("status") !== 2 &&
+      transaction.getDataValue("remarks") !== 5
+    ) {
+      return res.status(400).json({ message: "Item is not up for return." });
+    }
+
     //check if transaction is pending
     if (transaction.getDataValue("status") !== 2) {
       return res
