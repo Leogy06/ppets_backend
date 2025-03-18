@@ -44,6 +44,8 @@ const transactionRoutes = Router()
   //getting borrowed items transactions to track
   .get("/borrowed_items", getBorrowedItems)
   //initiate a return transaction
-  .post("/return", createReturnTransaction);
+  .post("/return", createReturnTransaction)
+  //approving the return transaction
+  .put("/approve/return");
 
 export default transactionRoutes;

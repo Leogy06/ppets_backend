@@ -954,18 +954,18 @@ export const createTransferTransaction = async (
   }
 };
 
-
 //approve return item
-export const approveReturnItemTransaction = async (req:express.Request, res:express.Response) => {
-  const {id:transactionId} = req.body
+export const approveReturnItemTransaction = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const { id: transactionId } = req.body;
 
   if (!transactionId) {
     return res.status(400).json({ message: "Transaction ID is missing. " });
   }
 
-
   try {
-
     const transaction = (await BorrowingTransaction.findByPk(
       transactionId
     )) as BorrowingTransactionProps;
@@ -976,7 +976,9 @@ export const approveReturnItemTransaction = async (req:express.Request, res:expr
 
     //check if transaction is pending
     if (transaction.getDataValue("status") !== 2) {
-      return res.status(400).json({ message: "Transaction is not pending return." });
+      return res
+        .status(400)
+        .json({ message: "Transaction is not pending return." });
     }
 
     //check if transaction is a return
@@ -987,11 +989,12 @@ export const approveReturnItemTransaction = async (req:express.Request, res:expr
     }
 
     //distributed item
-    const item = await Item.findOne({where:{
-      ITEM_ID:transaction.getDataValue("distributed_item_id"),
-      accountable_emp:transaction.getDataValue("owner_emp_id"),
-    }}) as ItemProps
-
+    const item = (await Item.findOne({
+      where: {
+        ITEM_ID: transaction.getDataValue("distributed_item_id"),
+        accountable_emp: transaction.getDataValue("owner_emp_id"),
+      },
+    })) as ItemProps;
 
     if (!item) {
       return res.status(404).json({ message: "Item not found." });
@@ -1000,7 +1003,6 @@ export const approveReturnItemTransaction = async (req:express.Request, res:expr
     //updating the item quantity
     //adding the borrowed quantity as it returns
     item.quantity += transaction.getDataValue("quantity");
-
 
     //updating the transaction (approving)
     transaction.status = 1; //approved
@@ -1011,15 +1013,11 @@ export const approveReturnItemTransaction = async (req:express.Request, res:expr
     //saving the item
     const newItem = await item.save();
 
-    res.status(200).json({newTransaction,newItem});
-
-    
+    res.status(200).json({ newTransaction, newItem });
   } catch (error) {
     console.error("Unable to approve return item transaction. ", error);
     res
       .status(500)
       .json({ message: "Unable to approve return item transaction.", error });
-
-    
   }
-}
+};
