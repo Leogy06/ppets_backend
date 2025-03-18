@@ -3,7 +3,9 @@ import {
   approvedLendTransaction,
   createBorrowTransaction,
   createLendTransaction,
+  createReturnTransaction,
   editBorrowTransaction,
+  getBorrowedItems,
   getBorrowingTransactionByDpt,
   getBorrowTransactionByEmployee,
   getBorrowTransactions,
@@ -35,6 +37,11 @@ const transactionRoutes = Router()
   .get("/count/today/:DPT_ID", getCountTodayRequestDepartment)
 
   //create borrow transaction route
-  .post("/borrow", transactionValidationRules, createBorrowTransaction);
+  .post("/borrow", transactionValidationRules, createBorrowTransaction)
+
+  //getting borrowed items transactions to track
+  .get("/borrowed_items", getBorrowedItems)
+  //initiate a return transaction
+  .post("/return", createReturnTransaction);
 
 export default transactionRoutes;

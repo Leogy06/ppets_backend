@@ -838,3 +838,104 @@ export const getCountTodayRequestDepartment = async (
       .json({ message: "Unable to get the count of transactions." });
   }
 };
+
+//create return transaction
+export const createReturnTransaction = async (
+  req: express.Request,
+  res: express.Response
+): Promise<any> => {
+  console.log("createReturnTransaction was called.");
+
+  //front end should get these values from transaction ID
+  const { id: transaction_id } = req.body;
+
+  if (!transaction_id) {
+    return res.status(400).json({ message: "Transaction ID is missing. " });
+  }
+
+  try {
+    const transaction = (await BorrowingTransaction.findByPk(
+      transaction_id
+    )) as BorrowingTransactionProps;
+
+    if (!transaction) {
+      return res.status(404).json({ message: "Transaction not found." });
+    }
+
+    //check if transaction is approved
+    if (transaction.getDataValue("status") !== 1) {
+      return res.status(400).json({ message: "Transaction is not approved." });
+    }
+
+    //check if transaction is already returned
+    if (transaction.getDataValue("remarks") === 5) {
+      return res
+        .status(400)
+        .json({ message: "Transaction has already returned." });
+    }
+
+    //check if transaction is already pending
+    if (transaction.getDataValue("status") === 2) {
+      return res
+        .status(400)
+        .json({ message: "Transaction is already pending return." });
+    }
+
+    //check if transaction was rejected
+    if (transaction.getDataValue("status") === 4) {
+      return res.status(400).json({ message: "Transaction was rejected." });
+    }
+
+    //check if transaction already requesting for return
+    if (transaction.getDataValue("remarks") === 5) {
+      return res
+        .status(400)
+        .json({ message: "Transaction is already requesting return." });
+    }
+
+    //update transaction to return and pending
+    transaction.status = 2; // pending
+    transaction.remarks = 5; // return
+
+    const newTransaction = await transaction.save();
+
+    res.status(200).json(newTransaction);
+  } catch (error) {
+    console.error("Unable to create return transaction. ", error);
+    res
+      .status(500)
+      .json({ message: "Unable to create return transaction.", error });
+  }
+};
+
+//for borrowed items / approved and in used
+export const getBorrowedItems = async (
+  req: express.Request,
+  res: express.Response
+): Promise<any> => {
+  const { borrower_emp_id } = req.query;
+
+  if (!borrower_emp_id) {
+    return res.status(400).json({ message: "Borrower ID is missing. " });
+  }
+
+  try {
+    const transactions = await BorrowingTransaction.findAll({
+      where: {
+        status: 1, //approved
+        borrower_emp_id, //the borrower emp id,
+        remarks: 1, //borrowing
+      },
+      include: [
+        { model: Employee, as: "borrowerEmp" },
+        { model: Employee, as: "ownerEmp" },
+        { model: ItemModel, as: "itemDetails" },
+      ],
+    });
+
+    res.status(200).json(transactions);
+  } catch (error) {
+    console.error("Unable to get borrowed items. ", error);
+    res.status(500).json({ message: "Unable to get borrowed items.", error });
+  }
+};
