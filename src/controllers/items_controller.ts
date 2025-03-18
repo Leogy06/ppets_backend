@@ -13,7 +13,12 @@ export const createItem = async (
   const errors = validationResult(req); //check if required fields are missing
 
   if (!errors.isEmpty()) {
-    return res.status(400).json(errors);
+    return res.status(400).json({
+      message: errors
+        .array()
+        .map((err) => err.msg)
+        .join(", "),
+    });
   }
 
   const {
@@ -24,22 +29,19 @@ export const createItem = async (
     SERIAL_NO,
     PROP_NO,
     REMARKS,
-    ARE_NO,
     PAR_NO,
     DEPARTMENT_ID,
     RECEIVED_AT,
-    PIS_NO,
     MR_NO,
     ACCOUNT_CODE,
     ADDED_BY,
-    ICS_NO,
   } = req.body;
+
   try {
     //check if prop and srn is duplicated
-    const [isSrnExist, isPropExist] = await Promise.all([
-      await ItemModel.count({ where: { SERIAL_NO } }),
-      await ItemModel.count({ where: { PROP_NO } }),
-    ]);
+    const isSrnExist = await ItemModel.count({ where: { SERIAL_NO } });
+    const isPropExist = await ItemModel.count({ where: { PROP_NO } });
+    const isParExist = await ItemModel.count({ where: { PAR_NO } });
 
     if (isSrnExist > 0) {
       return res
@@ -53,14 +55,20 @@ export const createItem = async (
         .json({ message: "Prop number was already in used." });
     }
 
+    if (isParExist > 0) {
+      return res
+        .status(400)
+        .json({ message: "Asset number was already in used." });
+    }
+
     //validate stock quantity
-    //if quantity is negative
     const stockNumber = Number(STOCK_QUANTITY);
     if (stockNumber <= 0) {
       return res
         .status(400)
         .json({ message: "Quantity are equal to zero or below. " });
     }
+
     //check if quantity is decimal
     if (!Number.isInteger(stockNumber)) {
       return res
@@ -68,8 +76,7 @@ export const createItem = async (
         .json({ message: "Stock quantity must be a whole number." });
     }
 
-    //put a regex here for qauntity because user can add ++ in number
-
+    //validate unit value
     if (UNIT_VALUE <= 0) {
       return res
         .status(400)
@@ -80,6 +87,7 @@ export const createItem = async (
     const receivedAtDate = new Date(RECEIVED_AT);
     const today = new Date();
 
+    //check if received at is in the future
     if (receivedAtDate > today) {
       return res.status(400).json({
         message:
@@ -87,6 +95,7 @@ export const createItem = async (
       });
     }
 
+    //create item
     const newItem = await ItemModel.create({
       ITEM_NAME,
       DESCRIPTION,
@@ -96,12 +105,10 @@ export const createItem = async (
       SERIAL_NO,
       PROP_NO,
       PAR_NO,
-      ARE_NO,
       REMARKS,
       ORIGINAL_QUANTITY: STOCK_QUANTITY,
       DEPARTMENT_ID,
       RECEIVED_AT,
-      PIS_NO,
       MR_NO,
       ACCOUNT_CODE,
       ADDED_BY,
