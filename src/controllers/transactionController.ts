@@ -1073,7 +1073,11 @@ export const createTransferTransaction = async (
   req: express.Request,
   res: express.Response
 ): Promise<any> => {
-  const { itemId, newAccountablePerson, quantityTransferred } = req.body;
+  const {
+    item_id: itemId,
+    newAccountablePerson,
+    quantityTransferred,
+  } = req.body;
 
   if (!itemId || !newAccountablePerson || !quantityTransferred) {
     return res.status(400).json({ message: "Required fields are missing." });
@@ -1105,12 +1109,7 @@ export const createTransferTransaction = async (
     }
 
     //check if item exist in distributed
-    const itemDistributed = await Item.findOne({
-      where: {
-        ITEM_ID: itemId,
-        accountable_emp: accountablePerson.getDataValue("EMP_ID"),
-      },
-    });
+    const itemDistributed = await Item.findByPk(itemId);
     //check if item exist in distributed
     if (!itemDistributed) {
       return res
@@ -1129,10 +1128,11 @@ export const createTransferTransaction = async (
     //create transfer transaction
     const newTransaction = await BorrowingTransaction.create({
       distributed_item_id: itemDistributed.getDataValue("ITEM_ID"),
-      owner_emp_id: accountablePerson.getDataValue("EMP_ID"),
+      owner_emp_id: accountablePerson.getDataValue("ID"),
       quantity: quantityTransferred,
       status: 2, //pending
       remarks: 4, //transfer
+      DPT_ID: accountablePerson.getDataValue("CURRENT_DPT_ID"),
     });
 
     res.status(201).json({ newTransaction });
