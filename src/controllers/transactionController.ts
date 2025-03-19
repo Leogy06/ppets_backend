@@ -410,7 +410,7 @@ export const approvedLendTransaction = async (
     }
 
     //check remarks if its borrow or lend
-    if (remarks !== 2 && remarks !== 3) {
+    if (remarks !== 2 && remarks !== 1) {
       return response
         .status(400)
         .json({ message: "Transaction is not up for approval." });
@@ -470,9 +470,9 @@ export const approvedLendTransaction = async (
     //adding remarks in distributed items for tracking of their items
 
     //ensure this is a string so concat function properly
-    const currentRemarks = distributedItem.remarks ?? "";
 
     //join full name
+    //update remarks
     const fullName = [
       empBorrower.LASTNAME,
       empBorrower.FIRSTNAME,
@@ -481,7 +481,7 @@ export const approvedLendTransaction = async (
     ]
       .filter(Boolean) // removes null, undefined and ""
       .join(" "); //join names with a sing space
-    distributedItem.remarks = `${currentRemarks}\nLend: ${fullName}\nDate Lent: ${new Date().toDateString()}\n`;
+    distributedItem.remarks = `Lend: ${fullName}\nDate Lent: ${new Date().toDateString()}\n`;
 
     //setting the status to approve (1)
     transaction.status = 1;
@@ -984,20 +984,6 @@ export const getBorrowedItems = async (
   }
 };
 
-//create a transfer of item transaction
-export const createTransferTransaction = async (
-  req: express.Request,
-  res: express.Response
-): Promise<any> => {
-  try {
-  } catch (error) {
-    console.error("Unable to create transfer transaction. ", error);
-    res
-      .status(500)
-      .json({ message: "Unable to create transfer transaction.", error });
-  }
-};
-
 //approve return item
 export const approveReturnItemTransaction = async (
   req: express.Request,
@@ -1079,6 +1065,82 @@ export const approveReturnItemTransaction = async (
     res
       .status(500)
       .json({ message: "Unable to approve return item transaction.", error });
+  }
+};
+
+//create a transfer of item transaction
+export const createTransferTransaction = async (
+  req: express.Request,
+  res: express.Response
+): Promise<any> => {
+  const { itemId, newAccountablePerson, quantityTransferred } = req.body;
+
+  if (!itemId || !newAccountablePerson || !quantityTransferred) {
+    return res.status(400).json({ message: "Required fields are missing." });
+  }
+  try {
+    //check if item exist
+    const item = await Item.findByPk(itemId);
+
+    //check if item exist
+    if (!item) {
+      return res.status(404).json({ message: "Item not found." });
+    }
+
+    //check if new accountable person exist
+    const accountablePerson = await Employee.findByPk(newAccountablePerson);
+
+    //check if new accountable person exist
+    if (!accountablePerson) {
+      return res
+        .status(404)
+        .json({ message: "New accountable person not found." });
+    }
+
+    //check if quantity is valid
+    if (quantityTransferred <= 0) {
+      return res
+        .status(400)
+        .json({ message: "Quantity must be greater than 0." });
+    }
+
+    //check if item exist in distributed
+    const itemDistributed = await Item.findOne({
+      where: {
+        ITEM_ID: itemId,
+        accountable_emp: accountablePerson.getDataValue("EMP_ID"),
+      },
+    });
+    //check if item exist in distributed
+    if (!itemDistributed) {
+      return res
+        .status(404)
+        .json({ message: "Item not found in distributed." });
+    }
+
+    //check if quantity is valid
+    if (quantityTransferred > itemDistributed.getDataValue("quantity")) {
+      return res.status(400).json({
+        message:
+          "Quantity transferred is greater than the quantity in distributed.",
+      });
+    }
+
+    //create transfer transaction
+    const newTransaction = await BorrowingTransaction.create({
+      distributed_item_id: itemDistributed.getDataValue("ITEM_ID"),
+      owner_emp_id: accountablePerson.getDataValue("EMP_ID"),
+      quantity: quantityTransferred,
+      status: 2, //pending
+      remarks: 4, //transfer
+    });
+
+    res.status(201).json({ newTransaction });
+  } catch (error) {
+    console.error("Unable to create transfer transaction. ", error);
+    res
+      .status(500)
+      .json({ message: "Unable to create transfer transaction.", error });
   }
 };
 

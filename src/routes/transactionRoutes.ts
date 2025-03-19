@@ -5,6 +5,7 @@ import {
   createBorrowTransaction,
   createLendTransaction,
   createReturnTransaction,
+  createTransferTransaction,
   editBorrowTransaction,
   getBorrowedItems,
   getBorrowingTransactionByDpt,
@@ -44,6 +45,7 @@ const transactionRoutes = Router()
   //initiate a return transaction
   .post("/return", createReturnTransaction)
   //approving the return transaction
-  .put("/approve/return", approveReturnItemTransaction);
+  .put("/approve/return", approveReturnItemTransaction)
+  .post("/transfer", createTransferTransaction);
 
 export default transactionRoutes;
