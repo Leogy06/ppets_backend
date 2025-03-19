@@ -1150,53 +1150,69 @@ export const approveTransferItemTransaction = async (
   res: express.Response
 ): Promise<any> => {
   const { itemId, newAccountablePerson, quantityTransferred, transaction_id } =
-    req.body; //distributed id
+    req.body; //distributed
+
+  console.log("\nbody: ", req.body, "\n");
 
   if (!itemId) {
     return res.status(400).json({ message: "Item ID is missing. " });
+  }
+
+  if (!newAccountablePerson) {
+    return res
+      .status(400)
+      .json({ message: "New accountable person is missing. " });
+  }
+
+  if (!quantityTransferred) {
+    return res
+      .status(400)
+      .json({ message: "Quantity transferred is missing. " });
+  }
+
+  if (!transaction_id) {
+    return res.status(400).json({ message: "Transaction ID is missing. " });
   }
 
   try {
     const findDistributed = await Item.findByPk(itemId);
 
     if (!findDistributed) {
-      return res.status(404).json({ message: "Item not found." });
+      return res.status(404).json({ message: "Item not found.", itemId });
     }
 
     //find transaction id
-    const transaction = await BorrowingTransaction.findByPk(transaction_id);
+    const transaction = (await BorrowingTransaction.findByPk(
+      transaction_id
+    )) as BorrowingTransactionProps;
 
     if (!transaction_id) {
       return res.status(400).json({ message: "Transaction Id is missing. " });
     }
 
     //check if the status and remarks are pending and transffered
-    if (
-      transaction?.getDataValue("status") !== 2 &&
-      transaction?.getDataValue("remarks") !== 5
-    ) {
+    const status = Number(transaction?.getDataValue("status"));
+    const remarks = Number(transaction?.getDataValue("remarks"));
+    if (status !== 2 && remarks !== 5) {
       return res
         .status(400)
-        .json({ message: "Transaction is not pending transfer." });
+        .json({ message: "Transaction is not pending and a transfer." });
     }
 
-    //create transaction for the approved transfer
-    const newTransaction = await BorrowingTransaction.create({
-      distributed_item_id: findDistributed.getDataValue("ITEM_ID"),
-      owner_emp_id: newAccountablePerson,
-      quantity: quantityTransferred,
-      status: 1, //approved
-      remarks: 5, //transfer
-    });
+    //updating the transaction (approving)
+    transaction.status = 1; //approved
 
     //updating the item quantity
-    const newTransferred = await Item.create({
+    //save to distributed
+    const newTransferredItem = await Item.create({
       accountable_emp: newAccountablePerson,
       ITEM_ID: findDistributed.getDataValue("ITEM_ID"),
       quantity: quantityTransferred,
     });
 
-    res.status(200).json({ newTransferred, newTransaction });
+    const newTransaction = await transaction.save();
+
+    res.status(200).json({ newTransferredItem, newTransaction });
   } catch (error) {
     console.error("Unable to approve transfer item transaction. ", error);
     res
