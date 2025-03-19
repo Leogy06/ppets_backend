@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   approvedLendTransaction,
+  approveReturnItemTransaction,
   createBorrowTransaction,
   createLendTransaction,
   createReturnTransaction,
@@ -33,19 +34,16 @@ const transactionRoutes = Router()
   //get transaction by owner and approved status
   //in order to track their items that has been borrowed
   .get("/get/approved/:ownerEmpId", getTransactionApprovedOwnerDepartment)
-
   //counts for dashboard
   .get("/count/all_time/:DPT_ID", getCountAllTimeRequestDepartment)
   .get("/count/today/:DPT_ID", getCountTodayRequestDepartment)
-
   //create borrow transaction route
   .post("/borrow", transactionValidationRules, createBorrowTransaction)
-
   //getting borrowed items transactions to track
   .get("/borrowed_items", getBorrowedItems)
   //initiate a return transaction
   .post("/return", createReturnTransaction)
   //approving the return transaction
-  .put("/approve/return");
+  .put("/approve/return", approveReturnItemTransaction);
 
 export default transactionRoutes;

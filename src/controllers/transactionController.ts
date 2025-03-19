@@ -40,6 +40,7 @@ export const getBorrowTransactions = async (
         { model: Employee, as: "ownerEmp" },
         { model: Employee, as: "borrowerEmp" },
         { model: Employee, as: "approvedByEmpDetails" },
+        { model: TransactionRemarks, as: "transactionRemarksDetails" },
       ],
     });
 
@@ -398,6 +399,17 @@ export const approvedLendTransaction = async (
       return response.status(404).json({ message: "Transaction not found." });
     }
 
+    //transaction identifier
+    //check if transaction status is borrow or lend
+    if (
+      transaction.getDataValue("status") !== 2 &&
+      transaction.getDataValue("remarks") !== (1 || 2)
+    ) {
+      return response
+        .status(400)
+        .json({ message: "Transaction status is not borrow or lend." });
+    }
+
     //deduc the quantity of that item
 
     //first find the item in distributed item
@@ -457,13 +469,13 @@ export const approvedLendTransaction = async (
     //join full name
     const fullName = [
       empBorrower.LASTNAME,
-      empBorrower.FISTNAME,
+      empBorrower.FIRSTNAME,
       empBorrower.MIDDLENAME,
       empBorrower.SUFFIX,
     ]
       .filter(Boolean) // removes null, undefined and ""
       .join(" "); //join names with a sing space
-    distributedItem.remarks = `${currentRemarks}, Lend to ${fullName}`;
+    distributedItem.remarks = `${currentRemarks}\nLend: ${fullName}\nDate Lent: ${new Date().toDateString()}\n`;
 
     //setting the status to approve (1)
     transaction.status = 1;
@@ -930,6 +942,7 @@ export const getBorrowedItems = async (
         { model: Employee, as: "borrowerEmp" },
         { model: Employee, as: "ownerEmp" },
         { model: ItemModel, as: "itemDetails" },
+        { model: TransactionRemarks, as: "transactionRemarksDetails" },
       ],
     });
 
@@ -958,7 +971,7 @@ export const createTransferTransaction = async (
 export const approveReturnItemTransaction = async (
   req: express.Request,
   res: express.Response
-) => {
+): Promise<any> => {
   const { id: transactionId } = req.body;
 
   if (!transactionId) {
@@ -982,17 +995,22 @@ export const approveReturnItemTransaction = async (
     }
 
     //check if transaction is pending
-    if (transaction.getDataValue("status") !== 2) {
-      return res
-        .status(400)
-        .json({ message: "Transaction is not pending return." });
+    const status = Number(transaction.getDataValue("status"));
+    if (status !== 2) {
+      return res.status(400).json({
+        message: "Transaction is not pending return.",
+        status,
+      });
     }
 
     //check if transaction is a return
-    if (transaction.getDataValue("remarks") !== 5) {
-      return res
-        .status(400)
-        .json({ message: "Transaction is not requesting return." });
+
+    const remarks = Number(transaction.getDataValue("remarks"));
+    if (remarks !== 5) {
+      return res.status(400).json({
+        message: "Transaction is not requesting return.",
+        remarks,
+      });
     }
 
     //distributed item
@@ -1004,7 +1022,9 @@ export const approveReturnItemTransaction = async (
     })) as ItemProps;
 
     if (!item) {
-      return res.status(404).json({ message: "Item not found." });
+      return res
+        .status(404)
+        .json({ message: "Item not found.", itemFound: item });
     }
 
     //updating the item quantity
@@ -1026,5 +1046,66 @@ export const approveReturnItemTransaction = async (
     res
       .status(500)
       .json({ message: "Unable to approve return item transaction.", error });
+  }
+};
+
+//approve transfer items
+export const approveTransferItemTransaction = async (
+  req: express.Request,
+  res: express.Response
+): Promise<any> => {
+  const { itemId, newAccountablePerson, quantityTransferred, transaction_id } =
+    req.body; //distributed id
+
+  if (!itemId) {
+    return res.status(400).json({ message: "Item ID is missing. " });
+  }
+
+  try {
+    const findDistributed = await Item.findByPk(itemId);
+
+    if (!findDistributed) {
+      return res.status(404).json({ message: "Item not found." });
+    }
+
+    //find transaction id
+    const transaction = await BorrowingTransaction.findByPk(transaction_id);
+
+    if (!transaction_id) {
+      return res.status(400).json({ message: "Transaction Id is missing. " });
+    }
+
+    //check if the status and remarks are pending and transffered
+    if (
+      transaction?.getDataValue("status") !== 2 &&
+      transaction?.getDataValue("remarks") !== 5
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Transaction is not pending transfer." });
+    }
+
+    //create transaction for the approved transfer
+    const newTransaction = await BorrowingTransaction.create({
+      distributed_item_id: findDistributed.getDataValue("ITEM_ID"),
+      owner_emp_id: newAccountablePerson,
+      quantity: quantityTransferred,
+      status: 1, //approved
+      remarks: 5, //transfer
+    });
+
+    //updating the item quantity
+    const newTransferred = await Item.create({
+      accountable_emp: newAccountablePerson,
+      ITEM_ID: findDistributed.getDataValue("ITEM_ID"),
+      quantity: quantityTransferred,
+    });
+
+    res.status(200).json({ newTransferred, newTransaction });
+  } catch (error) {
+    console.error("Unable to approve transfer item transaction. ", error);
+    res
+      .status(500)
+      .json({ message: "Unable to approve transfer item transaction.", error });
   }
 };
