@@ -400,14 +400,20 @@ export const approvedLendTransaction = async (
     }
 
     //transaction identifier
-    //check if transaction status is borrow or lend
-    if (
-      transaction.getDataValue("status") !== 2 &&
-      transaction.getDataValue("remarks") !== (1 || 2)
-    ) {
+    //check status if pending
+    const status = Number(transaction.getDataValue("status"));
+    const remarks = Number(transaction.getDataValue("remarks"));
+    if (status !== 2) {
       return response
         .status(400)
-        .json({ message: "Transaction status is not borrow or lend." });
+        .json({ message: "Transaction status was not pending" });
+    }
+
+    //check remarks if its borrow or lend
+    if (remarks !== 2 && remarks !== 3) {
+      return response
+        .status(400)
+        .json({ message: "Transaction is not up for approval." });
     }
 
     //deduc the quantity of that item
@@ -567,10 +573,35 @@ export const rejectTransaction = async (
       transactionId
     )) as BorrowingTransactionProps;
 
+    //transaction status
+    const status = Number(transaction.getDataValue("status"));
+    const remarks = Number(transaction.getDataValue("remarks"));
+
+    if (status !== 2) {
+      return response.status(400).json({
+        message: "Transaction has already been approved or rejected. ",
+      });
+    }
+
+    //check if it's a distribution
+    if (remarks === 3) {
+      return response.status(400).json({
+        message: "Transaction can't be rejected for is a distribution. ",
+      });
+    }
+
+    //check if it's a return
+    if (remarks === 5) {
+      return response.status(400).json({
+        message: "Can't reject, for it's already returned",
+      });
+    }
+
     if (!transaction) {
       return response.status(404).json({ message: "Transaction not found." });
     }
 
+    //update transaction to reject
     transaction.status = 4; //reject transaction
 
     //create notification about the rejected transaction
@@ -1014,10 +1045,12 @@ export const approveReturnItemTransaction = async (
     }
 
     //distributed item
+    const ITEM_ID = Number(transaction.getDataValue("distributed_item_id"));
+    const accountable_emp = Number(transaction.getDataValue("owner_emp_id"));
     const item = (await Item.findOne({
       where: {
-        ITEM_ID: transaction.getDataValue("distributed_item_id"),
-        accountable_emp: transaction.getDataValue("owner_emp_id"),
+        ITEM_ID,
+        accountable_emp,
       },
     })) as ItemProps;
 
