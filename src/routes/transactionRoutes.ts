@@ -46,6 +46,6 @@ const transactionRoutes = Router()
   .post("/return", createReturnTransaction)
   //approving the return transaction
   .put("/approve/return", approveReturnItemTransaction)
-  .post("/transfer", createTransferTransaction);
+  .post("/create/transfer", createTransferTransaction);
 
 export default transactionRoutes;
