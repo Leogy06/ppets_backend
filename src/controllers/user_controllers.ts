@@ -123,6 +123,7 @@ export const viewUsers = async (
 };
 
 //login users
+//post - /user/auth/api/login
 export const login = async (
   req: CustomRequest,
   res: express.Response

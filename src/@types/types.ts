@@ -1,4 +1,3 @@
-import BorrowingTransaction from "../models/transactionModel.js";
 import Item from "../models/distributedItemModel.js";
 import ItemCategory from "../models/item_category.js";
 import ItemModel from "../models/itemModel.js";
@@ -83,7 +82,7 @@ export interface UserProps {
   current_dpt_id: number;
 }
 
-export interface BorrowingTransactionProps extends BorrowingTransaction {
+export interface TransactionProps {
   id: number;
   distributed_item_id: number;
   borrower_emp_id: number;

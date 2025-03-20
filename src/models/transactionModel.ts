@@ -3,12 +3,12 @@ import sequelize from "../db/config.js";
 import Employee from "./employee.js";
 import Department from "./department.js";
 import BorrowingStatus from "./transactionStatusModel.js";
-import ItemModel from "./itemModel.js";
+import Item from "./distributedItemModel.js";
 import TransactionRemarks from "./btRemarksModel.js";
 
-class BorrowingTransaction extends Model {}
+class TransactionModel extends Model {}
 
-BorrowingTransaction.init(
+TransactionModel.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -69,45 +69,45 @@ BorrowingTransaction.init(
 );
 
 // Define the association
-BorrowingTransaction.belongsTo(ItemModel, {
+TransactionModel.belongsTo(Item, {
   foreignKey: "distributed_item_id",
-  as: "itemDetails",
+  as: "distributedItemDetails",
 });
 
-BorrowingTransaction.belongsTo(Employee, {
+TransactionModel.belongsTo(Employee, {
   foreignKey: "owner_emp_id",
   as: "ownerEmp",
 });
 
 //approved by
-BorrowingTransaction.belongsTo(Employee, {
+TransactionModel.belongsTo(Employee, {
   foreignKey: "APPROVED_BY",
   as: "approvedByEmpDetails",
 });
 
-BorrowingTransaction.belongsTo(Employee, {
+TransactionModel.belongsTo(Employee, {
   foreignKey: "borrower_emp_id",
   as: "borrowerEmp",
 });
 
 //borrow to department
-BorrowingTransaction.belongsTo(Department, {
+TransactionModel.belongsTo(Department, {
   foreignKey: "DPT_ID",
   as: "departmentDetails",
 });
 
 //status
 //borrow to department
-BorrowingTransaction.belongsTo(BorrowingStatus, {
+TransactionModel.belongsTo(BorrowingStatus, {
   foreignKey: "status",
   as: "statusDetails",
 });
 
-BorrowingTransaction.belongsTo(TransactionRemarks, {
+TransactionModel.belongsTo(TransactionRemarks, {
   foreignKey: "remarks",
   as: "transactionRemarksDetails",
 });
 
 //distributed item
 
-export default BorrowingTransaction;
+export default TransactionModel;

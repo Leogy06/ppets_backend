@@ -78,7 +78,7 @@ Item.init(
 
 Item.belongsTo(ItemModel, {
   foreignKey: "ITEM_ID",
-  as: "itemDetails",
+  as: "distributedItemDetails",
 });
 
 Item.belongsTo(Employee, {
