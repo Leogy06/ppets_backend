@@ -2,13 +2,13 @@ import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
 
 class Department extends Model {
-  public ID!: number;
-  public DEPARTMENT_NAME!: string;
-  public CODE!: string;
-  public DESCRIPTION?: string;
-  public OFFICER!: string;
-  public POSITION!: string;
-  public ENTRY_DATE!: Date;
+  declare ID: number;
+  declare DEPARTMENT_NAME: string;
+  declare CODE: string;
+  declare DESCRIPTION: string;
+  declare OFFICER: string;
+  declare POSITION: string;
+  declare ENTRY_DATE: Date;
 }
 
 Department.init(

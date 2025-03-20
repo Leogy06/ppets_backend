@@ -6,7 +6,20 @@ import BorrowingStatus from "./transactionStatusModel.js";
 import Item from "./distributedItemModel.js";
 import TransactionRemarks from "./btRemarksModel.js";
 
-class TransactionModel extends Model {}
+class TransactionModel extends Model {
+  declare id: number;
+  declare distributed_item_id: number;
+  declare borrower_emp_id: number;
+  declare owner_emp_id: number;
+  declare quantity: number;
+  declare status: number;
+  declare DPT_ID: number;
+  declare remarks: number;
+  declare APPROVED_BY: number;
+  declare RECEIVED_BY: number;
+  declare TRANSACTION_DESCRIPTION: string;
+  declare DISTRIBUTED_ITM_ID: number;
+}
 
 TransactionModel.init(
   {
@@ -18,6 +31,11 @@ TransactionModel.init(
       autoIncrement: true,
     },
     distributed_item_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      unique: false,
+    },
+    DISTRIBUTED_ITM_ID: {
       type: DataTypes.INTEGER,
       allowNull: false,
       unique: false,
