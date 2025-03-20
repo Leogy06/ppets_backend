@@ -265,14 +265,7 @@ export const getItemsByOwner = async (
 };
 
 //get items not owned
-/**
- * Get all items that are not owned by the given employee
- * @param {express.Request} req - The request object.
- * @param {express.Response} res - The response object.
- * @param {string} req.params.empId - The employee id.
- * @param {string} req.query.departmentId - The department id.
- * @returns {Promise<express.Response>} The response object.
- */
+// get - /items/notOwned/:empId (query & param)
 export const getNotOwnedItems = async (
   req: express.Request,
   res: express.Response
@@ -293,7 +286,7 @@ export const getNotOwnedItems = async (
       include: [
         {
           model: ItemModel,
-          as: "itemDetails",
+          as: "undistributedItemDetails",
           include: [{ model: AccountItem, as: "accountCodeDetails" }],
         },
         { model: Employee, as: "accountableEmpDetails" },
