@@ -2,13 +2,15 @@ import express from "express";
 import TransactionModel from "../models/transactionModel.js";
 import Item from "../models/distributedItemModel.js";
 import ItemModel from "../models/itemModel.js";
+import { handleServerError } from "../utils/errorHandler.js";
+import { Op } from "sequelize";
 
-// api = get /transaction
+//get /transaction
 export const transactionController = async (
   req: express.Request,
   res: express.Response
 ): Promise<any> => {
-  const { DPT_ID, TRANSACTION_TYPE } = req.query;
+  const { DPT_ID, TRANSACTION_TYPE, LIMIT } = req.query;
 
   //check if query params are empty
   if (!DPT_ID || !TRANSACTION_TYPE) {
@@ -18,12 +20,13 @@ export const transactionController = async (
   }
 
   try {
-    const transactions = await TransactionModel.findAll({
+    const transaction = await TransactionModel.findAll({
       where: {
         DPT_ID,
         remarks: TRANSACTION_TYPE,
       },
       order: [["createdAt", "DESC"]],
+      limit: LIMIT ? parseInt(LIMIT as string, 10) : 10,
       include: [
         {
           model: Item,
@@ -33,8 +36,8 @@ export const transactionController = async (
       ],
     });
 
-    res.status(200).json(transactions);
+    res.status(200).json(transaction);
   } catch (error) {
-    console.error("Unable to get transactions. ", error);
+    handleServerError(res, error, "Unable to get transactions. ");
   }
 };
