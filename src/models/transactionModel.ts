@@ -87,14 +87,16 @@ TransactionModel.init(
 );
 
 // Define the association
+
+//distributed item
 TransactionModel.belongsTo(Item, {
-  foreignKey: "distributed_item_id",
+  foreignKey: "DISTRIBUTED_ITM_ID",
   as: "distributedItemDetails",
 });
 
 TransactionModel.belongsTo(Employee, {
   foreignKey: "owner_emp_id",
-  as: "ownerEmp",
+  as: "ownerEmpDetails",
 });
 
 //approved by
@@ -105,7 +107,7 @@ TransactionModel.belongsTo(Employee, {
 
 TransactionModel.belongsTo(Employee, {
   foreignKey: "borrower_emp_id",
-  as: "borrowerEmp",
+  as: "borrowerEmpDetails",
 });
 
 //borrow to department
@@ -125,7 +127,5 @@ TransactionModel.belongsTo(TransactionRemarks, {
   foreignKey: "remarks",
   as: "transactionRemarksDetails",
 });
-
-//distributed item
 
 export default TransactionModel;

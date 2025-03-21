@@ -6,6 +6,7 @@ import Item from "../../models/distributedItemModel.js";
 import Employee from "../../models/employee.js";
 import TransactionModel from "../../models/transactionModel.js";
 import { Op } from "sequelize";
+import ItemModel from "../../models/itemModel.js";
 
 //post - /transaction/borrow
 export const createBorrowTransaction = async (
@@ -88,6 +89,21 @@ export const getBorrowingTransactionsByEmpId = async (
         [Op.or]: [{ owner_emp_id: empId }, { borrower_emp_id: empId }],
       },
       order: [["createdAt", "DESC"]],
+      include: [
+        {
+          model: Item,
+          as: "distributedItemDetails",
+          include: [{ model: ItemModel, as: "undistributedItemDetails" }],
+        },
+        {
+          model: Employee,
+          as: "ownerEmpDetails",
+        },
+        {
+          model: Employee,
+          as: "borrowerEmpDetails",
+        },
+      ],
     });
 
     res.status(200).json(transactions);

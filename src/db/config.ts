@@ -1,5 +1,6 @@
 import { config } from "dotenv";
 import { Dialect, Sequelize } from "sequelize";
+import winston from "winston";
 
 // Determine which .env file to load
 const envFile = process.env.NODE_ENV === "production" ? ".env" : ".env.local";
@@ -15,6 +16,16 @@ const db_name = String(DB_NAME);
 const db_username = String(DB_USERNAME);
 const db_dialect = DB_DIALECT as Dialect;
 
+//winston logger
+const logger = winston.createLogger({
+  level: "info",
+  format: winston.format.combine(
+    winston.format.colorize(),
+    winston.format.simple()
+  ),
+  transports: [new winston.transports.Console()],
+});
+
 const sequelize = new Sequelize(db_name, db_username, db_password, {
   host: db_host,
   port: db_port,
@@ -28,11 +39,12 @@ const sequelize = new Sequelize(db_name, db_username, db_password, {
     acquire: 30000,
     idle: 10000,
   },
+  logging: (msg) => logger.info(msg + "\n"),
 });
 
 sequelize
   .authenticate()
-  .then(() => console.log("\x1b[32m\x1b[1m✔ Connected to MySQL \x1b[0m"))
+  .then(() => console.log("\x1b[32m\x1b[1m✔ Connected to MySQL \x1b[0m\n"))
   .catch((err) =>
     console.error("\x1b[31m\x1b[1m✖ Unable to connect database: \x1b[0m", err)
   );
