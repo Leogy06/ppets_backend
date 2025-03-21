@@ -7,6 +7,7 @@ import Employee from "../../models/employee.js";
 import TransactionModel from "../../models/transactionModel.js";
 import { Op } from "sequelize";
 import ItemModel from "../../models/itemModel.js";
+import { logger } from "../../logger/logger.js";
 
 //post - /transaction/borrow
 export const createBorrowTransaction = async (
@@ -69,45 +70,5 @@ export const createBorrowTransaction = async (
     res.status(201).json(newBorrowTransaction);
   } catch (error) {
     handleServerError(res, error, "Unable to create borrow transaction");
-  }
-};
-
-// get /transaction.borrow
-export const getBorrowingTransactionsByEmpId = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
-  const { empId } = req.query;
-
-  if (!empId) {
-    return res.status(400).json({ message: "Query params are empty. ", empId });
-  }
-  try {
-    const transactions = await TransactionModel.findAll({
-      where: {
-        remarks: 1,
-        [Op.or]: [{ owner_emp_id: empId }, { borrower_emp_id: empId }],
-      },
-      order: [["createdAt", "DESC"]],
-      include: [
-        {
-          model: Item,
-          as: "distributedItemDetails",
-          include: [{ model: ItemModel, as: "undistributedItemDetails" }],
-        },
-        {
-          model: Employee,
-          as: "ownerEmpDetails",
-        },
-        {
-          model: Employee,
-          as: "borrowerEmpDetails",
-        },
-      ],
-    });
-
-    res.status(200).json(transactions);
-  } catch (error) {
-    handleServerError(res, error, "Unable to get transactions. ");
   }
 };

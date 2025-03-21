@@ -93,6 +93,7 @@ export interface TransactionProps {
   updatedAt: Date;
   APPROVED_BY: number;
   remarks: number;
+  DPT_ID: number;
 }
 
 export interface NotificationProps extends Notification {

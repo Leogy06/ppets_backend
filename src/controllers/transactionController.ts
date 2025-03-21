@@ -1,43 +1,30 @@
 import express from "express";
-import TransactionModel from "../models/transactionModel.js";
-import Item from "../models/distributedItemModel.js";
-import ItemModel from "../models/itemModel.js";
 import { handleServerError } from "../utils/errorHandler.js";
-import { Op } from "sequelize";
+import transactionServices from "../services/transactionServices.js";
 
-//get /transaction
 export const transactionController = async (
   req: express.Request,
   res: express.Response
 ): Promise<any> => {
-  const { DPT_ID, TRANSACTION_TYPE, LIMIT } = req.query;
+  const { DPT_ID, TRANSACTION_TYPE, EMP_ID, LIMIT } = req.query;
 
-  //check if query params are empty
+  // Check if required query params are empty
   if (!DPT_ID || !TRANSACTION_TYPE) {
     return res
       .status(400)
-      .json({ message: "Query params are empty. ", DPT_ID, TRANSACTION_TYPE });
+      .json({ message: "Query params are empty.", DPT_ID, TRANSACTION_TYPE });
   }
 
   try {
-    const transaction = await TransactionModel.findAll({
-      where: {
-        DPT_ID,
-        remarks: TRANSACTION_TYPE,
-      },
-      order: [["createdAt", "DESC"]],
-      limit: LIMIT ? parseInt(LIMIT as string, 10) : 10,
-      include: [
-        {
-          model: Item,
-          as: "distributedItemDetails",
-          include: [{ model: ItemModel, as: "distributedItemDetails" }],
-        },
-      ],
-    });
+    const transactions = await transactionServices.getTransactions(
+      Number(DPT_ID),
+      Number(EMP_ID),
+      Number(LIMIT),
+      Number(TRANSACTION_TYPE)
+    );
 
-    res.status(200).json(transaction);
+    res.status(200).json(transactions);
   } catch (error) {
-    handleServerError(res, error, "Unable to get transactions. ");
+    handleServerError(res, error, "Unable to get transactions.");
   }
 };
