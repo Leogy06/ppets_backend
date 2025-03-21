@@ -9,6 +9,7 @@ import BorrowingTransaction from "../models/transactionModel.js";
 import Employee from "../models/employee.js";
 import { users } from "../sockets/socketManager.js";
 import AccountItem from "../models/accountItemModel.js";
+import distributedItemService from "../services/distributedItemServices.js";
 
 //distribute item to employee by the admin
 export const addItem = async (
@@ -311,24 +312,13 @@ export const getItemByEmployeeDpt = async (
     return res.status(400).json({ message: "Employee ID is missing." });
   }
   try {
-    const isDeptExist = await Department.findByPk(department);
+    const departmentId = Number(department);
 
-    if (!isDeptExist) {
-      return res.status(404).json({ message: "Department does not exist" });
-    }
-
-    const items = await Item.findAll({
-      where: { current_dpt_id: department },
-      include: [
-        { model: ItemModel, as: "itemDetails" },
-        {
-          model: Employee,
-          as: "accountableEmpDetails",
-        },
-      ],
-    });
-
-    res.status(200).json(items);
+    const items = await distributedItemService.getItemsByDepartment(
+      departmentId,
+      10
+    );
+    res.json(items);
   } catch (error) {
     console.error("Unable to get item by employee department. ", error);
     res
