@@ -7,6 +7,7 @@ import TransactionRemarks from "../models/btRemarksModel.js";
 import TransactionStatusModel from "../models/transactionStatusModel.js";
 import { CustomError } from "../utils/CustomError.js";
 import { TransactionProps } from "../@types/types.js";
+import { logger } from "../logger/logger.js";
 
 //creating borrow transaction interface
 
@@ -65,6 +66,10 @@ const transactionServices = {
       remarks,
     } = data;
 
+    if (!DISTRIBUTED_ITM_ID || !quantity || !borrower_emp_id || !owner_emp_id) {
+      throw new CustomError("Missing required fields.", 400);
+    }
+
     const [distributedItem, borrowee, owner] = await Promise.all([
       Item.findByPk(DISTRIBUTED_ITM_ID),
       Employee.findByPk(borrower_emp_id),
@@ -77,8 +82,11 @@ const transactionServices = {
     }
 
     // Validate quantity
-    if (!quantity || !Number.isInteger(quantity) || quantity <= 0) {
-      throw new CustomError("Quantity must be greater than 0.", 400);
+    if (quantity <= 0) {
+      throw new CustomError(
+        `Quantity must be greater than 0. ${quantity}`,
+        400
+      );
     }
 
     if (quantity > distributedItem.getDataValue("quantity")) {
@@ -97,19 +105,19 @@ const transactionServices = {
       throw new CustomError("You cannot borrow your own item.", 400);
     }
 
-    // Check if borrower already has a pending borrow transaction
+    // Check if this item has already up for request but not yet approved
     const existingBorrowTransaction = await TransactionModel.findOne({
       where: {
         DISTRIBUTED_ITM_ID,
         borrower_emp_id,
         status: 2, // Pending
-        remarks: 1, // Borrowing
+        remarks, // Borrow or lend
       },
     });
 
     if (existingBorrowTransaction) {
       throw new CustomError(
-        "You are already borrowing this item. Still pending...",
+        "You are already requested this item. Still pending...",
         400
       );
     }

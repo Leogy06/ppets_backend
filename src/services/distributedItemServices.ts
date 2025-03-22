@@ -3,26 +3,34 @@ import Item from "../models/distributedItemModel.js";
 import ItemModel from "../models/itemModel.js";
 import Employee from "../models/employee.js";
 import { CustomError } from "../utils/CustomError.js";
+import { TransactionProps } from "../@types/types.js";
 
 interface DistributedItemService {
-  department: number;
+  department: TransactionProps["DPT_ID"];
   limit: number;
-  owner_emp_id?: number;
+  owner_emp_id?: TransactionProps["owner_emp_id"];
 }
 
 const distributedItemService = {
-  async getItemsByDepartment({
+  async getDistributedItems({
     department,
     limit,
-    owner_emp_id,
+    owner_emp_id: accountable_emp,
   }: DistributedItemService) {
     const whereClause: WhereOptions<any> = {};
+    const whereNotOwned: WhereOptions<any> = {};
 
-    if (department) whereClause.current_dpt_id = department;
+    if (department) {
+      whereClause.current_dpt_id = department;
+      whereNotOwned.current_dpt_id = department;
+    }
 
-    if (owner_emp_id) whereClause.accountable_emp = owner_emp_id;
+    if (accountable_emp) {
+      whereClause.accountable_emp = accountable_emp;
+      whereNotOwned.accountable_emp = { [Op.ne]: accountable_emp };
+    }
 
-    return await Item.findAll({
+    const ownedItems = await Item.findAll({
       where: whereClause,
       order: [["createdAt", "DESC"]],
       limit,
@@ -37,6 +45,24 @@ const distributedItemService = {
         },
       ],
     });
+
+    const notOwnedItems = await Item.findAll({
+      where: whereNotOwned,
+      order: [["createdAt", "DESC"]],
+      limit,
+      include: [
+        {
+          model: ItemModel,
+          as: "undistributedItemDetails",
+        },
+        {
+          model: Employee,
+          as: "accountableEmpDetails",
+        },
+      ],
+    });
+
+    return { ownedItems, notOwnedItems };
   },
 
   async getDistributedItemByIdService(itemId: number) {

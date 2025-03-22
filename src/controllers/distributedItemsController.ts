@@ -10,7 +10,7 @@ export const getDistributedItems = async (
   const { department, limit, owner_emp_id } = req.query;
 
   try {
-    const distributedItems = await distributedItemService.getItemsByDepartment({
+    const distributedItems = await distributedItemService.getDistributedItems({
       department: Number(department),
       limit: Number(limit),
       owner_emp_id: Number(owner_emp_id),

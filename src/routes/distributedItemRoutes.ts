@@ -4,6 +4,8 @@ import {
   getItemByIdController,
 } from "../controllers/distributedItemsController.js";
 
+//distributed item routes
+// /item
 const distributedItemRoutes = Router()
   .get("/", getDistributedItems)
   .get("/:itemId", getItemByIdController);
