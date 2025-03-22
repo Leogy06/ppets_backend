@@ -3,18 +3,8 @@ import { handleServerError } from "../utils/errorHandler.js";
 import transactionServices from "../services/transactionServices.js";
 //transaction controller
 
-export const getTransactions = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
+export const getTransactions = async (req: Request, res: Response) => {
   const { DPT_ID, TRANSACTION_TYPE, EMP_ID, LIMIT } = req.query;
-
-  // Check if required query params are empty
-  if (!DPT_ID || !TRANSACTION_TYPE) {
-    return res
-      .status(400)
-      .json({ message: "Query params are empty.", DPT_ID, TRANSACTION_TYPE });
-  }
 
   try {
     const transactions = await transactionServices.getTransactions(

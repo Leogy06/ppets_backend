@@ -19,6 +19,10 @@ const transactionServices = {
     LIMIT: number,
     TRANSACTION_TYPE: number
   ) {
+    if (!DPT_ID || !EMP_ID || !LIMIT || !TRANSACTION_TYPE) {
+      throw new CustomError("Query params are empty.", 400);
+    }
+
     // Define the where clause using Sequelize's WhereOptions type
     const whereClause: WhereOptions<any> = {};
 
