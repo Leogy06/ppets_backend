@@ -4,19 +4,18 @@ import cookieParser from "cookie-parser";
 import { protectRoute } from "./middlewares/auth.js";
 import { logger } from "./logger/logger.js";
 
-// Import routes
-import employee_routes from "./routes/employee_routes.js";
 import user_routes from "./routes/user_routes.js";
 import department_routes from "./routes/department_routes.js";
 import item_category_routes from "./routes/item_category_routes.js";
 import user_type_routes from "./routes/user_type_routes.js";
 import processingStatus_routes from "./routes/processingStatus_routes.js";
 import notification_routes from "./routes/notifcation_routes.js";
-import distributedItem_routes from "./routes/distributedItem_routes.js";
 import item_routes from "./routes/item_routes.js";
 import transactionRoutes from "./routes/transactionRoutes.js";
 import pdfKitRoutes from "./routes/pdfKitRoutes.js";
 import accountItemRoutes from "./routes/accountItem_routes.js";
+import distributedItemRoutes from "./routes/distributedItemRoutes.js";
+import employeeRoutes from "./routes/employeeRoutes.js";
 
 const app = express();
 
@@ -27,7 +26,7 @@ app.use(cookieParser());
 
 // Logging middleware
 app.use((req, res, next) => {
-  logger.info(`Incoming request: ${req.method} ${req.url}`);
+  logger.info(`Incoming request: ${req.method} ${req.url} \n`);
   next();
 });
 
@@ -39,10 +38,10 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Routes
-app.use("/employees", protectRoute, employee_routes);
+app.use("/employees", protectRoute, employeeRoutes);
 app.use("/departments", protectRoute, department_routes);
 app.use("/user", user_routes);
-app.use("/item", protectRoute, distributedItem_routes);
+app.use("/item", protectRoute, distributedItemRoutes);
 app.use("/item-category", protectRoute, item_category_routes);
 app.use("/transaction", protectRoute, transactionRoutes);
 app.use("/user_type", user_type_routes);

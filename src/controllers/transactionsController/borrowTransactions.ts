@@ -2,12 +2,6 @@
 
 import { Request, Response } from "express";
 import { handleServerError } from "../../utils/errorHandler.js";
-import Item from "../../models/distributedItemModel.js";
-import Employee from "../../models/employee.js";
-import TransactionModel from "../../models/transactionModel.js";
-import { Op } from "sequelize";
-import ItemModel from "../../models/itemModel.js";
-import { logger } from "../../logger/logger.js";
 import transactionServices from "../../services/transactionServices.js";
 
 //post - /transaction/borrow

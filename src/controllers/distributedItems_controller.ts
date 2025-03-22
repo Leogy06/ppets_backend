@@ -272,7 +272,7 @@ export const getNotOwnedItems = async (
   res: express.Response
 ): Promise<any> => {
   const { empId } = req.params;
-  const { departmentId } = req.query;
+  const { departmentId, limit } = req.query;
 
   if (!empId) return res.status(400).json({ message: "Emp id is required." });
   if (!departmentId)
@@ -283,6 +283,7 @@ export const getNotOwnedItems = async (
         accountable_emp: { [Op.ne]: empId },
         current_dpt_id: departmentId,
       },
+      limit: limit ? parseInt(limit as string) : 10,
       order: [["createdAt", "DESC"]],
       include: [
         {

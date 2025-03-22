@@ -1,9 +1,8 @@
 import { config } from "dotenv";
 import { Dialect, Sequelize } from "sequelize";
-import winston from "winston";
 
 // Determine which .env file to load
-const envFile = process.env.NODE_ENV === "production" ? ".env" : ".env.local";
+// const envFile = process.env.NODE_ENV === "production" ? ".env" : ".env.local";
 config({ path: ".env" });
 
 const { DB_NAME, DB_DIALECT, DB_PASSWORD, DB_HOST, DB_PORT, DB_USERNAME } =
@@ -15,16 +14,6 @@ const db_port = Number(DB_PORT);
 const db_name = String(DB_NAME);
 const db_username = String(DB_USERNAME);
 const db_dialect = DB_DIALECT as Dialect;
-
-//winston logger
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.combine(
-    winston.format.colorize(),
-    winston.format.simple()
-  ),
-  transports: [new winston.transports.Console()],
-});
 
 const sequelize = new Sequelize(db_name, db_username, db_password, {
   host: db_host,
@@ -39,7 +28,7 @@ const sequelize = new Sequelize(db_name, db_username, db_password, {
     acquire: 30000,
     idle: 10000,
   },
-  logging: (msg) => logger.info(msg + "\n"),
+  logging: false,
 });
 
 sequelize
