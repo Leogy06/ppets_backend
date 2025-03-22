@@ -1,9 +1,9 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
 
-class BorrowingStatus extends Model {}
+class TransactionStatusModel extends Model {}
 
-BorrowingStatus.init(
+TransactionStatusModel.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -25,4 +25,4 @@ BorrowingStatus.init(
   }
 );
 
-export default BorrowingStatus;
+export default TransactionStatusModel;

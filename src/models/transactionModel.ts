@@ -2,9 +2,9 @@ import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
 import Employee from "./employee.js";
 import Department from "./department.js";
-import BorrowingStatus from "./transactionStatusModel.js";
 import Item from "./distributedItemModel.js";
 import TransactionRemarks from "./btRemarksModel.js";
+import TransactionStatusModel from "./transactionStatusModel.js";
 
 class TransactionModel extends Model {
   declare id: number;
@@ -118,9 +118,9 @@ TransactionModel.belongsTo(Department, {
 
 //status
 //borrow to department
-TransactionModel.belongsTo(BorrowingStatus, {
+TransactionModel.belongsTo(TransactionStatusModel, {
   foreignKey: "status",
-  as: "statusDetails",
+  as: "transactionStatusDetails",
 });
 
 TransactionModel.belongsTo(TransactionRemarks, {

@@ -3,6 +3,18 @@ import TransactionModel from "../models/transactionModel.js";
 import Item from "../models/distributedItemModel.js";
 import Employee from "../models/employee.js";
 import ItemModel from "../models/itemModel.js";
+import TransactionRemarks from "../models/btRemarksModel.js";
+import TransactionStatusModel from "../models/transactionStatusModel.js";
+import { CustomError } from "../utils/CustomError.js";
+
+//creating borrow transaction interface
+interface BorrowTransactionData {
+  DISTRIBUTED_ITM_ID: number;
+  quantity: number;
+  borrower_emp_id: number;
+  owner_emp_id: number;
+  TRANSACTION_DESCRIPTION?: string;
+}
 
 //transaction services
 const transactionServices = {
@@ -37,7 +49,81 @@ const transactionServices = {
         },
         { model: Employee, as: "borrowerEmpDetails" },
         { model: Employee, as: "ownerEmpDetails" },
+        { model: TransactionStatusModel, as: "transactionStatusDetails" },
+        { model: TransactionRemarks, as: "transactionRemarksDetails" },
       ],
+    });
+  },
+
+  //create borrowing transaction services
+  async createBorrowingTransaction(data: BorrowTransactionData) {
+    const {
+      DISTRIBUTED_ITM_ID,
+      quantity,
+      borrower_emp_id,
+      owner_emp_id,
+      TRANSACTION_DESCRIPTION,
+    } = data;
+    const [distributedItem, borrowee, owner] = await Promise.all([
+      Item.findByPk(DISTRIBUTED_ITM_ID),
+      Employee.findByPk(borrower_emp_id),
+      Employee.findByPk(owner_emp_id),
+    ]);
+
+    // Validate existence
+    if (!distributedItem || !borrowee || !owner) {
+      throw new CustomError("Item or employee not found.", 404);
+    }
+
+    // Validate quantity
+    if (quantity <= 0) {
+      throw new CustomError("Quantity must be greater than 0.", 400);
+    }
+
+    if (distributedItem.getDataValue("quantity") < quantity) {
+      throw new CustomError("Not enough quantity available.", 400);
+    }
+
+    // Prevent self-borrowing
+    if (borrowee.getDataValue("ID") === owner.getDataValue("ID")) {
+      throw new CustomError("You cannot borrow your own item.", 400);
+    }
+
+    if (
+      borrowee.getDataValue("ID") ===
+      distributedItem.getDataValue("accountable_emp_id")
+    ) {
+      throw new CustomError("You cannot borrow your own item.", 400);
+    }
+
+    // Check if borrower already has a pending borrow transaction
+    const existingBorrowTransaction = await TransactionModel.findOne({
+      where: {
+        DISTRIBUTED_ITM_ID,
+        borrower_emp_id,
+        status: 2, // Pending
+        remarks: 1, // Borrowing
+      },
+    });
+
+    if (existingBorrowTransaction) {
+      throw new CustomError(
+        "You are already borrowing this item. Still pending...",
+        400
+      );
+    }
+
+    // Create transaction
+    return await TransactionModel.create({
+      DISTRIBUTED_ITM_ID,
+      distributed_item_id: distributedItem.get("ITEM_ID"),
+      borrower_emp_id,
+      owner_emp_id,
+      quantity,
+      status: 2, // Pending
+      remarks: 1, // Borrowing
+      TRANSACTION_DESCRIPTION,
+      DPT_ID: distributedItem.get("current_dpt_id"),
     });
   },
 };
