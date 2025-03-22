@@ -85,6 +85,7 @@ export interface UserProps {
 export interface TransactionProps {
   id: number;
   distributed_item_id: number;
+  DISTRIBUTED_ITM_ID: number;
   borrower_emp_id: number;
   owner_emp_id: number;
   quantity: number;
@@ -93,6 +94,7 @@ export interface TransactionProps {
   updatedAt: Date;
   APPROVED_BY: number;
   remarks: number;
+  TRANSACTION_DESCRIPTION: string;
   DPT_ID: number;
 }
 

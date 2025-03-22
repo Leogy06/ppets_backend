@@ -6,15 +6,9 @@ import ItemModel from "../models/itemModel.js";
 import TransactionRemarks from "../models/btRemarksModel.js";
 import TransactionStatusModel from "../models/transactionStatusModel.js";
 import { CustomError } from "../utils/CustomError.js";
+import { TransactionProps } from "../@types/types.js";
 
 //creating borrow transaction interface
-interface BorrowTransactionData {
-  DISTRIBUTED_ITM_ID: number;
-  quantity: number;
-  borrower_emp_id: number;
-  owner_emp_id: number;
-  TRANSACTION_DESCRIPTION?: string;
-}
 
 //transaction services
 const transactionServices = {
@@ -56,14 +50,17 @@ const transactionServices = {
   },
 
   //create borrowing transaction services
-  async createBorrowingTransaction(data: BorrowTransactionData) {
+  async createTransactionService(data: Partial<TransactionProps>) {
     const {
       DISTRIBUTED_ITM_ID,
       quantity,
       borrower_emp_id,
       owner_emp_id,
       TRANSACTION_DESCRIPTION,
+      status,
+      remarks,
     } = data;
+
     const [distributedItem, borrowee, owner] = await Promise.all([
       Item.findByPk(DISTRIBUTED_ITM_ID),
       Employee.findByPk(borrower_emp_id),
@@ -76,11 +73,11 @@ const transactionServices = {
     }
 
     // Validate quantity
-    if (quantity <= 0) {
+    if (!quantity || !Number.isInteger(quantity) || quantity <= 0) {
       throw new CustomError("Quantity must be greater than 0.", 400);
     }
 
-    if (distributedItem.getDataValue("quantity") < quantity) {
+    if (quantity > distributedItem.getDataValue("quantity")) {
       throw new CustomError("Not enough quantity available.", 400);
     }
 
@@ -120,8 +117,8 @@ const transactionServices = {
       borrower_emp_id,
       owner_emp_id,
       quantity,
-      status: 2, // Pending
-      remarks: 1, // Borrowing
+      status,
+      remarks,
       TRANSACTION_DESCRIPTION,
       DPT_ID: distributedItem.get("current_dpt_id"),
     });

@@ -1,15 +1,24 @@
 import { Router } from "express";
-import { transactionController } from "../controllers/transactionController.js";
-import { createBorrowTransaction } from "../controllers/transactionsController/borrowTransactions.js";
+import {
+  createTransaction,
+  getTransactions,
+} from "../controllers/transactionController.js";
+import validateTransaction from "../middlewares/validateTransaction.js";
+import { transactionShema } from "../validations/transactionValidation.js";
+
+//transaction routes
 
 //api in index - /transaction
 const transactionRoutes = Router();
 
 //get transaction by type(remarks) and department
-transactionRoutes.get("", transactionController);
+transactionRoutes.get("", getTransactions);
 
 //borrow transaction
 //create borrow transaction
-transactionRoutes.post("/borrow", createBorrowTransaction);
-
+transactionRoutes.post(
+  "/",
+  validateTransaction(transactionShema),
+  createTransaction
+);
 export default transactionRoutes;
