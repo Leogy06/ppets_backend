@@ -117,7 +117,7 @@ const transactionServices = {
 
     if (existingBorrowTransaction) {
       throw new CustomError(
-        "You are already requested this item. Still pending...",
+        "The request has already been made. Still pending...",
         400
       );
     }
