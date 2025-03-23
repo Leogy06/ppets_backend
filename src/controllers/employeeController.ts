@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { handleServerError } from "../utils/errorHandler.js";
 import employeeServices from "../services/employeeServices.js";
+import { logger } from "../logger/logger.js";
 
 export const getEmployees = async (req: Request, res: Response) => {
   try {
@@ -12,5 +13,24 @@ export const getEmployees = async (req: Request, res: Response) => {
     res.status(200).json(employees);
   } catch (error) {
     handleServerError(res, error, "Unable to get employees.");
+  }
+};
+
+export const editEmployee = async (req: Request, res: Response) => {
+  try {
+    const employee = await employeeServices.editEmployee(req.body);
+    res.status(200).json(employee);
+  } catch (error) {
+    handleServerError(res, error, "Unable to edit employee.");
+  }
+};
+
+export const deleteEmployees = async (req: Request, res: Response) => {
+  const { IDs } = req.body;
+  try {
+    const employee = await employeeServices.deleteEmployee(IDs);
+    res.status(200).json(employee);
+  } catch (error) {
+    handleServerError(res, error, "Unable to delete employee.");
   }
 };

@@ -1,6 +1,13 @@
 import { Router } from "express";
-import { getEmployees } from "../controllers/employeeController.js";
+import {
+  deleteEmployees,
+  editEmployee,
+  getEmployees,
+} from "../controllers/employeeController.js";
 
-const employeeRoutes = Router().get("/", getEmployees);
+const employeeRoutes = Router()
+  .get("/", getEmployees)
+  .put("/", editEmployee)
+  .delete("/", deleteEmployees);
 
 export default employeeRoutes;
