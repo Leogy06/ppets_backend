@@ -20,7 +20,7 @@ const transactionServices = {
     LIMIT: number,
     TRANSACTION_TYPE: number
   ) {
-    if (!DPT_ID || !EMP_ID || !LIMIT || !TRANSACTION_TYPE) {
+    if (!DPT_ID || !LIMIT || !TRANSACTION_TYPE) {
       throw new CustomError("Query params are empty.", 400);
     }
 
@@ -134,6 +134,58 @@ const transactionServices = {
       TRANSACTION_DESCRIPTION,
       DPT_ID: distributedItem.get("current_dpt_id"),
     });
+  },
+
+  //edit transaction
+  async editTransactionService(data: Partial<TransactionProps>) {
+    const { id } = data;
+
+    logger.info("Editing transaction", data);
+
+    if (!id) {
+      throw new CustomError("Missing required fields.", 400);
+    }
+
+    const transaction = await TransactionModel.findByPk(id);
+
+    if (!transaction) {
+      throw new CustomError("Transaction not found.", 404);
+    }
+
+    if (transaction.getDataValue("status") !== 2) {
+      throw new CustomError("Transaction status is not pending.", 400);
+    }
+
+    //reduce the quantuty in distributed item
+    const distributedItem = await Item.findByPk(
+      transaction.getDataValue("DISTRIBUTED_ITM_ID")
+    );
+
+    if (!distributedItem) {
+      throw new CustomError("Item not found.", 404);
+    }
+
+    //check if quantity is enough
+    if (
+      transaction.getDataValue("quantity") >
+      distributedItem.getDataValue("quantity")
+    ) {
+      throw new CustomError("Not enough quantity available.", 400);
+    }
+
+    //reduce the quantity
+    const newQuantity =
+      distributedItem.getDataValue("quantity") -
+      transaction.getDataValue("quantity");
+
+    //reducing the quantity
+    await Item.update(
+      { quantity: newQuantity },
+      { where: { id: transaction.getDataValue("DISTRIBUTED_ITM_ID") } }
+    );
+
+    //edit transaction
+    return await TransactionModel.update(data, { where: { id } });
   },
 };
 

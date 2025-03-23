@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { handleServerError } from "../utils/errorHandler.js";
 import transactionServices from "../services/transactionServices.js";
+import { logger } from "../logger/logger.js";
 //transaction controller
 
 export const getTransactions = async (req: Request, res: Response) => {
@@ -48,5 +49,16 @@ export const createTransaction = async (req: Request, res: Response) => {
     res.status(201).json(newBorrowTransaction);
   } catch (error) {
     handleServerError(res, error, "Unable to create borrow transaction");
+  }
+};
+
+export const editTransaction = async (req: Request, res: Response) => {
+  try {
+    const transaction = await transactionServices.editTransactionService(
+      req.body
+    );
+    res.status(200).json(transaction);
+  } catch (error) {
+    handleServerError(res, error, "Unable to edit transaction");
   }
 };
