@@ -52,6 +52,7 @@ export const createTransaction = async (req: Request, res: Response) => {
   }
 };
 
+//edit transaction, for approve only
 export const editTransaction = async (req: Request, res: Response) => {
   try {
     const transaction = await transactionServices.editTransactionService(
@@ -60,5 +61,17 @@ export const editTransaction = async (req: Request, res: Response) => {
     res.status(200).json(transaction);
   } catch (error) {
     handleServerError(res, error, "Unable to edit transaction");
+  }
+};
+
+//reject transaction for reject
+export const rejectTransaction = async (req: Request, res: Response) => {
+  try {
+    const transaction = await transactionServices.rejectTransactionService(
+      req.body
+    );
+    res.status(200).json(transaction);
+  } catch (error) {
+    handleServerError(res, error, "Unable to reject transaction");
   }
 };

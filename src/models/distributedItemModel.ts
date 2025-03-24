@@ -27,6 +27,7 @@ Item.init(
     status: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      defaultValue: 1,
     },
     unit_value: {
       type: DataTypes.FLOAT,
@@ -42,7 +43,7 @@ Item.init(
     },
     remarks: {
       type: DataTypes.STRING(45),
-      allowNull: false,
+      allowNull: true,
     },
     deleted: {
       type: DataTypes.TINYINT,

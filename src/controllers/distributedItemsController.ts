@@ -1,12 +1,9 @@
 import distributedItemService from "../services/distributedItemServices.js";
 import { handleServerError } from "../utils/errorHandler.js";
-import express from "express";
+import { Request, Response } from "express";
 
 // get - /items/distributed_items
-export const getDistributedItems = async (
-  req: express.Request,
-  res: express.Response
-) => {
+export const getDistributedItems = async (req: Request, res: Response) => {
   const { department, limit, owner_emp_id } = req.query;
 
   try {
@@ -22,10 +19,7 @@ export const getDistributedItems = async (
   }
 };
 
-export const getItemByIdController = async (
-  req: express.Request,
-  res: express.Response
-) => {
+export const getItemByIdController = async (req: Request, res: Response) => {
   const { itemId } = req.params;
 
   try {
@@ -36,5 +30,21 @@ export const getItemByIdController = async (
     res.status(200).json(item);
   } catch (error) {
     handleServerError(res, error, "Unable to get item.");
+  }
+};
+
+//add distributed item
+export const addDistributedItemController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const newItem = await distributedItemService.addDistributedItemServices(
+      req.body
+    );
+
+    res.status(201).json(newItem);
+  } catch (error) {
+    handleServerError(res, error, "Unable to add item.");
   }
 };

@@ -34,8 +34,7 @@ export interface ItemProps extends Item {
   name: string;
   description: string;
   quantity: number;
-  ics?: string | null;
-  are_no?: string | null;
+  ORIGINAL_QUANTITY: number;
   prop_no?: string | null;
   serial_no?: string | null;
   pis_no?: string | null;

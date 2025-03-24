@@ -187,6 +187,33 @@ const transactionServices = {
     //edit transaction
     return await TransactionModel.update(data, { where: { id } });
   },
+
+  async rejectTransactionService(data: Partial<TransactionProps>) {
+    const { id } = data;
+
+    if (!id) {
+      throw new CustomError("Missing required fields.", 400);
+    }
+
+    const transaction = await TransactionModel.findByPk(id);
+
+    if (!transaction) {
+      throw new CustomError("Transaction not found.", 404);
+    }
+
+    //check if transaction is pending
+    if (transaction.getDataValue("status") !== 2) {
+      throw new CustomError("Transaction status is not pending.", 400);
+    }
+
+    //check if already rejected
+    if (transaction.getDataValue("status") === 4) {
+      throw new CustomError("Transaction is already rejected.", 400);
+    }
+
+    //4 - rejected
+    return await TransactionModel.update({ status: 4 }, { where: { id } });
+  },
 };
 
 export default transactionServices;

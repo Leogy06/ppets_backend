@@ -3,7 +3,8 @@ import Item from "../models/distributedItemModel.js";
 import ItemModel from "../models/itemModel.js";
 import Employee from "../models/employee.js";
 import { CustomError } from "../utils/CustomError.js";
-import { TransactionProps } from "../@types/types.js";
+import { EmployeeProps, ItemProps, TransactionProps } from "../@types/types.js";
+import { add } from "date-fns";
 
 interface DistributedItemService {
   department: TransactionProps["DPT_ID"];
@@ -71,6 +72,14 @@ const distributedItemService = {
     return await Item.findByPk(itemId, {
       include: [{ model: ItemModel, as: "undistributedItemDetails" }],
     });
+  },
+
+  //add distributed item service
+  async addDistributedItemServices(data: Partial<ItemProps>) {
+    data.total_value = Number(data?.unit_value) * Number(data?.quantity);
+    data.ORIGINAL_QUANTITY = data.quantity;
+
+    return await Item.create(data);
   },
 };
 

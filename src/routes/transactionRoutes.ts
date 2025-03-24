@@ -3,6 +3,7 @@ import {
   createTransaction,
   editTransaction,
   getTransactions,
+  rejectTransaction,
 } from "../controllers/transactionController.js";
 import validateTransaction from "../middlewares/validateTransaction.js";
 import { transactionShema } from "../validations/transactionValidation.js";
@@ -13,6 +14,7 @@ import { transactionShema } from "../validations/transactionValidation.js";
 const transactionRoutes = Router()
   .get("/", getTransactions)
   .post("/", validateTransaction(transactionShema), createTransaction)
-  .put("/", validateTransaction(transactionShema), editTransaction);
+  .put("/", validateTransaction(transactionShema), editTransaction)
+  .put("/reject", rejectTransaction);
 
 export default transactionRoutes;
