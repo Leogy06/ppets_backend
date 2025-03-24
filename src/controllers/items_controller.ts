@@ -4,6 +4,7 @@ import ItemModel from "../models/itemModel.js";
 import { ItemModelProps } from "../@types/types.js";
 import { Op } from "sequelize";
 import AccountItem from "../models/accountItemModel.js";
+import undistributedItemServices from "../services/undistributedItemService.js";
 
 //distributed item
 export const createItem = async (
@@ -121,23 +122,21 @@ export const createItem = async (
   }
 };
 
-export const getItems = async (
+//get undistributed items
+export const getUndistributedItems = async (
   req: Express.Request,
   res: Express.Response
 ): Promise<any> => {
-  const { DEPARTMENT_ID } = req.query;
+  const { DEPARTMENT_ID, limit } = req.query;
 
-  if (!DEPARTMENT_ID) {
-    return res.status(400).json({ message: "Department ID is required. " });
-  }
   try {
-    const items = await ItemModel.findAll({
-      where: { DEPARTMENT_ID },
-      order: [["createdAt", "DESC"]],
-      include: [{ model: AccountItem, as: "accountCodeDetails" }],
-    });
+    const undistributedItems =
+      await undistributedItemServices.getUndistributedItemServices({
+        limit: Number(limit),
+        department: Number(DEPARTMENT_ID),
+      });
 
-    res.status(200).json(items);
+    res.status(200).json(undistributedItems);
   } catch (error) {
     console.error("Unable to get items. ", error);
     res.status(500).json({ message: "Unable to get items. ", error });

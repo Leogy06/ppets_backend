@@ -117,6 +117,15 @@ const employeeServices = {
 
     return { message: "Employee successfully deleted." };
   },
+
+  //get employee by id
+  async getEmployeeByIdService(ID: EmployeeProps["ID"]) {
+    if (!ID) {
+      throw new CustomError("ID is required.", 400);
+    }
+
+    return await Employee.findByPk(ID);
+  },
 };
 
 export default employeeServices;

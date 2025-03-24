@@ -58,6 +58,9 @@ export const protectRoute = (
     req.user = decoded; // Store user data for later use
     next();
   } catch (error) {
-    res.status(403).json({ message: "Invalid token", error });
+    res.status(403).json({
+      message: "Session expired or Invalid Token, Login Again.",
+      error,
+    });
   }
 };

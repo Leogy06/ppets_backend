@@ -47,7 +47,7 @@ app.use("/transaction", protectRoute, transactionRoutes);
 app.use("/user_type", user_type_routes);
 app.use("/status_process", protectRoute, processingStatus_routes);
 app.use("/notification", protectRoute, notification_routes);
-app.use("/api/item", protectRoute, item_routes);
+app.use("/api/item", protectRoute, item_routes); //undistributed item
 app.use("/api/pdfkit", protectRoute, pdfKitRoutes);
 app.use("/account_code", protectRoute, accountItemRoutes);
 

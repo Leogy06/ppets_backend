@@ -34,3 +34,21 @@ export const deleteEmployees = async (req: Request, res: Response) => {
     handleServerError(res, error, "Unable to delete employee.");
   }
 };
+
+//get employee
+export const getEmployeeByIdController = async (
+  req: Request,
+  res: Response
+) => {
+  const { employeeId } = req.params;
+
+  try {
+    const employee = await employeeServices.getEmployeeByIdService(
+      Number(employeeId)
+    );
+
+    res.status(200).json(employee);
+  } catch (error) {
+    handleServerError(res, error, "Unable to get employee.");
+  }
+};

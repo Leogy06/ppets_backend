@@ -5,6 +5,7 @@ import Employee from "../models/employee.js";
 import { CustomError } from "../utils/CustomError.js";
 import { EmployeeProps, ItemProps, TransactionProps } from "../@types/types.js";
 import { add } from "date-fns";
+import { logger } from "../logger/logger.js";
 
 interface DistributedItemService {
   department: TransactionProps["DPT_ID"];
@@ -76,8 +77,35 @@ const distributedItemService = {
 
   //add distributed item service
   async addDistributedItemServices(data: Partial<ItemProps>) {
+    // console.log("data ", data);
+
     data.total_value = Number(data?.unit_value) * Number(data?.quantity);
     data.ORIGINAL_QUANTITY = data.quantity;
+
+    //find in the undistributed item
+    const undistributedItem = (await ItemModel.findByPk(data.ITEM_ID)) as any;
+
+    if (!undistributedItem) {
+      throw new CustomError("Item does not exist.", 400);
+    }
+
+    //check if quantity is enough in the undistributed item
+    if (
+      undistributedItem.getDataValue("STOCK_QUANTITY") < Number(data?.quantity)
+    ) {
+      throw new CustomError("Item quantity is not enough.", 400);
+    }
+
+    //update quantity in undistributed item
+    const newQuantity =
+      Number(undistributedItem.getDataValue("STOCK_QUANTITY")) -
+      Number(data?.quantity); //subtracting
+
+    undistributedItem.STOCK_QUANTITY = newQuantity;
+
+    const undistributedItemResult = await undistributedItem.save();
+
+    // console.log("undistributedItemResult ", undistributedItemResult);
 
     return await Item.create(data);
   },
