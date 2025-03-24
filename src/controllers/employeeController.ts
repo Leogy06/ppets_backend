@@ -52,3 +52,20 @@ export const getEmployeeByIdController = async (
     handleServerError(res, error, "Unable to get employee.");
   }
 };
+
+//get count of all employee in a department
+export const getEmployeeCountController = async (
+  req: Request,
+  res: Response
+) => {
+  const { CURRENT_DPT_ID } = req.query;
+
+  try {
+    const employeeCount = await employeeServices.getEmployeeCountService(
+      Number(CURRENT_DPT_ID)
+    );
+    res.status(200).json(employeeCount);
+  } catch (error) {
+    handleServerError(res, error, "Unable to get employee count.");
+  }
+};

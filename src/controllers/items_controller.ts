@@ -5,8 +5,9 @@ import { ItemModelProps } from "../@types/types.js";
 import { Op } from "sequelize";
 import AccountItem from "../models/accountItemModel.js";
 import undistributedItemServices from "../services/undistributedItemService.js";
+import { handleServerError } from "../utils/errorHandler.js";
 
-//distributed item
+//undistributed item
 export const createItem = async (
   req: Express.Request,
   res: Express.Response
@@ -266,5 +267,23 @@ export const getUndistributedItem = async (
     res
       .status(500)
       .json({ message: "Unable to get undistributed item. ", error });
+  }
+};
+
+//get undistributed items count
+export const getUndistributedItemsCount = async (
+  req: Express.Request,
+  res: Express.Response
+): Promise<any> => {
+  const { DEPARTMENT_ID } = req.query;
+
+  try {
+    const count = await ItemModel.count({
+      where: { DEPARTMENT_ID, DELETE: 0 },
+    });
+
+    res.status(200).json(count);
+  } catch (error) {
+    handleServerError(res, error, "Unable to get undistributed items count.");
   }
 };

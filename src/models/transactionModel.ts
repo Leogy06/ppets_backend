@@ -72,11 +72,6 @@ TransactionModel.init(
       defaultValue: null,
     },
 
-    RECEIVED_BY: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      defaultValue: null,
-    },
     TRANSACTION_DESCRIPTION: {
       type: DataTypes.STRING(45),
       allowNull: true,

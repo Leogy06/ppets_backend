@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   addDistributedItemController,
   getDistributedItems,
+  getDistributedItemsCountController,
   getItemByIdController,
 } from "../controllers/distributedItemsController.js";
 import validateDistributedItem from "../middlewares/validateDistributedItem.js";
@@ -16,6 +17,7 @@ const distributedItemRoutes = Router()
     "/",
     validateDistributedItem(distributedItemDetails),
     addDistributedItemController
-  );
+  )
+  .get("/api/count", getDistributedItemsCountController);
 
 export default distributedItemRoutes;

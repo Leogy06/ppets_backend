@@ -21,6 +21,13 @@ const undistributedItemServices = {
       limit,
     });
   },
+
+  //get items count
+  async getUndistributedItemCountService(department: number) {
+    if (!department) throw new CustomError("Department id is required.", 400);
+
+    return await ItemModel.count({ where: { DEPARTMENT_ID: department } });
+  },
 };
 
 export default undistributedItemServices;

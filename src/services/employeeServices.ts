@@ -36,7 +36,7 @@ const employeeServices = {
   //edit employee
   async editEmployee(data: EmployeeProps) {
     if (!data.ID) {
-      throw new CustomError("ID is required.", 400);
+      throw new CustomError("ID is required .", 400);
     }
 
     //check if theres employee in that id
@@ -125,6 +125,18 @@ const employeeServices = {
     }
 
     return await Employee.findByPk(ID);
+  },
+
+  //get count of all employee in a department
+  async getEmployeeCountService(
+    CURRENT_DPT_ID: EmployeeProps["CURRENT_DPT_ID"]
+  ) {
+    if (!CURRENT_DPT_ID) {
+      throw new CustomError("CURRENT_DPT_ID is required.", 400);
+    }
+    return await Employee.count({
+      where: { CURRENT_DPT_ID },
+    });
   },
 };
 
