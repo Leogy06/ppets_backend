@@ -92,3 +92,40 @@ export const approveTransferTransactionController = async (
     handleServerError(res, error, "Unable to approve transaction");
   }
 };
+
+//approve return transaction
+export const approveReturnTransactionController = async (
+  req: Request,
+  res: Response
+) => {
+  const { transactionId } = req.body;
+  const { APPROVED_BY } = req.query;
+
+  try {
+    const transaction =
+      await transactionServices.approveReturnTransactionService(
+        transactionId,
+        Number(APPROVED_BY)
+      );
+    res.status(200).json(transaction);
+  } catch (error) {
+    handleServerError(res, error, "Unable to approve transaction");
+  }
+};
+
+//get transaction count
+export const getTransactionCountController = async (
+  req: Request,
+  res: Response
+) => {
+  const remarks = Number(req.query.remarks);
+  const DPT_ID = Number(req.query.DPT_ID);
+  try {
+    const transactionCount =
+      await transactionServices.getTransactionCountService(remarks, DPT_ID);
+
+    res.status(200).json(transactionCount);
+  } catch (error) {
+    handleServerError(res, error, "Unable to get transaction count.");
+  }
+};

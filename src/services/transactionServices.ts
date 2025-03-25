@@ -10,7 +10,6 @@ import { ItemProps, TransactionProps } from "../@types/types.js";
 import { logger } from "../logger/logger.js";
 
 //creating borrow transaction interface
-
 //transaction services
 const transactionServices = {
   //get transactions
@@ -314,6 +313,76 @@ const transactionServices = {
       distributedAt: new Date(),
       DISTRIBUTED_BY: transaction.APPROVED_BY,
     });
+  },
+
+  //approve return transaction
+  async approveReturnTransactionService(
+    transactionId: TransactionProps["id"],
+    APPROVED_BY: TransactionProps["APPROVED_BY"]
+  ) {
+    if (!transactionId) {
+      throw new CustomError("Missing required fields.", 400);
+    }
+
+    if (!APPROVED_BY) {
+      throw new CustomError("Missing required fields.", 400);
+    }
+
+    //find the transaction
+    const transaction = await TransactionModel.findByPk(transactionId);
+
+    if (!transaction) {
+      throw new CustomError("Transaction not found.", 404);
+    }
+
+    //check if transaction is pending
+    if (transaction.getDataValue("status") !== 2) {
+      throw new CustomError("Transaction status is not pending.", 400);
+    }
+
+    //check if the remarks is return
+    // 5- return
+    if (transaction.getDataValue("remarks") !== 5) {
+      throw new CustomError("Transaction is not for return.", 400);
+    }
+
+    //find the item in distributed item
+    const distributedItem = (await Item.findByPk(
+      transaction.getDataValue("DISTRIBUTED_ITM_ID")
+    )) as ItemProps;
+
+    //check if distributed item exist in the database
+    if (!distributedItem) {
+      throw new CustomError("Distributed item not found.", 404);
+    }
+
+    distributedItem.quantity = +transaction.getDataValue("quantity");
+
+    if (distributedItem.quantity >= distributedItem.ORIGINAL_QUANTITY) {
+      throw new CustomError("Quantity is greater than original quantity.", 400);
+    }
+
+    //update the transaction
+    transaction.status = 1; //approved, from pending
+    transaction.APPROVED_BY = APPROVED_BY; //change the approve by
+
+    //save the lendee item
+    await distributedItem.save();
+    //save the transaction
+    await transaction.save();
+
+    return transaction;
+  },
+
+  //get transaction count base on type
+  async getTransactionCountService(
+    remarks: TransactionProps["remarks"],
+    DPT_ID: TransactionProps["DPT_ID"]
+  ) {
+    if (!remarks) throw new CustomError("Missing required fields.", 400);
+
+    const count = await TransactionModel.count({ where: { remarks, DPT_ID } });
+    return count;
   },
 };
 

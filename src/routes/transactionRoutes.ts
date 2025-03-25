@@ -1,8 +1,10 @@
 import { Router } from "express";
 import {
+  approveReturnTransactionController,
   approveTransferTransactionController,
   createTransaction,
   editTransaction,
+  getTransactionCountController,
   getTransactions,
   rejectTransaction,
 } from "../controllers/transactionController.js";
@@ -17,6 +19,8 @@ const transactionRoutes = Router()
   .post("/", validateTransaction(transactionShema), createTransaction)
   .put("/", validateTransaction(transactionShema), editTransaction)
   .put("/reject", rejectTransaction)
-  .put("/approve/transfer", approveTransferTransactionController);
+  .put("/approve/transfer", approveTransferTransactionController)
+  .put("/approve/return", approveReturnTransactionController)
+  .get("/api/count", getTransactionCountController);
 
 export default transactionRoutes;
