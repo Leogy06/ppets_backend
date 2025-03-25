@@ -6,7 +6,7 @@ import ItemModel from "../models/itemModel.js";
 import TransactionRemarks from "../models/btRemarksModel.js";
 import TransactionStatusModel from "../models/transactionStatusModel.js";
 import { CustomError } from "../utils/CustomError.js";
-import { TransactionProps } from "../@types/types.js";
+import { ItemProps, TransactionProps } from "../@types/types.js";
 import { logger } from "../logger/logger.js";
 
 //creating borrow transaction interface
@@ -188,14 +188,17 @@ const transactionServices = {
     return await TransactionModel.update(data, { where: { id } });
   },
 
-  async rejectTransactionService(data: Partial<TransactionProps>) {
-    const { id } = data;
-
-    if (!id) {
-      throw new CustomError("Missing required fields.", 400);
+  async rejectTransactionService(
+    transactionId: Partial<TransactionProps["id"]>
+  ) {
+    if (!transactionId) {
+      throw new CustomError(
+        `Missing required fields. id: ${transactionId}`,
+        400
+      );
     }
 
-    const transaction = await TransactionModel.findByPk(id);
+    const transaction = await TransactionModel.findByPk(transactionId);
 
     if (!transaction) {
       throw new CustomError("Transaction not found.", 404);
@@ -212,7 +215,105 @@ const transactionServices = {
     }
 
     //4 - rejected
-    return await TransactionModel.update({ status: 4 }, { where: { id } });
+    return await TransactionModel.update(
+      { status: 4 },
+      { where: { id: transactionId } }
+    );
+  },
+
+  async approveTransferTransactionService(
+    transactionId: TransactionProps["id"],
+    APPROVED_BY: TransactionProps["APPROVED_BY"]
+  ) {
+    if (!transactionId) {
+      throw new CustomError("Missing required fields.", 400);
+    }
+
+    const transaction = await TransactionModel.findByPk(transactionId);
+
+    if (!transaction) {
+      throw new CustomError("Transaction not found.", 404);
+    }
+
+    //throw erro if transaction is already rejects
+    if (transaction.getDataValue("status") === 4) {
+      throw new CustomError("Transaction is already rejected.", 400);
+    }
+
+    //check if transaction is pending
+    if (transaction.getDataValue("status") !== 2) {
+      throw new CustomError("Transaction status is not pending.", 400);
+    }
+
+    //check if the remarks is transfer
+    // 4- transfer
+    if (transaction.getDataValue("remarks") !== 4) {
+      throw new CustomError("Transaction is not for transfer.", 400);
+    }
+
+    //find the item in distributed item
+    const distributedItem = (await Item.findByPk(
+      transaction.getDataValue("DISTRIBUTED_ITM_ID")
+    )) as ItemProps;
+
+    //check if distributed item exist in the database
+    if (!distributedItem) {
+      throw new CustomError("Distributed item not found.", 404);
+    }
+
+    //check if quantity is enough
+    if (
+      transaction.getDataValue("quantity") >
+      distributedItem.getDataValue("quantity")
+    ) {
+      //reject automatically sinces it is lack in quantity
+      await TransactionModel.update(
+        { status: 4 },
+        { where: { id: transactionId } }
+      );
+      throw new CustomError("Not enough quantity available.", 400);
+    }
+
+    //reduce the quantity
+    const newQuantity =
+      distributedItem.getDataValue("quantity") -
+      transaction.getDataValue("quantity");
+
+    //reduce the original quantity
+    const newOriginalQuantity =
+      distributedItem.ORIGINAL_QUANTITY - transaction.getDataValue("quantity");
+
+    //reducing the quantities
+    distributedItem.quantity = newQuantity;
+    distributedItem.ORIGINAL_QUANTITY = newOriginalQuantity;
+
+    //update the transaction
+    transaction.status = 1; //approved, from pending
+    transaction.APPROVED_BY = APPROVED_BY; //change the approve by
+
+    //save the lendee item
+    await distributedItem.save();
+    //save the transaction
+    await transaction.save();
+
+    //transfering the quantity
+    //create new distributed item
+    return await Item.create({
+      ITEM_ID: transaction.getDataValue("DISTRIBUTED_ITM_ID"),
+      quantity: transaction.getDataValue("quantity"),
+      ORIGINAL_QUANTITY: transaction.getDataValue("quantity"),
+      unit_value: distributedItem.getDataValue("unit_value"),
+      //accountable employee is from transaction borrower
+      accountable_emp: transaction.getDataValue("borrower_emp_id"),
+      total_value:
+        distributedItem.getDataValue("unit_value") *
+        transaction.getDataValue("quantity"),
+      status: 1,
+      current_dpt_id: transaction.getDataValue("DPT_ID"),
+      added_by: transaction.APPROVED_BY,
+      distributedAt: new Date(),
+      DISTRIBUTED_BY: transaction.APPROVED_BY,
+    });
   },
 };
 

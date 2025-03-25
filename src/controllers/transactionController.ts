@@ -68,10 +68,27 @@ export const editTransaction = async (req: Request, res: Response) => {
 export const rejectTransaction = async (req: Request, res: Response) => {
   try {
     const transaction = await transactionServices.rejectTransactionService(
-      req.body
+      req.body.data
     );
     res.status(200).json(transaction);
   } catch (error) {
     handleServerError(res, error, "Unable to reject transaction");
+  }
+};
+
+//approve return
+export const approveTransferTransactionController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const transaction =
+      await transactionServices.approveTransferTransactionService(
+        req.body.transactionId,
+        Number(req.query.APPROVED_BY)
+      );
+    res.status(200).json(transaction);
+  } catch (error) {
+    handleServerError(res, error, "Unable to approve transaction");
   }
 };
