@@ -35,7 +35,7 @@ const corsOptions = {
   origin: process.env.CLIENT_ORIGIN,
   credentials: true,
 };
-app.use(cors(corsOptions));
+app.use(cors({ origin: "*" }));
 
 // Routes
 app.use("/employees", protectRoute, employeeRoutes);
