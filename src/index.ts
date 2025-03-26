@@ -11,6 +11,7 @@ const port = process.env.PORT || 8080;
 
 // Create HTTP server
 const server = createServer(app);
+console.log("client origin: ", process.env.CLIENT_ORIGIN);
 
 // WebSocket setup
 const io = new Server(server, {
