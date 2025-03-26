@@ -69,3 +69,13 @@ export const getEmployeeCountController = async (
     handleServerError(res, error, "Unable to get employee count.");
   }
 };
+
+//create employee
+export const createEmployeeController = async (req: Request, res: Response) => {
+  try {
+    const employee = await employeeServices.createEmployeeService(req.body);
+    res.status(200).json(employee);
+  } catch (error) {
+    handleServerError(res, error, "Unable to create employee.");
+  }
+};

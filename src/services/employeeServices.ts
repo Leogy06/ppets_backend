@@ -138,6 +138,26 @@ const employeeServices = {
       where: { CURRENT_DPT_ID },
     });
   },
+
+  //create employe
+  async createEmployeeService(data: Partial<EmployeeProps>) {
+    //check if id number is duplicated
+    const isIDExist = await Employee.findOne({
+      where: { ID_NUMBER: data.ID_NUMBER },
+    });
+    if (isIDExist) {
+      throw new CustomError("ID number is already taken.", 400);
+    }
+
+    //time for the default values
+    data.CREATED_WHEN = new Date();
+    data.CURRENT_DPT_ID = data.DEPARTMENT_ID;
+    data.UPDATED_BY = data.CREATED_BY;
+    data.UPDATED_WHEN = new Date();
+    data.DELETED = 0;
+
+    return await Employee.create(data);
+  },
 };
 
 export default employeeServices;
