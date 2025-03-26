@@ -12,6 +12,8 @@ const port = process.env.PORT || 8080;
 // Create HTTP server
 const server = createServer(app);
 
+console.log("process.env.CLIENT_ORIGIN", process.env.CLIENT_ORIGIN);
+
 // WebSocket setup
 const io = new Server(server, {
   cors: {
@@ -29,8 +31,7 @@ app.use((req, res, next) => {
 
 // WebSocket logic
 socketManager(io);
-
-// Start the server
+//adts-frontend-next-app.vercel.app/
 const startServer = async () => {
   try {
     await sequilize.sync();
