@@ -35,7 +35,11 @@ const corsOptions = {
   origin: process.env.CLIENT_ORIGIN,
   credentials: true,
 };
-app.use(cors({ origin: "*" }));
+app.use(cors(corsOptions));
+
+app.get("/", (req, res) => {
+  res.send("Hello from the backend!");
+});
 
 // Routes
 app.use("/employees", protectRoute, employeeRoutes);
