@@ -116,6 +116,13 @@ const distributedItemService = {
 
     return await Item.count({ where: { accountable_emp: employeeId } });
   },
+
+  //get items count by emp id
+  async getItemsCountByEmpIdService(employeeId: EmployeeProps["ID"]) {
+    if (!employeeId) throw new CustomError("Employee id is required.", 400);
+
+    return await Item.count({ where: { accountable_emp: employeeId } });
+  },
 };
 
 export default distributedItemService;

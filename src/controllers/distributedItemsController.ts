@@ -65,3 +65,20 @@ export const getDistributedItemsCountController = async (
     handleServerError(res, error, "Unable to get distributed item count.");
   }
 };
+
+export const getDistributedItemsByEmpIdCountController = async (
+  req: Request,
+  res: Response
+) => {
+  const { employeeId } = req.query;
+  try {
+    const distributedItemCount =
+      await distributedItemService.getItemsCountByEmpIdService(
+        Number(employeeId)
+      );
+
+    res.status(200).json(distributedItemCount);
+  } catch (error) {
+    handleServerError(res, error, "Unable to get distributed item count.");
+  }
+};
