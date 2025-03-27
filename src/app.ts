@@ -26,7 +26,7 @@ app.use(cookieParser());
 
 // Logging middleware
 app.use((req, res, next) => {
-  logger.info(`Incoming request: ${req.method} ${req.url} \n`);
+  logger.info(`Incoming request: ${req.method} ${req.url}`);
   next();
 });
 

@@ -173,21 +173,21 @@ export const login = async (
     res.cookie("accessToken", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict", //none since were cross site in production
+      maxAge: 8 * 60 * 60 * 1000, // 8 hours
     });
 
     //username
     res.cookie("username", user.username, {
       secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
-      maxAge: 7 * 24 * 60 * 60 * 1000, //7 days
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict", //none since were cross site in production
+      maxAge: 8 * 60 * 60 * 1000, // 8 hours
     });
 
     res.cookie("role", user.role, {
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, //7 days
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict", //none since were cross site in production
+      maxAge: 8 * 60 * 60 * 1000, // 8 hours
     });
 
     res.status(200).json({
