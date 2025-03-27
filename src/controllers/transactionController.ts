@@ -2,6 +2,12 @@ import { Request, Response } from "express";
 import { handleServerError } from "../utils/errorHandler.js";
 import transactionServices from "../services/transactionServices.js";
 import { logger } from "../logger/logger.js";
+import notificationServices from "../services/notifcationServices.js";
+import Employee from "../models/employee.js";
+import User from "../models/user.js";
+import { CustomError } from "../utils/CustomError.js";
+import { users } from "../sockets/socketManager.js";
+import setNotificationUser from "../utils/sendNotificationToUsers.js";
 //transaction controller
 
 export const getTransactions = async (req: Request, res: Response) => {
@@ -34,9 +40,9 @@ export const createTransaction = async (req: Request, res: Response) => {
   } = req.body;
 
   try {
+    //create transaction
     const newBorrowTransaction =
       await transactionServices.createTransactionService({
-        distributed_item_id: 0,
         DISTRIBUTED_ITM_ID,
         quantity,
         borrower_emp_id,
@@ -45,6 +51,11 @@ export const createTransaction = async (req: Request, res: Response) => {
         status,
         remarks,
       });
+
+    await notificationServices.createTransactionNotificationService(
+      newBorrowTransaction,
+      req
+    );
 
     res.status(201).json(newBorrowTransaction);
   } catch (error) {

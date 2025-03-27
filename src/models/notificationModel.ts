@@ -2,9 +2,19 @@ import { DataTypes, Model } from "sequelize";
 import sequelize from "../db/config.js";
 import BorrowingTransaction from "./transactionModel.js";
 
-class Notification extends Model {}
+class NotificationModel extends Model {
+  public ID!: number;
+  public READ!: number;
+  public TRANSACTION_ID!: number;
+  public TRANSACTION!: number;
+  public ITEM_ID!: number;
+  public QUANTITY!: number;
+  public REQUEST_STATUS!: number;
+  public OWNER_ID!: number;
+  public BORROWER_ID!: number;
+}
 
-Notification.init(
+NotificationModel.init(
   {
     ID: {
       type: DataTypes.INTEGER,
@@ -13,21 +23,37 @@ Notification.init(
       allowNull: false,
       unique: true,
     },
-    MESSAGE: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
     READ: {
       type: DataTypes.TINYINT,
       defaultValue: 0,
     },
-    FOR_EMP: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
     TRANSACTION_ID: {
       type: DataTypes.INTEGER,
       allowNull: true,
+    },
+    TRANSACTION: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    ITEM_ID: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    QUANTITY: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    REQUEST_STATUS: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    OWNER_ID: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    BORROWER_ID: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
   },
   {
@@ -37,9 +63,9 @@ Notification.init(
   }
 );
 
-Notification.belongsTo(BorrowingTransaction, {
+NotificationModel.belongsTo(BorrowingTransaction, {
   foreignKey: "TRANSACTION_ID",
   as: "borrowingTransactionDetails",
 });
 
-export default Notification;
+export default NotificationModel;

@@ -97,11 +97,18 @@ export interface TransactionProps {
   DPT_ID: number;
 }
 
-export interface NotificationProps extends Notification {
+export interface NotificationProps {
   ID: number;
   MESSAGE: number;
   READ: number;
   TRANSACTION_ID: number | null;
+  ADMIN_ID: number;
+  TRANSACTION: number;
+  ITEM_ID: number;
+  QUANTITY: number;
+  REQUEST_STATUS: number;
+  OWNER_ID: number;
+  BORROWER_ID: number;
 }
 
 //items new

@@ -1,0 +1,48 @@
+import { NotificationProps, TransactionProps } from "../@types/types.js";
+import NotificationModel from "../models/notificationModel.js";
+import User from "../models/user.js";
+import { CustomError } from "../utils/CustomError.js";
+import setNotificationUser from "../utils/sendNotificationToUsers.js";
+import { Request } from "express";
+
+const notificationServices = {
+  //create notification
+  async createTransactionNotificationService(
+    data: Partial<TransactionProps>,
+    req: Request
+  ) {
+    //find the admin of that department
+    const adminDepartment = await User.findOne({
+      where: {
+        DEPARTMENT_USER: data.DPT_ID,
+        role: 1,
+      },
+    });
+
+    if (!adminDepartment) throw new CustomError("Admin not found", 404);
+
+    //create the notification
+    const newNotification = await NotificationModel.create({
+      TRANSACTION_ID: data.id,
+      TRANSACTION: data.remarks,
+      ITEM_ID: data.distributed_item_id,
+      QUANTITY: data.quantity,
+      REQUEST_STATUS: data.status,
+      OWNER_ID: data.owner_emp_id,
+      BORROWER_ID: data.borrower_emp_id,
+      ADMIN_ID: adminDepartment.getDataValue("id"),
+    });
+
+    //send notification
+    //for admin
+    setNotificationUser(
+      adminDepartment.getDataValue("id"),
+      newNotification,
+      req
+    );
+
+    return newNotification;
+  },
+};
+
+export default notificationServices;
