@@ -5,6 +5,7 @@ import {
   createTransaction,
   editTransaction,
   getTransactionCountController,
+  getTransactionCountTodayController,
   getTransactions,
   rejectTransaction,
 } from "../controllers/transactionController.js";
@@ -21,6 +22,7 @@ const transactionRoutes = Router()
   .put("/reject", rejectTransaction)
   .put("/approve/transfer", approveTransferTransactionController)
   .put("/approve/return", approveReturnTransactionController)
-  .get("/api/count", getTransactionCountController);
+  .get("/api/count", getTransactionCountController)
+  .get("/api/count/today", getTransactionCountTodayController);
 
 export default transactionRoutes;

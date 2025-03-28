@@ -140,3 +140,18 @@ export const getTransactionCountController = async (
     handleServerError(res, error, "Unable to get transaction count.");
   }
 };
+
+//get transaction count today controller
+export const getTransactionCountTodayController = async (
+  req: Request,
+  res: Response
+) => {
+  const DPT_ID = Number(req.query.DPT_ID);
+  try {
+    const transactionCount =
+      await transactionServices.getTransactionCountTodayService(DPT_ID);
+    res.status(200).json(transactionCount);
+  } catch (error) {
+    handleServerError(res, error, "Unable to get transaction count today");
+  }
+};

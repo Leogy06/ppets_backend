@@ -376,13 +376,46 @@ const transactionServices = {
 
   //get transaction count base on type
   async getTransactionCountService(
-    remarks: TransactionProps["remarks"],
+    remarks: TransactionProps["remarks"] | undefined,
     DPT_ID: TransactionProps["DPT_ID"]
   ) {
-    if (!remarks) throw new CustomError("Missing required fields.", 400);
+    if (!DPT_ID) throw new CustomError("Missing required fields.", 400);
 
-    const count = await TransactionModel.count({ where: { remarks, DPT_ID } });
+    const where: WhereOptions<TransactionProps> = { DPT_ID };
+    if (remarks) where.remarks = remarks;
+
+    const count = await TransactionModel.count({ where });
     return count;
+  },
+
+  //get transaciton tpday
+  async getTransactionCountTodayService(DPT_ID: TransactionProps["DPT_ID"]) {
+    if (!DPT_ID)
+      throw new CustomError(
+        "Missing required fields. This error is from getTransactionCountTodayService",
+        400
+      );
+
+    const today = new Date();
+    const startOfDay = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+    const endOfDay = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() + 1
+    );
+
+    const where: WhereOptions<TransactionProps> = {
+      DPT_ID,
+      createdAt: { [Op.between]: [startOfDay, endOfDay] },
+    };
+
+    const transactions = await TransactionModel.count({ where });
+
+    return transactions;
   },
 };
 
