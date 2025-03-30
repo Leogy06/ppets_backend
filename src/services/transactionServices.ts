@@ -270,7 +270,10 @@ const transactionServices = {
         { status: 4 },
         { where: { id: transactionId } }
       );
-      throw new CustomError("Not enough quantity available.", 400);
+      throw new CustomError(
+        "Not enough quantity available. Transaction rejected.",
+        400
+      );
     }
 
     //reduce the quantity
@@ -298,7 +301,7 @@ const transactionServices = {
     //transfering the quantity
     //create new distributed item
     return await Item.create({
-      ITEM_ID: transaction.getDataValue("DISTRIBUTED_ITM_ID"),
+      ITEM_ID: transaction.getDataValue("distributed_item_id"), //make sure this is from undistributed item, even the name of this is distributed item
       quantity: transaction.getDataValue("quantity"),
       ORIGINAL_QUANTITY: transaction.getDataValue("quantity"),
       unit_value: distributedItem.getDataValue("unit_value"),
