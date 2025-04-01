@@ -1,11 +1,6 @@
 import { Router } from "express";
-import {
-  editNotification,
-  getNotification,
-} from "../controllers/notificationController.js";
-
-const notification_routes = Router()
-  .get("/", getNotification)
-  .put("/", editNotification);
+import { getNoticationController } from "../controllers/notificationController.js";
+//end point - /notification
+const notification_routes = Router().get("/", getNoticationController);
 
 export default notification_routes;

@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import { NotificationProps, TransactionProps } from "../@types/types.js";
 import NotificationModel from "../models/notificationModel.js";
 import User from "../models/user.js";
@@ -42,6 +43,41 @@ const notificationServices = {
     );
 
     return newNotification;
+  },
+
+  async getNotificationService({
+    empId,
+    limit,
+  }: {
+    empId: number;
+    limit: number;
+  }) {
+    if (!empId || isNaN(empId)) {
+      throw new CustomError("Employee ID is invalid.", 400);
+    }
+
+    if (!limit || isNaN(limit)) {
+      throw new CustomError("Limit is invalid.", 400);
+    }
+
+    //find admin emp id
+    const admin = await User.findOne({
+      where: {
+        emp_id: empId,
+        role: 1,
+      },
+    });
+
+    return await NotificationModel.findAll({
+      where: {
+        [Op.or]: {
+          OWNER_ID: empId,
+          BORROWER_ID: empId,
+          ADMIN_ID: admin?.getDataValue("id"),
+        },
+      },
+      limit,
+    });
   },
 };
 
