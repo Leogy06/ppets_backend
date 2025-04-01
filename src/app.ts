@@ -26,7 +26,15 @@ app.use(cookieParser());
 
 // Logging middleware
 app.use((req, res, next) => {
-  logger.info(`Incoming request: ${req.method} ${req.url}`);
+  const start = process.hrtime();
+  res.on("finish", () => {
+    const diff = process.hrtime(start); //calculate how long the request took in milliseconds
+    const responseTimeMs = (diff[0] * 1e3 + diff[1] / 1e6).toFixed(3);
+
+    logger.info(
+      `Incoming request: ${req.method} ${req.url} - ${responseTimeMs}ms`
+    );
+  });
   next();
 });
 

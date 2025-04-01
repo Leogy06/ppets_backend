@@ -8,18 +8,27 @@ import { logger } from "../logger/logger.js";
 interface EmployeeServiceProps {
   departmentId: number;
   limit?: number;
+  DELETED?: number;
 }
 
 const employeeServices = {
-  async getEmployees({ departmentId, limit }: EmployeeServiceProps) {
+  async getEmployees({
+    departmentId,
+    limit,
+    DELETED = 0,
+  }: EmployeeServiceProps) {
     if (!departmentId) throw new CustomError("Department id is required.", 400);
-
+    if (DELETED === undefined)
+      throw new CustomError("DELETED is required.", 400);
     const whereClause: WhereOptions<any> = {};
 
     if (departmentId) whereClause.CURRENT_DPT_ID = departmentId;
 
-    //filter deleted
-    whereClause.DELETED = { [Op.or]: [0, null] };
+    if (DELETED === 1) {
+      whereClause.DELETED = Number(DELETED);
+    } else {
+      whereClause.DELETED = { [Op.or]: [0, null] };
+    }
 
     return await Employee.findAll({
       where: whereClause,

@@ -8,6 +8,7 @@ export const getEmployees = async (req: Request, res: Response) => {
     const employees = await employeeServices.getEmployees({
       departmentId: Number(req.query.departmentId),
       limit: Number(req.query.limit),
+      DELETED: Number(req.query.DELETED),
     });
 
     res.status(200).json(employees);
