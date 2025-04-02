@@ -139,19 +139,6 @@ const transactionServices = {
       DPT_ID: distributedItem.get("current_dpt_id"),
     });
 
-    const adminDepartment = await User.findOne({
-      where: {
-        role: 1,
-        DEPARTMENT_USER: newTransaction.getDataValue("DPT_ID"),
-      },
-    });
-
-    //create notification about the transaction
-    notificationServices.createTransactionNotificationService(
-      newTransaction,
-      req
-    );
-
     // Create transaction
     return newTransaction;
   },
@@ -205,7 +192,9 @@ const transactionServices = {
     );
 
     //edit transaction
-    return await TransactionModel.update(data, { where: { id } });
+    TransactionModel.update(data, { where: { id } });
+
+    return await TransactionModel.findByPk(id);
   },
 
   async rejectTransactionService(

@@ -55,6 +55,10 @@ NotificationModel.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    ADMIN_ID: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
   },
   {
     sequelize,

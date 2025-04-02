@@ -8,6 +8,7 @@ import User from "../models/user.js";
 import { CustomError } from "../utils/CustomError.js";
 import { users } from "../sockets/socketManager.js";
 import setNotificationUser from "../utils/sendNotificationToUsers.js";
+import { TransactionProps } from "../@types/types.js";
 //transaction controller
 
 export const getTransactions = async (req: Request, res: Response) => {
@@ -42,15 +43,18 @@ export const createTransaction = async (req: Request, res: Response) => {
   try {
     //create transaction
     const newBorrowTransaction =
-      await transactionServices.createTransactionService({
-        DISTRIBUTED_ITM_ID,
-        quantity,
-        borrower_emp_id,
-        owner_emp_id,
-        TRANSACTION_DESCRIPTION,
-        status,
-        remarks,
-      });
+      await transactionServices.createTransactionService(
+        {
+          DISTRIBUTED_ITM_ID,
+          quantity,
+          borrower_emp_id,
+          owner_emp_id,
+          TRANSACTION_DESCRIPTION,
+          status,
+          remarks,
+        },
+        req
+      );
 
     await notificationServices.createTransactionNotificationService(
       newBorrowTransaction,
@@ -66,12 +70,22 @@ export const createTransaction = async (req: Request, res: Response) => {
 //edit transaction, for approve only
 export const editTransaction = async (req: Request, res: Response) => {
   try {
-    const transaction = await transactionServices.editTransactionService(
+    const transaction = (await transactionServices.editTransactionService(
       req.body
+    )) as any;
+
+    // console.log("Transactions: ", transaction);
+
+    //creating the notification
+    await notificationServices.createTransactionNotificationService(
+      transaction,
+      req
     );
+
+    //send the transaction
     res.status(200).json(transaction);
   } catch (error) {
-    handleServerError(res, error, "Unable to edit transaction");
+    handleServerError(res, error, `Unable to edit transaction - ${error}.`);
   }
 };
 
