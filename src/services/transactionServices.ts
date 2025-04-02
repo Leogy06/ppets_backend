@@ -8,6 +8,9 @@ import TransactionStatusModel from "../models/transactionStatusModel.js";
 import { CustomError } from "../utils/CustomError.js";
 import { ItemProps, TransactionProps } from "../@types/types.js";
 import { logger } from "../logger/logger.js";
+import { Request } from "express";
+import notificationServices from "./notifcationServices.js";
+import User from "../models/user.js";
 
 //creating borrow transaction interface
 //transaction services
@@ -54,7 +57,10 @@ const transactionServices = {
   },
 
   //create borrowing transaction services
-  async createTransactionService(data: Partial<TransactionProps>) {
+  async createTransactionService(
+    data: Partial<TransactionProps>,
+    req: Request
+  ) {
     const {
       DISTRIBUTED_ITM_ID,
       quantity,
@@ -121,8 +127,7 @@ const transactionServices = {
       );
     }
 
-    // Create transaction
-    return await TransactionModel.create({
+    const newTransaction = await TransactionModel.create({
       DISTRIBUTED_ITM_ID,
       distributed_item_id: distributedItem.get("ITEM_ID"),
       borrower_emp_id,
@@ -133,6 +138,22 @@ const transactionServices = {
       TRANSACTION_DESCRIPTION,
       DPT_ID: distributedItem.get("current_dpt_id"),
     });
+
+    const adminDepartment = await User.findOne({
+      where: {
+        role: 1,
+        DEPARTMENT_USER: newTransaction.getDataValue("DPT_ID"),
+      },
+    });
+
+    //create notification about the transaction
+    notificationServices.createTransactionNotificationService(
+      newTransaction,
+      req
+    );
+
+    // Create transaction
+    return newTransaction;
   },
 
   //edit transaction

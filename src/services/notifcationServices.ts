@@ -68,6 +68,8 @@ const notificationServices = {
       },
     });
 
+    console.log("admin id: ", admin?.getDataValue("id"));
+
     return await NotificationModel.findAll({
       where: {
         [Op.or]: {
