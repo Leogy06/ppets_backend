@@ -36,11 +36,11 @@ const startServer = async () => {
   try {
     await sequilize.sync();
     console.log(
-      "\x1b[32m\x1b[1m✔ All models were synchronized successfully.\x1b[0m\n"
+      "\x1b[32m\x1b[1m✔ All models were synchronized successfully.\x1b[0m"
     );
 
     server.listen(port, () => {
-      console.log(`\x1b[32m\x1b[1m✔ Server running on port ${port}\x1b[0m\n`);
+      console.log(`\x1b[32m\x1b[1m✔ Server running on port ${port}\x1b[0m`);
     });
   } catch (error) {
     console.error("\x1b[31m❌ Error starting the server:\x1b[0m", error);

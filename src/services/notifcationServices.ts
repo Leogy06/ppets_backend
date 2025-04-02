@@ -52,7 +52,7 @@ const notificationServices = {
     empId: number;
     limit: number;
   }) {
-    if (!empId || isNaN(empId)) {
+    if (!empId) {
       throw new CustomError("Employee ID is invalid.", 400);
     }
 

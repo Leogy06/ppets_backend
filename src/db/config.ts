@@ -34,7 +34,7 @@ const sequelize = new Sequelize(db_name, db_username, db_password, {
 
 sequelize
   .authenticate()
-  .then(() => console.log("\x1b[32m\x1b[1m✔ Connected to MySQL \x1b[0m\n"))
+  .then(() => console.log("\x1b[32m\x1b[1m✔ Connected to MySQL \x1b[0m"))
   .catch((err) =>
     console.error("\x1b[31m\x1b[1m✖ Unable to connect database: \x1b[0m", err)
   );
