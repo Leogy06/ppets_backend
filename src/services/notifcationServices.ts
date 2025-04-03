@@ -1,24 +1,19 @@
 import { Op } from "sequelize";
-import {
-  NotificationProps,
-  TransactionProps,
-  UserProps,
-} from "../@types/types.js";
+import { TransactionProps } from "../@types/types.js";
 import NotificationModel from "../models/notificationModel.js";
 import User from "../models/user.js";
 import { CustomError } from "../utils/CustomError.js";
 import setNotificationUser from "../utils/sendNotificationToUsers.js";
 import { Request } from "express";
-import { get } from "http";
 import Employee from "../models/employee.js";
-import Item from "../models/distributedItemModel.js";
 import ItemModel from "../models/itemModel.js";
+import { Server } from "socket.io";
 
 const notificationServices = {
   //create notification
   async createTransactionNotificationService(
     data: Partial<TransactionProps>,
-    req: Request
+    io: Server
   ) {
     //find the admin of that department
     const adminDepartment = (await User.findOne({
@@ -49,14 +44,14 @@ const notificationServices = {
     setNotificationUser(
       adminDepartment.getDataValue("id"),
       newNotification,
-      req
+      io
     );
 
     //for owner
-    setNotificationUser(Number(data.owner_emp_id), newNotification, req);
+    setNotificationUser(Number(data.owner_emp_id), newNotification, io);
 
     //for borrower
-    setNotificationUser(Number(data.borrower_emp_id), newNotification, req);
+    setNotificationUser(Number(data.borrower_emp_id), newNotification, io);
 
     return newNotification;
   },

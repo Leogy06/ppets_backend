@@ -51,7 +51,7 @@ export const createTransaction = async (req: Request, res: Response) => {
 
     await notificationServices.createTransactionNotificationService(
       newBorrowTransaction,
-      req
+      req.io
     );
 
     res.status(201).json(newBorrowTransaction);
@@ -72,7 +72,7 @@ export const editTransaction = async (req: Request, res: Response) => {
     //creating the notification
     await notificationServices.createTransactionNotificationService(
       transaction,
-      req
+      req.io
     );
 
     //send the transaction
@@ -109,7 +109,7 @@ export const approveTransferTransactionController = async (
     //creating approve notification
     await notificationServices.createTransactionNotificationService(
       transaction,
-      req
+      req.io
     );
     res.status(200).json(transaction);
   } catch (error) {
@@ -135,7 +135,7 @@ export const approveReturnTransactionController = async (
     //create approve notification
     await notificationServices.createTransactionNotificationService(
       transaction,
-      req
+      req.io
     );
 
     res.status(200).json(transaction);

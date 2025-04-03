@@ -45,6 +45,7 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+// Test route
 app.get("/api/hello", (req, res) => {
   console.log("Hello from the backend!");
   res.send("Hello from the backend!");
