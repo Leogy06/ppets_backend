@@ -10,6 +10,9 @@ import { CustomError } from "../utils/CustomError.js";
 import setNotificationUser from "../utils/sendNotificationToUsers.js";
 import { Request } from "express";
 import { get } from "http";
+import Employee from "../models/employee.js";
+import Item from "../models/distributedItemModel.js";
+import ItemModel from "../models/itemModel.js";
 
 const notificationServices = {
   //create notification
@@ -40,6 +43,8 @@ const notificationServices = {
     });
 
     //send notification
+    //
+    //
     //for admin
     setNotificationUser(
       adminDepartment.getDataValue("id"),
@@ -88,6 +93,12 @@ const notificationServices = {
         ],
       },
       limit,
+      order: [["createdAt", "DESC"]],
+      include: [
+        { model: Employee, as: "ownerEmpDetails" },
+        { model: Employee, as: "borrowerEmpDetails" },
+        { model: ItemModel, as: "itemDetails" },
+      ],
     });
   },
 
