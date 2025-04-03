@@ -9,8 +9,6 @@ import { CustomError } from "../utils/CustomError.js";
 import { ItemProps, TransactionProps } from "../@types/types.js";
 import { logger } from "../logger/logger.js";
 import { Request } from "express";
-import notificationServices from "./notifcationServices.js";
-import User from "../models/user.js";
 
 //creating borrow transaction interface
 //transaction services

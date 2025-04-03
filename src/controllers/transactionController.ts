@@ -1,14 +1,7 @@
 import { Request, Response } from "express";
 import { handleServerError } from "../utils/errorHandler.js";
 import transactionServices from "../services/transactionServices.js";
-import { logger } from "../logger/logger.js";
 import notificationServices from "../services/notifcationServices.js";
-import Employee from "../models/employee.js";
-import User from "../models/user.js";
-import { CustomError } from "../utils/CustomError.js";
-import { users } from "../sockets/socketManager.js";
-import setNotificationUser from "../utils/sendNotificationToUsers.js";
-import { TransactionProps } from "../@types/types.js";
 //transaction controller
 
 export const getTransactions = async (req: Request, res: Response) => {
@@ -108,10 +101,16 @@ export const approveTransferTransactionController = async (
 ) => {
   try {
     const transaction =
-      await transactionServices.approveTransferTransactionService(
+      (await transactionServices.approveTransferTransactionService(
         req.body.transactionId,
         Number(req.query.APPROVED_BY)
-      );
+      )) as any;
+
+    //creating approve notification
+    await notificationServices.createTransactionNotificationService(
+      transaction,
+      req
+    );
     res.status(200).json(transaction);
   } catch (error) {
     handleServerError(res, error, "Unable to approve transaction");
@@ -132,6 +131,13 @@ export const approveReturnTransactionController = async (
         transactionId,
         Number(APPROVED_BY)
       );
+
+    //create approve notification
+    await notificationServices.createTransactionNotificationService(
+      transaction,
+      req
+    );
+
     res.status(200).json(transaction);
   } catch (error) {
     handleServerError(res, error, "Unable to approve transaction");
