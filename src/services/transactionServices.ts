@@ -192,7 +192,13 @@ const transactionServices = {
     //edit transaction
     TransactionModel.update(data, { where: { id } });
 
-    return await TransactionModel.findByPk(id);
+    const updatedTransaction = await TransactionModel.findByPk(id);
+
+    if (!updatedTransaction) {
+      throw new CustomError("Transaction not found.", 404);
+    }
+
+    return updatedTransaction;
   },
 
   async rejectTransactionService(

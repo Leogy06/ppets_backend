@@ -11,10 +11,7 @@ import { Server } from "socket.io";
 
 const notificationServices = {
   //create notification
-  async createTransactionNotificationService(
-    data: Partial<TransactionProps>,
-    io: Server
-  ) {
+  async createTransactionNotificationService(data: Partial<TransactionProps>) {
     //find the admin of that department
     const adminDepartment = (await User.findOne({
       where: {
@@ -36,22 +33,6 @@ const notificationServices = {
       BORROWER_ID: data.borrower_emp_id,
       ADMIN_ID: adminDepartment.id,
     });
-
-    //send notification
-    //
-    //
-    //for admin
-    setNotificationUser(
-      adminDepartment.getDataValue("id"),
-      newNotification,
-      io
-    );
-
-    //for owner
-    setNotificationUser(Number(data.owner_emp_id), newNotification, io);
-
-    //for borrower
-    setNotificationUser(Number(data.borrower_emp_id), newNotification, io);
 
     return newNotification;
   },
