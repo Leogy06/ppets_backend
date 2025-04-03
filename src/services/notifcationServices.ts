@@ -9,6 +9,7 @@ import User from "../models/user.js";
 import { CustomError } from "../utils/CustomError.js";
 import setNotificationUser from "../utils/sendNotificationToUsers.js";
 import { Request } from "express";
+import { get } from "http";
 
 const notificationServices = {
   //create notification
@@ -80,13 +81,38 @@ const notificationServices = {
 
     return await NotificationModel.findAll({
       where: {
-        [Op.or]: {
-          OWNER_ID: empId,
-          BORROWER_ID: empId,
-          ...(admin ? [{ ADMIN_ID: admin?.getDataValue("id") }] : []), // only include ADMIN_ID if admin is found
-        },
+        [Op.or]: [
+          { OWNER_ID: empId },
+          { BORROWER_ID: empId },
+          ...(admin ? [{ ADMIN_ID: admin.getDataValue("id") }] : []),
+        ],
       },
       limit,
+    });
+  },
+
+  //get notification count
+  async getNotificationCountService({ empId }: { empId: number }) {
+    if (!empId) {
+      throw new CustomError("Employee ID is invalid.", 400);
+    }
+
+    //get admin emp id
+    const admin = await User.findOne({
+      where: {
+        emp_id: empId,
+        role: 1,
+      },
+    });
+
+    return await NotificationModel.count({
+      where: {
+        [Op.or]: [
+          { OWNER_ID: empId },
+          { BORROWER_ID: empId },
+          ...(admin ? [{ ADMIN_ID: admin.getDataValue("id") }] : []),
+        ],
+      },
     });
   },
 };
