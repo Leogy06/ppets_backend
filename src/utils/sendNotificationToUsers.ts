@@ -1,4 +1,4 @@
-import { EmployeeProps, NotificationProps } from "../@types/types.js";
+import { EmployeeProps } from "../@types/types.js";
 import { logger } from "../logger/logger.js";
 import NotificationModel from "../models/notificationModel.js";
 import { users } from "../sockets/socketManager.js";
