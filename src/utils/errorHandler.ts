@@ -9,9 +9,17 @@ export const handleServerError = (
   message = "Internal Server Error",
   statusCode = 500
 ) => {
-  logger.error(error); // Logs actual error details
+  if (error instanceof Error) {
+    logger.error(`Error: ${error.message}`);
+    logger.error(`Stack Trace: ${error.stack}`);
+  } else {
+    logger.error(`Error: ${error}`);
+  }
 
   if (error instanceof CustomError) {
+    logger.error(`Custom Error: ${error.message}`);
+    logger.error(`Custome Error, Stack Trace: ${error.stack}`);
+
     return res
       .status(error.statusCode)
       .json({ success: false, message: error.message });

@@ -4,6 +4,7 @@ import { Server } from "socket.io";
 import sequilize from "./db/config.js";
 import app from "./app.js";
 import socketManager from "./sockets/socketManager.js";
+import { NextFunction, Request, Response } from "express";
 
 config();
 
@@ -12,7 +13,7 @@ const port = process.env.PORT || 8080;
 // Create HTTP server
 const server = createServer(app);
 
-// console.log("process.env.CLIENT_ORIGIN", process.env.CLIENT_ORIGIN);
+// console.log("process.env.CLIENT_ORIGIN", process.enksv.CLIENT_ORIGIN);
 
 // WebSocket setup
 const io = new Server(server, {

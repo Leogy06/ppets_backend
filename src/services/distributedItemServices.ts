@@ -103,7 +103,8 @@ const distributedItemService = {
 
     undistributedItem.STOCK_QUANTITY = newQuantity;
 
-    const undistributedItemResult = await undistributedItem.save();
+    //save the undistributed item
+    await undistributedItem.save();
 
     // console.log("undistributedItemResult ", undistributedItemResult);
 

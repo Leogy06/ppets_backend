@@ -34,75 +34,27 @@ export const createTransaction = async (req: Request, res: Response) => {
     status,
     remarks,
   } = req.body;
-  console.log("executing create transaction controller");
 
   try {
     //create transaction
-    const newBorrowTransaction =
-      await transactionServices.createTransactionService({
-        DISTRIBUTED_ITM_ID,
-        quantity,
-        borrower_emp_id,
-        owner_emp_id,
-        TRANSACTION_DESCRIPTION,
-        status,
-        remarks,
-      });
-
-    const newNotification =
-      await notificationServices.createTransactionNotificationService(
-        newBorrowTransaction
-      );
-
-    console.log("\nnew notification: ", newNotification, "\n");
-
-    //send notififcation
-    //to admin
-    const admin = await User.findOne({
-      where: {
-        role: 1,
-        DEPARTMENT_USER: newBorrowTransaction.getDataValue("DPT_ID"),
-      },
+    const newTransaction = await transactionServices.createTransactionService({
+      DISTRIBUTED_ITM_ID,
+      quantity,
+      borrower_emp_id,
+      owner_emp_id,
+      TRANSACTION_DESCRIPTION,
+      status,
+      remarks,
     });
 
-    //send notification to admin, owner and borrower.
-    //get socket id
-    const socketId = users.get(admin?.getDataValue("emp_id"));
-    if (socketId) {
-      console.log("socket id admin ", socketId);
-      console.log("admin socket id ", socketId);
-
-      req.io
-        .to(socketId)
-        .emit("newTransactionNotification", newBorrowTransaction);
+    if (newTransaction) {
+      //create notification
+      await notificationServices.createTransactionNotificationService(
+        newTransaction.getDataValue("id")
+      );
     }
 
-    //to owner
-    const ownerSocketId = users.get(newNotification.getDataValue("OWNER_ID"));
-    if (ownerSocketId) {
-      console.log("socket id owner ", socketId);
-      console.log("owner socket id ", ownerSocketId);
-
-      req.io
-        .to(ownerSocketId)
-        .emit("newTransactionNotification", newBorrowTransaction);
-    }
-
-    //to borrower
-    const borrowerSocketId = users.get(
-      newNotification.getDataValue("BORROWER_ID")
-    );
-
-    if (borrowerSocketId) {
-      console.log("socket id borrower ", socketId);
-      console.log("borrower socket id ", borrowerSocketId);
-
-      req.io
-        .to(borrowerSocketId)
-        .emit("newTransactionNotification", newBorrowTransaction);
-    }
-
-    res.status(201).json(newBorrowTransaction);
+    res.status(201).json(newTransaction);
   } catch (error) {
     handleServerError(res, error, "Unable to create borrow transaction");
   }
@@ -111,40 +63,14 @@ export const createTransaction = async (req: Request, res: Response) => {
 //edit transaction, for approve only
 export const editTransaction = async (req: Request, res: Response) => {
   try {
-    const transaction = (await transactionServices.editTransactionService(
+    const transaction = await transactionServices.editTransactionService(
       req.body
-    )) as any;
+    );
 
     //creating the notification
     await notificationServices.createTransactionNotificationService(
-      transaction
+      transaction.getDataValue("id")
     );
-    const admin = await User.findOne({
-      where: {
-        role: 1,
-        DEPARTMENT_USER: transaction.getDataValue("DPT_ID"),
-      },
-    });
-
-    //get socket id
-    const socketId = users.get(admin?.getDataValue("emp_id"));
-    if (socketId) {
-      req.io.to(socketId).emit("newTransactionNotification", transaction);
-    }
-
-    //to owner
-    const ownerSocketId = users.get(transaction.getDataValue("OWNER_ID"));
-    if (ownerSocketId) {
-      req.io.to(ownerSocketId).emit("newTransactionNotification", transaction);
-    }
-
-    //to borrower
-    const borrowerSocketId = users.get(transaction.getDataValue("BORROWER_ID"));
-    if (borrowerSocketId) {
-      req.io
-        .to(borrowerSocketId)
-        .emit("newTransactionNotification", transaction);
-    }
 
     //send the transaction
     res.status(200).json(transaction);
@@ -172,14 +98,14 @@ export const approveTransferTransactionController = async (
 ) => {
   try {
     const transaction =
-      (await transactionServices.approveTransferTransactionService(
+      await transactionServices.approveTransferTransactionService(
         req.body.transactionId,
         Number(req.query.APPROVED_BY)
-      )) as any;
+      );
 
     //creating approve notification
     await notificationServices.createTransactionNotificationService(
-      transaction
+      transaction.getDataValue("id")
     );
     res.status(200).json(transaction);
   } catch (error) {
@@ -204,7 +130,7 @@ export const approveReturnTransactionController = async (
 
     //create approve notification
     await notificationServices.createTransactionNotificationService(
-      transaction
+      transaction.getDataValue("id")
     );
 
     res.status(200).json(transaction);

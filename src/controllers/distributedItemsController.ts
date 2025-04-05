@@ -57,36 +57,9 @@ export const addDistributedItemController = async (
       remarks: 3, //distribution
     });
 
-    //create notification for distributing the item
-    const newNotification =
-      await notificationServices.createTransactionNotificationService(
-        newTransaction
-      );
-
-    //send notification
-    //admin
-    const admin = await User.findOne({
-      where: {
-        role: 1,
-        DEPARTMENT_USER: newItem.getDataValue("current_dpt_id"),
-      },
-    });
-
-    //to admin
-    if (admin) {
-      const socketId = users.get(admin.getDataValue("emp_id"));
-      if (socketId) {
-        req.io.to(socketId).emit("newTransactionNotification", newNotification);
-      }
-    }
-
-    //to owner
-    const ownerSocketId = users.get(newItem.getDataValue("accountable_emp"));
-    if (ownerSocketId) {
-      req.io
-        .to(ownerSocketId)
-        .emit("newTransactionNotification", newNotification);
-    }
+    await notificationServices.createTransactionNotificationService(
+      newTransaction
+    );
 
     res.status(201).json(newItem);
   } catch (error) {

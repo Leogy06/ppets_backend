@@ -1,37 +1,44 @@
 import { Op } from "sequelize";
-import { TransactionProps } from "../@types/types.js";
+import { TransactionProps, UserProps } from "../@types/types.js";
 import NotificationModel from "../models/notificationModel.js";
 import User from "../models/user.js";
 import { CustomError } from "../utils/CustomError.js";
-import setNotificationUser from "../utils/sendNotificationToUsers.js";
-import { Request } from "express";
 import Employee from "../models/employee.js";
 import ItemModel from "../models/itemModel.js";
-import { Server } from "socket.io";
+import sentNotificationUser from "../utils/sendNotificationToUsers.js";
+import { Request } from "express";
+import TransactionModel from "../models/transactionModel.js";
 
 const notificationServices = {
   //create notification
-  async createTransactionNotificationService(data: Partial<TransactionProps>) {
+  async createTransactionNotificationService(transactionId: number) {
+    console.log("transactionId ", transactionId);
+
+    //find the transaction
+    const transaction = await TransactionModel.findByPk(transactionId);
+
+    if (!transaction) throw new CustomError("Transaction not found", 404);
+
     //find the admin of that department
-    const adminDepartment = (await User.findOne({
+    const adminDepartment = await User.findOne({
       where: {
-        DEPARTMENT_USER: data.DPT_ID,
-        role: 1,
+        DEPARTMENT_USER: transaction?.getDataValue("DPT_ID"),
+        role: 1, //admin
       },
-    })) as any;
+    });
 
     if (!adminDepartment) throw new CustomError("Admin not found", 404);
 
     //create the notification
     const newNotification = await NotificationModel.create({
-      TRANSACTION_ID: data.id,
-      TRANSACTION: data.remarks,
-      ITEM_ID: data.distributed_item_id,
-      QUANTITY: data.quantity,
-      REQUEST_STATUS: data.status,
-      OWNER_ID: data.owner_emp_id,
-      BORROWER_ID: data.borrower_emp_id,
-      ADMIN_ID: adminDepartment.id,
+      TRANSACTION_ID: transaction?.getDataValue("id").id,
+      TRANSACTION: transaction?.getDataValue("remarks"),
+      ITEM_ID: transaction?.getDataValue("distributed_item_id"),
+      QUANTITY: transaction?.getDataValue("quantity"),
+      REQUEST_STATUS: transaction?.getDataValue("status"),
+      OWNER_ID: transaction?.getDataValue("owner_emp_id"),
+      BORROWER_ID: transaction?.getDataValue("borrower_emp_id"),
+      ADMIN_ID: adminDepartment.getDataValue("id"),
     });
 
     return newNotification;

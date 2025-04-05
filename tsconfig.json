@@ -7,7 +7,8 @@
     "target": "ESNext",
     "strict": true,
     "esModuleInterop": true,
-    "declaration": true
+    "declaration": true,
+    "typeRoots": ["./types", "./node_modules/@types"]
   },
   "include": ["src"] // Ensure only the "src" folder is compiled
 }

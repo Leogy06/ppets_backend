@@ -1,14 +1,15 @@
-import { Server } from "socket.io";
 import { EmployeeProps } from "../@types/types.js";
 import { logger } from "../logger/logger.js";
 import NotificationModel from "../models/notificationModel.js";
 import Employee from "../models/employee.js";
 import employeeFullName from "./employeeFullName.js";
+import { Request } from "express";
+import { users } from "../sockets/socketManager.js";
 
-const setNotificationUser = async (
+const sentNotificationUser = async (
   empId: EmployeeProps["ID"],
-  transaction: NotificationModel,
-  io: Server
+  notification: NotificationModel,
+  req: Request
 ) => {
   const employee = (await Employee.findByPk(empId)) as any;
   if (!employee) {
@@ -16,12 +17,15 @@ const setNotificationUser = async (
     return;
   }
 
-  logger.info(`Sending notification to user ${employeeFullName(employee)}`);
-  // Emit the notification to the user
-  io.to(employee.getDataValue("ID")).emit(
-    "newTransactionNotification",
-    transaction
-  );
+  const socketId = users.get(empId);
+
+  if (socketId) {
+    console.log("socketId", socketId);
+
+    logger.info(`Sending notification to user ${employeeFullName(employee)}`);
+    // Emit the notification to the user
+    req.io.to(socketId).emit("newTransactionNotification", notification);
+  }
 };
 
-export default setNotificationUser;
+export default sentNotificationUser;

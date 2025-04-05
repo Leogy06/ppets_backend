@@ -8,7 +8,6 @@ import TransactionStatusModel from "../models/transactionStatusModel.js";
 import { CustomError } from "../utils/CustomError.js";
 import { ItemProps, TransactionProps } from "../@types/types.js";
 import { logger } from "../logger/logger.js";
-import { Request } from "express";
 
 //creating borrow transaction interface
 //transaction services
@@ -324,7 +323,7 @@ const transactionServices = {
 
     //transfering the quantity
     //create new distributed item
-    return await Item.create({
+    await Item.create({
       ITEM_ID: transaction.getDataValue("distributed_item_id"), //make sure this is from undistributed item, even the name of this is distributed item
       quantity: transaction.getDataValue("quantity"),
       ORIGINAL_QUANTITY: transaction.getDataValue("quantity"),
@@ -340,6 +339,8 @@ const transactionServices = {
       distributedAt: new Date(),
       DISTRIBUTED_BY: transaction.APPROVED_BY,
     });
+
+    return transaction;
   },
 
   //approve return transaction
