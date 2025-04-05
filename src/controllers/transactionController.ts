@@ -34,26 +34,27 @@ export const createTransaction = async (req: Request, res: Response) => {
     status,
     remarks,
   } = req.body;
+  console.log("executing create transaction controller");
 
   try {
     //create transaction
     const newBorrowTransaction =
-      await transactionServices.createTransactionService(
-        {
-          DISTRIBUTED_ITM_ID,
-          quantity,
-          borrower_emp_id,
-          owner_emp_id,
-          TRANSACTION_DESCRIPTION,
-          status,
-          remarks,
-        },
-        req
+      await transactionServices.createTransactionService({
+        DISTRIBUTED_ITM_ID,
+        quantity,
+        borrower_emp_id,
+        owner_emp_id,
+        TRANSACTION_DESCRIPTION,
+        status,
+        remarks,
+      });
+
+    const newNotification =
+      await notificationServices.createTransactionNotificationService(
+        newBorrowTransaction
       );
 
-    await notificationServices.createTransactionNotificationService(
-      newBorrowTransaction
-    );
+    console.log("\nnew notification: ", newNotification, "\n");
 
     //send notififcation
     //to admin
@@ -63,19 +64,25 @@ export const createTransaction = async (req: Request, res: Response) => {
         DEPARTMENT_USER: newBorrowTransaction.getDataValue("DPT_ID"),
       },
     });
+
+    //send notification to admin, owner and borrower.
     //get socket id
     const socketId = users.get(admin?.getDataValue("emp_id"));
     if (socketId) {
+      console.log("socket id admin ", socketId);
+      console.log("admin socket id ", socketId);
+
       req.io
         .to(socketId)
         .emit("newTransactionNotification", newBorrowTransaction);
     }
 
     //to owner
-    const ownerSocketId = users.get(
-      newBorrowTransaction.getDataValue("OWNER_ID")
-    );
+    const ownerSocketId = users.get(newNotification.getDataValue("OWNER_ID"));
     if (ownerSocketId) {
+      console.log("socket id owner ", socketId);
+      console.log("owner socket id ", ownerSocketId);
+
       req.io
         .to(ownerSocketId)
         .emit("newTransactionNotification", newBorrowTransaction);
@@ -83,10 +90,13 @@ export const createTransaction = async (req: Request, res: Response) => {
 
     //to borrower
     const borrowerSocketId = users.get(
-      newBorrowTransaction.getDataValue("BORROWER_ID")
+      newNotification.getDataValue("BORROWER_ID")
     );
 
     if (borrowerSocketId) {
+      console.log("socket id borrower ", socketId);
+      console.log("borrower socket id ", borrowerSocketId);
+
       req.io
         .to(borrowerSocketId)
         .emit("newTransactionNotification", newBorrowTransaction);

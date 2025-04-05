@@ -55,10 +55,7 @@ const transactionServices = {
   },
 
   //create borrowing transaction services
-  async createTransactionService(
-    data: Partial<TransactionProps>,
-    req: Request
-  ) {
+  async createTransactionService(data: Partial<TransactionProps>) {
     const {
       DISTRIBUTED_ITM_ID,
       quantity,
@@ -69,19 +66,39 @@ const transactionServices = {
       remarks,
     } = data;
 
-    if (!DISTRIBUTED_ITM_ID || !quantity || !borrower_emp_id || !owner_emp_id) {
+    if (!DISTRIBUTED_ITM_ID || !quantity || !owner_emp_id) {
       throw new CustomError("Missing required fields.", 400);
     }
 
-    const [distributedItem, borrowee, owner] = await Promise.all([
+    const [distributedItem, owner] = await Promise.all([
       Item.findByPk(DISTRIBUTED_ITM_ID),
-      Employee.findByPk(borrower_emp_id),
       Employee.findByPk(owner_emp_id),
     ]);
 
     // Validate existence
-    if (!distributedItem || !borrowee || !owner) {
+    if (!distributedItem || !owner) {
       throw new CustomError("Item or employee not found.", 404);
+    }
+
+    //check borrower exists
+    if (borrower_emp_id) {
+      const borrower = await Employee.findByPk(borrower_emp_id);
+
+      if (!borrower) {
+        throw new CustomError("Borrower not found.", 404);
+      }
+
+      // Prevent self-borrowing
+      if (borrower.getDataValue("ID") === owner.getDataValue("ID")) {
+        throw new CustomError("You cannot borrow your own item.", 400);
+      }
+
+      if (
+        borrower.getDataValue("ID") ===
+        distributedItem.getDataValue("accountable_emp_id")
+      ) {
+        throw new CustomError("You cannot borrow your own item.", 400);
+      }
     }
 
     // Validate quantity
@@ -96,26 +113,19 @@ const transactionServices = {
       throw new CustomError("Not enough quantity available.", 400);
     }
 
-    // Prevent self-borrowing
-    if (borrowee.getDataValue("ID") === owner.getDataValue("ID")) {
-      throw new CustomError("You cannot borrow your own item.", 400);
+    //where transaction
+    const whereClause: WhereOptions<any> = {
+      DISTRIBUTED_ITM_ID,
+      status: 2, // Pending
+      remarks, // Borrow or lend
+    };
+
+    if (borrower_emp_id) {
+      whereClause.borrower_emp_id = borrower_emp_id;
     }
 
-    if (
-      borrowee.getDataValue("ID") ===
-      distributedItem.getDataValue("accountable_emp_id")
-    ) {
-      throw new CustomError("You cannot borrow your own item.", 400);
-    }
-
-    // Check if this item has already up for request but not yet approved
     const existingBorrowTransaction = await TransactionModel.findOne({
-      where: {
-        DISTRIBUTED_ITM_ID,
-        borrower_emp_id,
-        status: 2, // Pending
-        remarks, // Borrow or lend
-      },
+      where: whereClause,
     });
 
     if (existingBorrowTransaction) {

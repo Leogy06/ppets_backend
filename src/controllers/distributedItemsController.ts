@@ -1,4 +1,8 @@
+import User from "../models/user.js";
 import distributedItemService from "../services/distributedItemServices.js";
+import notificationServices from "../services/notifcationServices.js";
+import transactionServices from "../services/transactionServices.js";
+import { users } from "../sockets/socketManager.js";
 import { handleServerError } from "../utils/errorHandler.js";
 import { Request, Response } from "express";
 
@@ -42,6 +46,47 @@ export const addDistributedItemController = async (
     const newItem = await distributedItemService.addDistributedItemServices(
       req.body
     );
+
+    //create transaction for distributed item
+    const newTransaction = await transactionServices.createTransactionService({
+      DISTRIBUTED_ITM_ID: newItem.getDataValue("id"),
+      quantity: newItem.getDataValue("quantity"),
+      owner_emp_id: newItem.getDataValue("accountable_emp"),
+      TRANSACTION_DESCRIPTION: "Distributed Item",
+      status: 1,
+      remarks: 3, //distribution
+    });
+
+    //create notification for distributing the item
+    const newNotification =
+      await notificationServices.createTransactionNotificationService(
+        newTransaction
+      );
+
+    //send notification
+    //admin
+    const admin = await User.findOne({
+      where: {
+        role: 1,
+        DEPARTMENT_USER: newItem.getDataValue("current_dpt_id"),
+      },
+    });
+
+    //to admin
+    if (admin) {
+      const socketId = users.get(admin.getDataValue("emp_id"));
+      if (socketId) {
+        req.io.to(socketId).emit("newTransactionNotification", newNotification);
+      }
+    }
+
+    //to owner
+    const ownerSocketId = users.get(newItem.getDataValue("accountable_emp"));
+    if (ownerSocketId) {
+      req.io
+        .to(ownerSocketId)
+        .emit("newTransactionNotification", newNotification);
+    }
 
     res.status(201).json(newItem);
   } catch (error) {

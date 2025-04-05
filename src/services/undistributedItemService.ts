@@ -1,3 +1,4 @@
+import AccountItem from "../models/accountItemModel.js";
 import ItemModel from "../models/itemModel.js";
 import { CustomError } from "../utils/CustomError.js";
 
@@ -19,6 +20,7 @@ const undistributedItemServices = {
       where: { DEPARTMENT_ID: department },
       order: [["createdAt", "DESC"]],
       limit,
+      include: [{ model: AccountItem, as: "accountCodeDetails" }],
     });
   },
 

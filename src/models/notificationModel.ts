@@ -55,7 +55,7 @@ NotificationModel.init(
     },
     BORROWER_ID: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     ADMIN_ID: {
       type: DataTypes.INTEGER,
