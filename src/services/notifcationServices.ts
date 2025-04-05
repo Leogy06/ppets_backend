@@ -12,8 +12,6 @@ import TransactionModel from "../models/transactionModel.js";
 const notificationServices = {
   //create notification
   async createTransactionNotificationService(transactionId: number) {
-    console.log("transactionId ", transactionId);
-
     //find the transaction
     const transaction = await TransactionModel.findByPk(transactionId);
 

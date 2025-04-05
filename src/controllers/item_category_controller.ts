@@ -13,8 +13,6 @@ export const addCategoryItem = async (
       return res.status(400).json({ message: "Description is required." });
     }
 
-    console.log("Description: ", description);
-
     const newItemCategory = await ItemCategory.create({ description });
 
     res.status(201).json(newItemCategory);

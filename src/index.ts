@@ -13,8 +13,6 @@ const port = process.env.PORT || 8080;
 // Create HTTP server
 const server = createServer(app);
 
-// console.log("process.env.CLIENT_ORIGIN", process.enksv.CLIENT_ORIGIN);
-
 // WebSocket setup
 const io = new Server(server, {
   cors: {

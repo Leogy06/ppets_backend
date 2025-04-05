@@ -77,8 +77,6 @@ const distributedItemService = {
 
   //add distributed item service
   async addDistributedItemServices(data: Partial<ItemProps>) {
-    // console.log("data ", data);
-
     data.total_value = Number(data?.unit_value) * Number(data?.quantity);
     data.ORIGINAL_QUANTITY = data.quantity;
 
@@ -105,8 +103,6 @@ const distributedItemService = {
 
     //save the undistributed item
     await undistributedItem.save();
-
-    // console.log("undistributedItemResult ", undistributedItemResult);
 
     return await Item.create(data);
   },
