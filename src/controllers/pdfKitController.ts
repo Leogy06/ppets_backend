@@ -3,7 +3,6 @@ import path from "path";
 import fs from "fs";
 import PDFDocument from "pdfkit";
 import { fileURLToPath } from "url";
-import { logger } from "../logger/logger.js";
 import { dateFormatter } from "../utils/dateFormatter.js";
 
 const __filename = fileURLToPath(import.meta.url);
