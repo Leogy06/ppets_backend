@@ -3,6 +3,7 @@ import { TransactionProps } from "../@types/types.js";
 import PDFDocument from "pdfkit";
 import { dateFormatter } from "../utils/dateFormatter.js";
 
+//end point - /api/pdf
 const doc = new PDFDocument({
   margin: 30,
   size: [612, 936], //long bond paper
@@ -79,4 +80,9 @@ export const getPdfReportService = async (
 
     doc.font("Helvetica").fontSize(10);
   };
+
+  addHeader();
+  addTableHeader();
+
+  doc.end();
 };

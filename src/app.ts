@@ -16,6 +16,8 @@ import pdfKitRoutes from "./routes/pdfKitRoutes.js";
 import accountItemRoutes from "./routes/accountItem_routes.js";
 import distributedItemRoutes from "./routes/distributedItemRoutes.js";
 import employeeRoutes from "./routes/employeeRoutes.js";
+import pdfReportRoutes from "./routes/pdfReportsRoutes.js";
+import reportBuilderRoutes from "./routes/reportBuilderRoutes.js";
 
 const app = express();
 
@@ -64,5 +66,9 @@ app.use("/notification", protectRoute, notification_routes);
 app.use("/api/item", protectRoute, item_routes); //undistributed item
 app.use("/api/pdfkit", protectRoute, pdfKitRoutes);
 app.use("/account_code", protectRoute, accountItemRoutes);
+//report builder
+app.use("/api/build-report", protectRoute, reportBuilderRoutes);
+//pdft routes
+app.use("/api/pdf", protectRoute, pdfReportRoutes);
 
 export default app; // Export app (without starting the server)
