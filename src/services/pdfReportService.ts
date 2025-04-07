@@ -2,18 +2,23 @@ import { Response } from "express";
 import { TransactionProps } from "../@types/types.js";
 import PDFDocument from "pdfkit";
 import { dateFormatter } from "../utils/dateFormatter.js";
+import fullNamer, {
+  getItemName,
+  transactionStatus,
+  transactionType,
+} from "../utils/destructureUtil.js";
 
 //end point - /api/pdf
-const doc = new PDFDocument({
-  margin: 30,
-  size: [612, 936], //long bond paper
-  layout: "landscape",
-});
 
 export const getPdfReportService = async (
   res: Response,
   reports: TransactionProps[]
 ) => {
+  const doc = new PDFDocument({
+    margin: 30,
+    size: [612, 936], //long bond paper
+    layout: "landscape",
+  });
   const today = new Date().toDateString();
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader(
@@ -24,7 +29,7 @@ export const getPdfReportService = async (
   doc.pipe(res);
 
   // Define consistent column widths
-  const columnWidths = [110, 50, 100, 70, 70, 50, 50, 70, 70, 70, 120];
+  const columnWidths = [100, 120, 120, 80, 80, 160, 160];
 
   //title
   //title
@@ -67,8 +72,7 @@ export const getPdfReportService = async (
       "Quantity",
       "Borrower",
       "Owner",
-    ];
-    const columnWidths = [170, 80, 100, 180, 180, 180]; // Adjusted for long bond paper
+    ]; // Adjusted for long bond paper
 
     let y = doc.y;
     doc.font("Helvetica-Bold").fontSize(12);
@@ -86,6 +90,17 @@ export const getPdfReportService = async (
     doc.font("Helvetica").fontSize(10);
   };
 
+  const addFooter = (currentPage: number, totalPages: number) => {
+    doc.fontSize(10).text(`Page ${currentPage} of ${totalPages}`, 500, 920, {
+      align: "center",
+    });
+  };
+
+  let pageCount = 0;
+  doc.on("pageAdded", () => {
+    pageCount++;
+  });
+
   addHeader();
   addTableHeader();
 
@@ -100,17 +115,13 @@ export const getPdfReportService = async (
 
     // Get row data
     const rowData = [
-      row?.remarks ?? "",
+      transactionType(row?.remarks),
       dateFormatter(row.createdAt),
+      getItemName(row?.distributedItemDetails?.undistributedItemDetails),
+      transactionStatus(row.status),
       `${row.quantity}`,
-      row?.are_no ?? "",
-      row?.ics ?? "",
-      row?.itemDetails?.PROP_NO ?? "",
-      row?.itemDetails?.SERIAL_NO ?? "",
-      row?.class_no ?? "",
-      row?.unit_value ?? "",
-      row?.total_value ?? "",
-      row?.accountablePerson ?? "",
+      fullNamer(row.borrowerEmpDetails),
+      fullNamer(row.ownerEmpDetails),
     ];
 
     // Determine max row height based on text wrapping
@@ -147,6 +158,10 @@ export const getPdfReportService = async (
     });
 
     y += maxRowHeight; // Move to next row position
+  });
+
+  doc.on("end", () => {
+    addFooter(pageCount, pageCount);
   });
 
   doc.end();

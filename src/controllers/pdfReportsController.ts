@@ -6,6 +6,7 @@ import { handleServerError } from "../utils/errorHandler.js";
 
 export const getPdfReportController = async (req: Request, res: Response) => {
   const reports = req.body.reports;
+
   try {
     await getPdfReportService(res, reports);
   } catch (error) {
