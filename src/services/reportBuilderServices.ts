@@ -1,7 +1,10 @@
-import { Op, WhereOptions } from "sequelize";
+import { Model, Op, WhereOptions } from "sequelize";
 import TransactionModel from "../models/transactionModel.js";
 import { TransactionProps } from "../@types/types.js";
 import { CustomError } from "../utils/CustomError.js";
+import Employee from "../models/employee.js";
+import Item from "../models/distributedItemModel.js";
+import ItemModel from "../models/itemModel.js";
 
 interface IFilters {
   //required fields
@@ -51,6 +54,21 @@ export const buildTransactionService = async (filters: IFilters) => {
 
   const transactions = await TransactionModel.findAll({
     where: whereClause,
+    order: [["createdAt", "DESC"]],
+    include: [
+      { model: Employee, as: "borrowerEmpDetails" },
+      { model: Employee, as: "ownerEmpDetails" },
+      {
+        model: Item,
+        as: "distributedItemDetails",
+        include: [
+          {
+            model: ItemModel,
+            as: "undistributedItemDetails",
+          },
+        ],
+      },
+    ],
   });
 
   return transactions;

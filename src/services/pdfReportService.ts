@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { TransactionProps } from "../@types/types.js";
 import PDFDocument from "pdfkit";
 import { dateFormatter } from "../utils/dateFormatter.js";
@@ -7,11 +7,12 @@ import { dateFormatter } from "../utils/dateFormatter.js";
 const doc = new PDFDocument({
   margin: 30,
   size: [612, 936], //long bond paper
+  layout: "landscape",
 });
 
 export const getPdfReportService = async (
   res: Response,
-  report: TransactionProps[]
+  reports: TransactionProps[]
 ) => {
   const today = new Date().toDateString();
   res.setHeader("Content-Type", "application/pdf");
@@ -21,6 +22,9 @@ export const getPdfReportService = async (
   );
 
   doc.pipe(res);
+
+  // Define consistent column widths
+  const columnWidths = [110, 50, 100, 70, 70, 50, 50, 70, 70, 70, 120];
 
   //title
   //title
@@ -56,12 +60,13 @@ export const getPdfReportService = async (
   //table header
   const addTableHeader = () => {
     const headers = [
+      "Transaction",
+      "Date Requested",
       "Item",
-      "Quantity",
       "Status",
-      "Accountable Employee",
+      "Quantity",
       "Borrower",
-      "Requested on",
+      "Owner",
     ];
     const columnWidths = [170, 80, 100, 180, 180, 180]; // Adjusted for long bond paper
 
@@ -83,6 +88,66 @@ export const getPdfReportService = async (
 
   addHeader();
   addTableHeader();
+
+  let y = doc.y;
+  const pageHeight = 612 - 20; // total height of the page minus margis
+
+  // Loop through items
+  reports.forEach((row: any, index: number) => {
+    const startX = 50;
+    let cellX = startX;
+    let maxRowHeight = 20; // Default row height
+
+    // Get row data
+    const rowData = [
+      row?.remarks ?? "",
+      dateFormatter(row.createdAt),
+      `${row.quantity}`,
+      row?.are_no ?? "",
+      row?.ics ?? "",
+      row?.itemDetails?.PROP_NO ?? "",
+      row?.itemDetails?.SERIAL_NO ?? "",
+      row?.class_no ?? "",
+      row?.unit_value ?? "",
+      row?.total_value ?? "",
+      row?.accountablePerson ?? "",
+    ];
+
+    // Determine max row height based on text wrapping
+    rowData.forEach((text, i) => {
+      const textHeight = doc.heightOfString(text, { width: columnWidths[i] });
+      maxRowHeight = Math.max(maxRowHeight, textHeight + 5); // Add padding
+    });
+
+    // Create new page if needed
+    if (y + maxRowHeight > pageHeight) {
+      doc.addPage();
+      addHeader();
+      addTableHeader();
+      y = doc.y;
+    }
+
+    // Alternate row shading
+    if (index % 2 === 0) {
+      doc
+        .rect(
+          startX - 5,
+          y - 2,
+          columnWidths.reduce((a, b) => a + b, 0),
+          maxRowHeight
+        )
+        .fill("#f2f2f2")
+        .fillColor("black");
+    }
+
+    // Render text in each cell
+    rowData.forEach((text, i) => {
+      doc.text(text, cellX, y, { width: columnWidths[i], align: "left" });
+      cellX += columnWidths[i];
+    });
+
+    y += maxRowHeight; // Move to next row position
+  });
 
   doc.end();
 };
