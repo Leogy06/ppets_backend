@@ -103,7 +103,7 @@ export const buildItemReportService = async (filters: IFilters) => {
   }
 
   const whereClause: WhereOptions = {
-    DPT_ID: departmentId,
+    current_dpt_id: departmentId,
   };
 
   if (start && end)

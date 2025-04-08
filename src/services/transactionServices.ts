@@ -336,7 +336,6 @@ const transactionServices = {
       status: 1,
       current_dpt_id: transaction.getDataValue("DPT_ID"),
       added_by: transaction.APPROVED_BY,
-      distributedAt: new Date(),
       DISTRIBUTED_BY: transaction.APPROVED_BY,
     });
 

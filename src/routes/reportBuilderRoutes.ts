@@ -7,6 +7,8 @@ import {
 const reportBuilderRoutes = Router();
 
 //transaction reports
+
+// api - /api/build-report
 reportBuilderRoutes
   .get("/transaction", buildTransactionController)
   .get("/items", buildItemReportController);
