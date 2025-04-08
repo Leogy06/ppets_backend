@@ -6,12 +6,12 @@ import { EmployeeProps } from "../@types/types.js";
 import Employee from "../models/employee.js";
 import { CustomError } from "../utils/CustomError.js";
 
-export const fetchEmployeeOptionService = (
+export const fetchEmployeeOptionService = async (
   dapartmentId: EmployeeProps["CURRENT_DPT_ID"]
 ) => {
   if (!dapartmentId) throw new CustomError("Dapartment id is required.", 400);
 
-  return Employee.findAll({
+  return await Employee.findAll({
     attributes: [
       "ID",
       "ID_NUMBER",
