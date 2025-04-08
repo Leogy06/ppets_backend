@@ -18,6 +18,7 @@ import distributedItemRoutes from "./routes/distributedItemRoutes.js";
 import employeeRoutes from "./routes/employeeRoutes.js";
 import pdfReportRoutes from "./routes/pdfReportsRoutes.js";
 import reportBuilderRoutes from "./routes/reportBuilderRoutes.js";
+import optionFetcherRoutes from "./routes/optionFetcherRoutes.js";
 
 const app = express();
 
@@ -70,5 +71,7 @@ app.use("/account_code", protectRoute, accountItemRoutes);
 app.use("/api/build-report", protectRoute, reportBuilderRoutes);
 //pdft routes
 app.use("/api/pdf", protectRoute, pdfReportRoutes);
+//option fetcher
+app.use("/api/option-fetcher", protectRoute, optionFetcherRoutes);
 
 export default app; // Export app (without starting the server)
