@@ -1,6 +1,11 @@
 import { Router } from "express";
-import { getPdfReportController } from "../controllers/pdfReportsController.js";
+import {
+  generateItemReportController,
+  getPdfReportController,
+} from "../controllers/pdfReportsController.js";
 
-const pdfReportRoutes = Router().post("/", getPdfReportController);
+const pdfReportRoutes = Router()
+  .post("/", getPdfReportController)
+  .post("/items", generateItemReportController);
 
 export default pdfReportRoutes;

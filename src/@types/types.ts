@@ -50,8 +50,10 @@ export interface ItemProps extends Item {
   added_by: number;
   createdAt: Date;
   updatedAt: Date;
-  itemDetails: ItemModelProps;
+  undistributedItemDetails: ItemModelProps;
   ITEM_ID: number;
+  accountableEmpDetails: EmployeeProps;
+  DISTRIBUTED_ON: string;
 }
 
 export interface ItemCategoryProps extends ItemCategory {
