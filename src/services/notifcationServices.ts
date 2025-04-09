@@ -1,17 +1,17 @@
 import { Op } from "sequelize";
-import { TransactionProps, UserProps } from "../@types/types.js";
 import NotificationModel from "../models/notificationModel.js";
 import User from "../models/user.js";
 import { CustomError } from "../utils/CustomError.js";
 import Employee from "../models/employee.js";
 import ItemModel from "../models/itemModel.js";
-import sentNotificationUser from "../utils/sendNotificationToUsers.js";
-import { Request } from "express";
 import TransactionModel from "../models/transactionModel.js";
 
 const notificationServices = {
   //create notification
-  async createTransactionNotificationService(transactionId: number) {
+  async createTransactionNotificationService(
+    transactionId: number,
+    status?: number
+  ) {
     //find the transaction
     const transaction = await TransactionModel.findByPk(transactionId);
 
@@ -29,11 +29,11 @@ const notificationServices = {
 
     //create the notification
     const newNotification = await NotificationModel.create({
-      TRANSACTION_ID: transaction?.getDataValue("id").id,
+      TRANSACTION_ID: transaction?.getDataValue("id"),
       TRANSACTION: transaction?.getDataValue("remarks"),
       ITEM_ID: transaction?.getDataValue("distributed_item_id"),
       QUANTITY: transaction?.getDataValue("quantity"),
-      REQUEST_STATUS: transaction?.getDataValue("status"),
+      REQUEST_STATUS: status ? status : transaction?.getDataValue("status"),
       OWNER_ID: transaction?.getDataValue("owner_emp_id"),
       BORROWER_ID: transaction?.getDataValue("borrower_emp_id"),
       ADMIN_ID: adminDepartment.getDataValue("id"),

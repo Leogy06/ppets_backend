@@ -69,7 +69,8 @@ export const editTransaction = async (req: Request, res: Response) => {
 
     //creating the notification
     await notificationServices.createTransactionNotificationService(
-      transaction.getDataValue("id")
+      transaction.getDataValue("id"),
+      req.body.status
     );
 
     //send the transaction
@@ -83,7 +84,12 @@ export const editTransaction = async (req: Request, res: Response) => {
 export const rejectTransaction = async (req: Request, res: Response) => {
   try {
     const transaction = await transactionServices.rejectTransactionService(
-      req.body.data
+      req.body.data.id
+    );
+
+    await notificationServices.createTransactionNotificationService(
+      req.body.data.id,
+      4 //reject
     );
     res.status(200).json(transaction);
   } catch (error) {
@@ -176,8 +182,6 @@ export const getTransactionByIdController = async (
   res: Response
 ) => {
   try {
-    console.log("executing transaction by id");
-
     const transactionId = Number(req.params.transactionId);
     const result = await transactionServices.getTransactionById(transactionId);
     res.status(200).json(result);

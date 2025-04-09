@@ -31,7 +31,7 @@ NotificationModel.init(
     },
     TRANSACTION_ID: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
     },
     TRANSACTION: {
       type: DataTypes.INTEGER,
