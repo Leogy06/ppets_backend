@@ -444,6 +444,36 @@ const transactionServices = {
 
     return transactions;
   },
+
+  async getTransactionById(transactionId: TransactionProps["id"]) {
+    if (!transactionId) {
+      throw new CustomError("Missing required fields.", 400);
+    }
+
+    const transaction = await TransactionModel.findByPk(transactionId, {
+      include: [
+        {
+          model: Item,
+          as: "distributedItemDetails",
+          include: [{ model: ItemModel, as: "undistributedItemDetails" }],
+        },
+        {
+          model: Employee,
+          as: "borrowerEmpDetails",
+        },
+        {
+          model: Employee,
+          as: "ownerEmpDetails",
+        },
+      ],
+    });
+
+    if (!transaction) {
+      throw new CustomError("Transaction not found.", 404);
+    }
+
+    return transaction;
+  },
 };
 
 export default transactionServices;

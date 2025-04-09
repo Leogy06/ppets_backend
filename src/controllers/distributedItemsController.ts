@@ -58,7 +58,7 @@ export const addDistributedItemController = async (
     });
 
     await notificationServices.createTransactionNotificationService(
-      newTransaction
+      newTransaction.getDataValue("id")
     );
 
     res.status(201).json(newItem);

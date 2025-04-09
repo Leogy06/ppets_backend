@@ -8,6 +8,7 @@ import {
   getTransactionCountTodayController,
   getTransactions,
   rejectTransaction,
+  getTransactionByIdController,
 } from "../controllers/transactionController.js";
 import validateTransaction from "../middlewares/validateTransaction.js";
 import { transactionShema } from "../validations/transactionValidation.js";
@@ -23,6 +24,7 @@ const transactionRoutes = Router()
   .put("/approve/transfer", approveTransferTransactionController)
   .put("/approve/return", approveReturnTransactionController)
   .get("/api/count", getTransactionCountController)
-  .get("/api/count/today", getTransactionCountTodayController);
+  .get("/api/count/today", getTransactionCountTodayController)
+  .get("/:transactionId", getTransactionByIdController);
 
 export default transactionRoutes;
