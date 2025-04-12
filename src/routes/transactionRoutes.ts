@@ -9,6 +9,7 @@ import {
   getTransactions,
   rejectTransaction,
   getTransactionByIdController,
+  returnTransactionController,
 } from "../controllers/transactionController.js";
 import validateTransaction from "../middlewares/validateTransaction.js";
 import { transactionShema } from "../validations/transactionValidation.js";
@@ -25,6 +26,8 @@ const transactionRoutes = Router()
   .put("/approve/return", approveReturnTransactionController)
   .get("/api/count", getTransactionCountController)
   .get("/api/count/today", getTransactionCountTodayController)
-  .get("/:transactionId", getTransactionByIdController);
+  .get("/:transactionId", getTransactionByIdController)
+  //return items
+  .post("/return", returnTransactionController);
 
 export default transactionRoutes;

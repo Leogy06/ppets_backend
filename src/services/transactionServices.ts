@@ -383,9 +383,11 @@ const transactionServices = {
       throw new CustomError("Distributed item not found.", 404);
     }
 
-    distributedItem.quantity = +transaction.getDataValue("quantity");
+    const returnQty = transaction.getDataValue("quantity");
 
-    if (distributedItem.quantity >= distributedItem.ORIGINAL_QUANTITY) {
+    distributedItem.quantity += returnQty;
+
+    if (distributedItem.quantity > distributedItem.ORIGINAL_QUANTITY) {
       throw new CustomError("Quantity is greater than original quantity.", 400);
     }
 
@@ -473,6 +475,45 @@ const transactionServices = {
     }
 
     return transaction;
+  },
+
+  //edit into return transaction
+  async editReturnTransactionService(data: Partial<TransactionProps>) {
+    const { id } = data;
+
+    if (!id) {
+      throw new CustomError("Missing required fields.", 400);
+    }
+
+    console.log("transaction id: ", id);
+
+    const transaction = await TransactionModel.findByPk(id);
+
+    if (!transaction) {
+      throw new CustomError("Transaction not found.", 404);
+    }
+
+    if (transaction.getDataValue("status") !== 1) {
+      throw new CustomError(
+        "Item can't be return. Its still not approved",
+        400
+      );
+    }
+
+    console.log("transaction remarks ", transaction.getDataValue("remarks"));
+
+    const remarks = transaction.getDataValue("remarks");
+
+    //check if the remarks is return
+    if (![1, 2].includes(remarks)) {
+      throw new CustomError("Transaction is not up for return.", 400);
+    }
+
+    //update the transaction into return
+    transaction.status = 2; //set into pending status
+    transaction.remarks = 5; //change remarks to return
+
+    return await transaction.save();
   },
 };
 

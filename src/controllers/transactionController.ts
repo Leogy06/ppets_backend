@@ -189,3 +189,25 @@ export const getTransactionByIdController = async (
     handleServerError(res, error, "Unable to get transaction by id.");
   }
 };
+
+//return transaction
+export const returnTransactionController = async (
+  req: Request,
+  res: Response
+) => {
+  console.log("req.body", req.body);
+
+  try {
+    const transaction = await transactionServices.editReturnTransactionService(
+      req.body
+    );
+
+    await notificationServices.createTransactionNotificationService(
+      transaction.getDataValue("id")
+    );
+
+    res.status(200).json(transaction);
+  } catch (error) {
+    handleServerError(res, error, "Unable to return transaction");
+  }
+};
