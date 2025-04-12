@@ -5,6 +5,7 @@ import { CustomError } from "../utils/CustomError.js";
 import Employee from "../models/employee.js";
 import ItemModel from "../models/itemModel.js";
 import TransactionModel from "../models/transactionModel.js";
+import { EmployeeProps } from "../@types/types.js";
 
 const notificationServices = {
   //create notification
@@ -106,6 +107,48 @@ const notificationServices = {
         ],
       },
     });
+  },
+
+  //get unread notification count
+  async getUnreadNotificationCountService(empId: EmployeeProps["ID"]) {
+    if (!empId) {
+      throw new CustomError("Employee ID is required.", 400);
+    }
+
+    const admin = await User.findOne({
+      where: {
+        emp_id: empId,
+        role: 1,
+      },
+    });
+
+    const whereConditions = {
+      [Op.or]: [
+        { OWNER_ID: empId },
+        { BORROWER_ID: empId },
+        ...(admin ? [{ ADMIN_ID: admin.getDataValue("id") }] : []),
+      ],
+      READ: 0,
+    };
+
+    const unreadCount = await NotificationModel.count({
+      where: whereConditions,
+    });
+
+    return unreadCount;
+  },
+
+  //mark notification as read
+  async markNotificationAsReadService(notificationIds: number[]) {
+    return await NotificationModel.update(
+      { READ: 1 },
+      {
+        where: {
+          id: { [Op.in]: notificationIds },
+          READ: 0,
+        },
+      }
+    );
   },
 };
 
