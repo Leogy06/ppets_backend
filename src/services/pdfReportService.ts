@@ -90,15 +90,10 @@ export const getPdfReportService = async (
     width: 860,
     columnsSize: [120, 120, 140, 80, 70, 160, 170],
     padding: [8],
-    prepareHeader: () => {
-      doc.font("Helvetica-Bold").fontSize(12);
-
-      return doc;
-    },
+    prepareHeader: () => doc.font("Helvetica-Bold").fontSize(12),
     prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
       doc.font("Helvetica").fontSize(10);
 
-      // Skip highlighting the first row (indexRow === 0)
       if (
         indexRow !== undefined &&
         indexRow > 0 &&
@@ -106,9 +101,12 @@ export const getPdfReportService = async (
         rectRow
       ) {
         doc
+          .save()
+          .lineWidth(0.5)
+          .strokeColor("#d9d9d9")
           .rect(rectRow.x, rectRow.y, rectRow.width, rectRow.height)
-          .fill("#f2f2f2")
-          .fillColor("black");
+          .stroke()
+          .restore();
       }
 
       return doc;
