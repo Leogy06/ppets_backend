@@ -35,7 +35,7 @@ app.use((req, res, next) => {
     const responseTimeMs = (diff[0] * 1e3 + diff[1] / 1e6).toFixed(3);
 
     logger.info(
-      `Incoming request: ${req.method} ${req.url} - ${responseTimeMs}ms`
+      `Incoming request: ${req.method} ${req.originalUrl} - ${responseTimeMs}ms`
     );
   });
   next();

@@ -1,7 +1,10 @@
 import Express from "express";
 import path from "path";
 import fs from "fs";
+
+//pdfkit
 import PDFDocument from "pdfkit";
+import table from "pdfkit-table";
 import { fileURLToPath } from "url";
 import { dateFormatter } from "../utils/dateFormatter.js";
 
@@ -76,7 +79,7 @@ export const renderRequestPDF = async (
         .moveDown(0.5);
       doc
         .fontSize(12)
-        .text("CITY ACCOUNTANT'S OFFICE", { align: "center" })
+        .text("CITY ACCOUNTANT'S OFFICEss", { align: "center" })
         .moveDown(0.2);
       doc
         .fontSize(9)
@@ -128,75 +131,17 @@ export const renderRequestPDF = async (
     addHeader();
     addTableHeader();
 
-    let y = doc.y;
-    const pageHeight = 612 - 60; // total height of the page minus margis
+    let y = doc.x;
+    const usablePageHeight =
+      doc.page.height - doc.page.margins.top - doc.page.margins.bottom;
+    // total height of the page minus margis
+
+    console.log("items: ", requestRows);
 
     //loop
-    requestRows.forEach((row: any, index: number) => {
-      const rowHeight = 20;
-      const startX = 50;
-      const columnWidths = [170, 80, 100, 180, 180, 180];
+    // const tableRows = requestRows.map((row) => [
 
-      if (y + rowHeight > pageHeight) {
-        doc.addPage(); //add new page pdfkit
-        addHeader(); //re-add header
-        addTableHeader(); //re-add table header
-        y = doc.y; //reset position
-      }
-
-      if (index % 2 === 0) {
-        doc
-          .rect(
-            startX - 5,
-            y - 2,
-            columnWidths.reduce((a, b) => a + b, 0),
-            rowHeight
-          )
-          .fill("#f2f2f2") // light gray background
-          .fillColor("black"); //reset text color
-      }
-
-      let cellX = startX;
-
-      //item name cell
-      doc.text(row?.itemDetails?.ITEM_NAME ?? "", cellX, y);
-      cellX += columnWidths[0];
-
-      //item quantity requested
-      doc.text(`${row.quantity}`, cellX, y);
-      cellX += columnWidths[1];
-
-      //transaction status
-      doc.text(row?.statusDetails.description.toUpperCase(), cellX, y);
-      cellX += columnWidths[2];
-
-      //owner cell
-      doc.text(
-        `${row?.ownerEmp?.FIRSTNAME ?? ""} ${row?.ownerEmp?.LASTNAME ?? ""} ${
-          row?.ownerEmp?.MIDDLENAME ?? ""
-        } ${row?.ownerEmp?.SUFFIX ?? ""}`,
-        cellX,
-        y
-      );
-      cellX += columnWidths[3];
-
-      //borrower cell
-      doc.text(
-        `${row.borrowerEmp?.FIRSTNAME ?? "--"} ${
-          row.borrowerEmp?.LASTNAME ?? ""
-        } ${row.borrowerEmp?.MIDDLENAME ?? ""} ${
-          row.borrowerEmp?.SUFFIX ?? ""
-        }`,
-        cellX,
-        y
-      );
-
-      //created transaction date
-      cellX += columnWidths[4];
-      doc.text(row.createdAt ? dateFormatter(row.createdAt) : "", cellX, y);
-
-      y += rowHeight; //move y position own for next row
-    });
+    // ])
 
     doc.end();
   } catch (error) {
