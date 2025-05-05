@@ -124,4 +124,8 @@ export interface ItemModelProps extends ItemModel {
   DELETE: number;
   ORIGINAL_STOCK: number;
   DEPARTMENT_ID: number;
+  SERIAL_NO: string;
+  PROP_NO: string;
+  ICS_NO: string;
+  PAR_NO: string;
 }

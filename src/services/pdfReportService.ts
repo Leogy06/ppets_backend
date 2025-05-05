@@ -166,32 +166,6 @@ export const generateItemReportService = async (
       .moveDown(6);
   };
 
-  //table header
-  const addTableHeader = () => {
-    const headers = [
-      "Item",
-      "Quantity",
-      "Unit Value",
-      "Accountable Person",
-      "Distribution",
-    ]; // Adjusted for long bond paper
-
-    let y = doc.y;
-    doc.font("Helvetica-Bold").fontSize(12);
-
-    headers.forEach((header, i) => {
-      doc.text(
-        header,
-        50 + columnWidths.slice(0, i).reduce((a, b) => a + b, 0),
-        y
-      );
-    });
-
-    doc.moveDown(0.5);
-
-    doc.font("Helvetica").fontSize(10);
-  };
-
   const addFooter = (currentPage: number, totalPages: number) => {
     doc.fontSize(10).text(`Page ${currentPage} of ${totalPages}`, 500, 920, {
       align: "center",
@@ -204,60 +178,47 @@ export const generateItemReportService = async (
   });
 
   addHeader();
-  addTableHeader();
 
-  let y = doc.y;
-  const pageHeight = 612 - 20; // total height of the page minus margis
-
-  // Loop through items
-  reports.forEach((row: ItemProps, index: number) => {
-    const startX = 50;
-    let cellX = startX;
-    let maxRowHeight = 20; // Default row height
-
-    // Get row data
-    const rowData = [
+  //table header and body
+  const table = {
+    headers: [
+      "Item",
+      "Serial no.",
+      "Prop. no.",
+      "PIS/ICS No.",
+      "PAR no.",
+      "Quantity",
+      "Unit Value",
+      "Accountable Person",
+    ],
+    rows: reports.map((row: ItemProps) => [
+      //item name
       getItemName(row?.undistributedItemDetails),
+      //serial no
+      row.undistributedItemDetails.SERIAL_NO,
+      //prop no
+      row.undistributedItemDetails.PROP_NO,
+      //ics no
+      row.undistributedItemDetails.ICS_NO,
+      //par no
+      row.undistributedItemDetails.PAR_NO,
+      //quantity
       `${String(row.quantity)}/${String(row.ORIGINAL_QUANTITY)}`,
+      //unit value
       String(row.unit_value),
+      //accountable person
       fullNamer(row.accountableEmpDetails),
-      dateFormatter(row.DISTRIBUTED_ON),
-    ];
+    ]),
+  };
 
-    // Determine max row height based on text wrapping
-    rowData.forEach((text, i) => {
-      const textHeight = doc.heightOfString(text, { width: columnWidths[i] });
-      maxRowHeight = Math.max(maxRowHeight, textHeight + 5); // Add padding
-    });
-
-    // Create new page if needed
-    if (y + maxRowHeight > pageHeight) {
-      doc.addPage();
-      addHeader();
-      addTableHeader();
-      y = doc.y;
-    }
-
-    // Alternate row shading
-    if (index % 2 === 0) {
-      doc
-        .rect(
-          startX - 5,
-          y - 2,
-          columnWidths.reduce((a, b) => a + b, 0),
-          maxRowHeight
-        )
-        .fill("#f2f2f2")
-        .fillColor("black");
-    }
-
-    // Render text in each cell
-    rowData.forEach((text, i) => {
-      doc.text(text, cellX, y, { width: columnWidths[i], align: "left" });
-      cellX += columnWidths[i];
-    });
-
-    y += maxRowHeight; // Move to next row position
+  //prepare table
+  await doc.table(table, {
+    x: 30,
+    width: 860,
+    columnsSize: [120, 100, 100, 100, 100, 80, 85, 180],
+    padding: [8],
+    prepareHeader: () => doc.font("Helvetica-Bold").fontSize(12),
+    prepareRow: () => doc.font("Helvetica").fontSize(10),
   });
 
   doc.on("end", () => {

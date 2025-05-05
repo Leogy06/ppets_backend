@@ -7,7 +7,7 @@ import {
 
 //for item name
 export const getItemName = (itemDetails: ItemModelProps) => {
-  return `${itemDetails?.ITEM_NAME ?? "--"}`;
+  return `${itemDetails?.ITEM_NAME ?? "--"}`.trim();
 };
 
 //-remarks, 1-borrowing, 2-lending, 3-distribution, 4-transfer
