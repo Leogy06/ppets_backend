@@ -47,10 +47,7 @@ export const getPdfReportService = async (
       .fontSize(9)
       .text("General Santos City", { align: "center" })
       .moveDown(0.5);
-    doc
-      .fontSize(16)
-      .text("ITEM REQUESTS LOGS", { align: "center" })
-      .moveDown(2);
+    doc.fontSize(16).text("TRANSACTION LOGS", { align: "center" }).moveDown(2);
 
     // Current Date at the top right corner
     doc
