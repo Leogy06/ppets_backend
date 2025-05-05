@@ -11,8 +11,8 @@ const itemValidationRules = [
   body("PROP_NO").notEmpty().withMessage("Property Number is missing."),
   body("DEPARTMENT_ID").notEmpty().withMessage("Department ID is missing."),
   body("RECEIVED_AT").notEmpty().withMessage("Received date is missing."),
-  body("PAR_NO").notEmpty().withMessage("PAR number is missing."),
-  body("MR_NO").notEmpty().withMessage("Mr number is missing."),
+  body("PAR_NO").optional(),
+  body("MR_NO").optional(),
   body("ACCOUNT_CODE").notEmpty().withMessage("Account code is missing."),
 ];
 
