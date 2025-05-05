@@ -85,26 +85,15 @@ export const getPdfReportService = async (
   await doc.table(table, {
     x: 30,
     width: 860,
-    columnsSize: [120, 120, 140, 80, 70, 160, 170],
+    columnsSize: [120, 120, 140, 80, 70, 170, 170],
+    divider: {
+      header: { disabled: false, width: 2, opacity: 1 },
+      horizontal: { disabled: false, width: 0.5, opacity: 0.5 },
+    },
     padding: [8],
-    prepareHeader: () => doc.font("Helvetica-Bold").fontSize(12),
+    prepareHeader: () => doc.font("Helvetica-Bold").fontSize(10),
     prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
-      doc.font("Helvetica").fontSize(10);
-
-      if (
-        indexRow !== undefined &&
-        indexRow > 0 &&
-        indexRow % 2 === 0 &&
-        rectRow
-      ) {
-        doc
-          .save()
-          .lineWidth(0.5)
-          .strokeColor("#d9d9d9")
-          .rect(rectRow.x, rectRow.y, rectRow.width, rectRow.height)
-          .stroke()
-          .restore();
-      }
+      doc.font("Helvetica").fontSize(8);
 
       return doc;
     },
@@ -131,9 +120,6 @@ export const generateItemReportService = async (
   );
 
   doc.pipe(res);
-
-  // Define consistent column widths
-  const columnWidths = [280, 100, 140, 240, 120]; // Total: 876
 
   //title
   //title
@@ -215,10 +201,18 @@ export const generateItemReportService = async (
   await doc.table(table, {
     x: 30,
     width: 860,
-    columnsSize: [120, 100, 100, 100, 100, 80, 85, 180],
+    divider: {
+      header: { disabled: false, width: 2, opacity: 1 },
+      horizontal: { disabled: false, width: 0.5, opacity: 0.5 },
+    },
+    columnsSize: [140, 90, 90, 90, 90, 80, 80, 200],
     padding: [8],
-    prepareHeader: () => doc.font("Helvetica-Bold").fontSize(12),
-    prepareRow: () => doc.font("Helvetica").fontSize(10),
+    prepareHeader: () => doc.font("Helvetica-Bold").fontSize(10),
+
+    prepareRow: () => {
+      doc.font("Helvetica").fontSize(8);
+      return doc;
+    },
   });
 
   doc.on("end", () => {
