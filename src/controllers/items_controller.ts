@@ -43,7 +43,23 @@ export const createItem = async (
     //check if prop and srn is duplicated
     const isSrnExist = await ItemModel.count({ where: { SERIAL_NO } });
     const isPropExist = await ItemModel.count({ where: { PROP_NO } });
-    const isParExist = await ItemModel.count({ where: { PAR_NO } });
+
+    let preparePar = null;
+
+    if (PAR_NO === "" || PAR_NO === null || PAR_NO === undefined) {
+      preparePar = null;
+    }
+
+    if (preparePar) {
+      const isParExist = await ItemModel.count({ where: { PAR_NO } });
+      if (isParExist > 0) {
+        return res
+          .status(400)
+          .json({ message: "PAR number was already in used." });
+      }
+
+      preparePar = PAR_NO;
+    }
 
     if (isSrnExist > 0) {
       return res
@@ -55,12 +71,6 @@ export const createItem = async (
       return res
         .status(400)
         .json({ message: "Prop number was already in used." });
-    }
-
-    if (isParExist > 0) {
-      return res
-        .status(400)
-        .json({ message: "Asset number was already in used." });
     }
 
     //validate stock quantity
@@ -106,7 +116,7 @@ export const createItem = async (
       TOTAL_VALUE: UNIT_VALUE * STOCK_QUANTITY,
       SERIAL_NO,
       PROP_NO,
-      PAR_NO,
+      PAR_NO: preparePar,
       REMARKS,
       ORIGINAL_QUANTITY: STOCK_QUANTITY,
       DEPARTMENT_ID,

@@ -57,7 +57,7 @@ ItemModel.init(
     },
     PAR_NO: {
       type: DataTypes.STRING(45),
-      allowNull: false,
+      allowNull: true,
       unique: true,
     },
     MR_NO: {
@@ -89,6 +89,7 @@ ItemModel.init(
     ICS_NO: {
       type: DataTypes.STRING(45),
       allowNull: true,
+      unique: true,
     },
   },
   {
