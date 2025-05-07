@@ -185,9 +185,9 @@ export const generateItemReportService = async (
       //prop no
       row.undistributedItemDetails.PROP_NO,
       //ics no
-      row.undistributedItemDetails.ICS_NO,
+      row?.undistributedItemDetails?.PIS_NO ?? "--",
       //par no
-      row.undistributedItemDetails.PAR_NO,
+      row?.undistributedItemDetails?.PAR_NO ?? "--",
       //quantity
       `${String(row.quantity)}/${String(row.ORIGINAL_QUANTITY)}`,
       //unit value

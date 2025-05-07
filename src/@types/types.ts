@@ -128,4 +128,5 @@ export interface ItemModelProps extends ItemModel {
   PROP_NO: string;
   ICS_NO: string;
   PAR_NO: string;
+  PIS_NO: string;
 }
