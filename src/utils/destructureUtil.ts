@@ -4,6 +4,7 @@ import {
   ItemProps,
   TransactionProps,
 } from "../@types/types.js";
+import AccountItem from "../models/accountItemModel.js";
 
 //for item name
 export const getItemName = (itemDetails: ItemModelProps) => {
@@ -43,6 +44,18 @@ export const transactionStatus = (status: TransactionProps["status"]) => {
     default:
       return "Unknown transaction status";
   }
+};
+
+//account codes
+export const accountCodeDetails = (itemDetails: ItemModelProps) => {
+  if (!itemDetails || !itemDetails.accountCodeDetails) return "--";
+
+  const details = itemDetails.accountCodeDetails as {
+    ACCOUNT_CODE: string;
+    ACCOUNT_TITLE: string;
+  };
+
+  return `${String(details.ACCOUNT_CODE)} - ${String(details.ACCOUNT_TITLE)}`;
 };
 
 //employe namer

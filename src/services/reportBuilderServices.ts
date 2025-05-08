@@ -5,6 +5,7 @@ import { CustomError } from "../utils/CustomError.js";
 import Employee from "../models/employee.js";
 import Item from "../models/distributedItemModel.js";
 import ItemModel from "../models/itemModel.js";
+import AccountItem from "../models/accountItemModel.js";
 
 interface IFilters {
   //required fields
@@ -119,7 +120,11 @@ export const buildItemReportService = async (filters: IFilters) => {
     where: whereClause,
     order: [["createdAt", "DESC"]],
     include: [
-      { model: ItemModel, as: "undistributedItemDetails" },
+      {
+        model: ItemModel,
+        as: "undistributedItemDetails",
+        include: [{ model: AccountItem, as: "accountCodeDetails" }],
+      },
       { model: Employee, as: "accountableEmpDetails" },
     ],
   });

@@ -5,10 +5,12 @@ import { ItemProps, TransactionProps } from "../@types/types.js";
 import PDFDocument from "pdfkit-table";
 import { dateFormatter } from "../utils/dateFormatter.js";
 import fullNamer, {
+  accountCodeDetails,
   getItemName,
   transactionStatus,
   transactionType,
 } from "../utils/destructureUtil.js";
+import { pesoFormatter } from "../utils/pesoFormatter.js";
 
 //end point - /api/pdf
 
@@ -165,9 +167,12 @@ export const generateItemReportService = async (
 
   addHeader();
 
+  console.log("rows: ", reports);
+
   //table header and body
   const table = {
     headers: [
+      "Account Code",
       "Item",
       "Serial no.",
       "Prop. no.",
@@ -178,6 +183,10 @@ export const generateItemReportService = async (
       "Accountable Person",
     ],
     rows: reports.map((row: ItemProps) => [
+      //Account code
+      accountCodeDetails(
+        row?.undistributedItemDetails?.accountCodeDetails?.ACCOUNT_CODE.toString()
+      ),
       //item name
       getItemName(row?.undistributedItemDetails),
       //serial no
@@ -191,7 +200,7 @@ export const generateItemReportService = async (
       //quantity
       `${String(row.quantity)}/${String(row.ORIGINAL_QUANTITY)}`,
       //unit value
-      String(row.unit_value),
+      pesoFormatter(row.unit_value),
       //accountable person
       fullNamer(row.accountableEmpDetails),
     ]),

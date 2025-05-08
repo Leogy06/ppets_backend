@@ -129,4 +129,12 @@ export interface ItemModelProps extends ItemModel {
   ICS_NO: string;
   PAR_NO: string;
   PIS_NO: string;
+  ACCOUNT_CODE: number; //id number
+  accountCodeDetails: AccountCodeProps;
+}
+
+export interface AccountCodeProps {
+  id: number;
+  ACCOUNT_CODE: string;
+  ACCOUNT_TITLE: string;
 }
