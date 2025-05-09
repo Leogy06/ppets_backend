@@ -62,7 +62,7 @@ ItemModel.init(
     },
     MR_NO: {
       type: DataTypes.STRING(45),
-      allowNull: false,
+      allowNull: true,
       unique: true,
     },
     ACCOUNT_CODE: {

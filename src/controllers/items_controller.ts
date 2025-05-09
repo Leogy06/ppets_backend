@@ -44,21 +44,17 @@ export const createItem = async (
     const isSrnExist = await ItemModel.count({ where: { SERIAL_NO } });
     const isPropExist = await ItemModel.count({ where: { PROP_NO } });
 
-    let preparePar = null;
+    let preparePar = PAR_NO;
 
     if (PAR_NO === "" || PAR_NO === null || PAR_NO === undefined) {
       preparePar = null;
-    }
-
-    if (preparePar) {
+    } else {
       const isParExist = await ItemModel.count({ where: { PAR_NO } });
       if (isParExist > 0) {
         return res
           .status(400)
           .json({ message: "PAR number was already in used." });
       }
-
-      preparePar = PAR_NO;
     }
 
     if (isSrnExist > 0) {
