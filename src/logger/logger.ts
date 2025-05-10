@@ -14,14 +14,14 @@ export const logger = createLogger({
   ),
   transports: [
     new transports.Console(),
-    new transports.File({
-      filename: "logs/error.log",
-      level: "error",
-      format: format.json(),
-    }),
-    new transports.File({
-      filename: "logs/combined.log",
-      format: format.json(),
-    }),
+    // new transports.File({
+    //   filename: "logs/error.log",
+    //   level: "error",
+    //   format: format.json(),
+    // }),
+    // new transports.File({
+    //   filename: "logs/combined.log",
+    //   format: format.json(),
+    // }),
   ],
 });
