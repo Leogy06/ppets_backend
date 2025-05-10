@@ -1,6 +1,12 @@
 import express from "express";
-import { getAccountItems } from "../controllers/accountItemController.js";
+import {
+  createAccountCodeController,
+  getAccountItems,
+} from "../controllers/accountItemController.js";
 
-const accountItemRoutes = express.Router().get("/", getAccountItems);
+const accountItemRoutes = express
+  .Router()
+  .get("/", getAccountItems)
+  .post("/", createAccountCodeController);
 
 export default accountItemRoutes;
