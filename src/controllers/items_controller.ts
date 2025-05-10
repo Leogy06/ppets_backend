@@ -37,6 +37,7 @@ export const createItem = async (
     MR_NO,
     ACCOUNT_CODE,
     ADDED_BY,
+    PIS_NO,
   } = req.body;
 
   try {
@@ -44,7 +45,7 @@ export const createItem = async (
     const isSrnExist = await ItemModel.count({ where: { SERIAL_NO } });
     const isPropExist = await ItemModel.count({ where: { PROP_NO } });
 
-    let preparePar = PAR_NO;
+    let preparePar = PAR_NO?.toString().trim();
 
     if (PAR_NO === "" || PAR_NO === null || PAR_NO === undefined) {
       preparePar = null;
@@ -54,6 +55,32 @@ export const createItem = async (
         return res
           .status(400)
           .json({ message: "PAR number was already in used." });
+      }
+    }
+
+    //prepare PIS
+    let preparePis = PIS_NO?.toString().trim();
+    if (PIS_NO === "" || PIS_NO === null || PIS_NO === undefined) {
+      preparePis = null;
+    } else {
+      const isPisExist = await ItemModel.count({ where: { PIS_NO } });
+      if (isPisExist > 0) {
+        return res
+          .status(400)
+          .json({ message: "PIS number was already in used." });
+      }
+    }
+
+    //prepare mr
+    let prepareMr = MR_NO?.toString().trim();
+    if (MR_NO === "" || MR_NO === null || MR_NO === undefined) {
+      prepareMr = null;
+    } else {
+      const isMrExist = await ItemModel.count({ where: { MR_NO } });
+      if (isMrExist > 0) {
+        return res
+          .status(400)
+          .json({ message: "MR number was already in used." });
       }
     }
 
@@ -117,9 +144,10 @@ export const createItem = async (
       ORIGINAL_QUANTITY: STOCK_QUANTITY,
       DEPARTMENT_ID,
       RECEIVED_AT,
-      MR_NO,
+      MR_NO: prepareMr,
       ACCOUNT_CODE,
       ADDED_BY,
+      PIS_NO: preparePis,
     });
 
     res.status(201).json(newItem);
