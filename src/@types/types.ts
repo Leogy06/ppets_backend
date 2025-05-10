@@ -54,6 +54,9 @@ export interface ItemProps extends Item {
   ITEM_ID: number;
   accountableEmpDetails: EmployeeProps;
   DISTRIBUTED_ON: string;
+
+  //this props are frontend modify
+  accCodeDetails: string;
 }
 
 export interface ItemCategoryProps extends ItemCategory {

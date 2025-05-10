@@ -47,16 +47,7 @@ export const transactionStatus = (status: TransactionProps["status"]) => {
 };
 
 //account codes
-export const accountCodeDetails = (itemDetails: ItemModelProps) => {
-  if (!itemDetails || !itemDetails.accountCodeDetails) return "--";
-
-  const details = itemDetails.accountCodeDetails as {
-    ACCOUNT_CODE: string;
-    ACCOUNT_TITLE: string;
-  };
-
-  return `${String(details.ACCOUNT_CODE)} - ${String(details.ACCOUNT_TITLE)}`;
-};
+export const accountCodeDetails = (itemDetails: ItemModelProps) => {};
 
 //employe namer
 

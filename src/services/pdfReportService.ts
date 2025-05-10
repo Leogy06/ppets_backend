@@ -167,8 +167,6 @@ export const generateItemReportService = async (
 
   addHeader();
 
-  console.log("rows: ", reports);
-
   //table header and body
   const table = {
     headers: [
@@ -183,26 +181,15 @@ export const generateItemReportService = async (
       "Accountable Person",
     ],
     rows: reports.map((row: ItemProps) => [
-      //Account code
-      accountCodeDetails(
-        row?.undistributedItemDetails?.accountCodeDetails?.ACCOUNT_CODE.toString()
-      ),
-      //item name
-      getItemName(row?.undistributedItemDetails),
-      //serial no
-      row.undistributedItemDetails.SERIAL_NO,
-      //prop no
-      row.undistributedItemDetails.PROP_NO,
-      //ics no
-      row?.undistributedItemDetails?.PIS_NO ?? "--",
-      //par no
-      row?.undistributedItemDetails?.PAR_NO ?? "--",
-      //quantity
-      `${String(row.quantity)}/${String(row.ORIGINAL_QUANTITY)}`,
-      //unit value
-      pesoFormatter(row.unit_value),
-      //accountable person
-      fullNamer(row.accountableEmpDetails),
+      row.accCodeDetails ?? "--",
+      getItemName(row?.undistributedItemDetails) ?? "--",
+      row.undistributedItemDetails?.SERIAL_NO ?? "--",
+      row.undistributedItemDetails?.PROP_NO ?? "--",
+      row.undistributedItemDetails?.PIS_NO ?? "--",
+      row.undistributedItemDetails?.PAR_NO ?? "--",
+      `${String(row.quantity ?? 0)}/${String(row.ORIGINAL_QUANTITY ?? 0)}`,
+      pesoFormatter(row.unit_value?.toString() ?? "0.00"),
+      fullNamer(row.accountableEmpDetails) ?? "--",
     ]),
   };
 
@@ -214,7 +201,7 @@ export const generateItemReportService = async (
       header: { disabled: false, width: 2, opacity: 1 },
       horizontal: { disabled: false, width: 0.5, opacity: 0.5 },
     },
-    columnsSize: [140, 90, 90, 90, 90, 80, 80, 200],
+    columnsSize: [140, 90, 90, 90, 90, 90, 80, 80, 200],
     padding: [8],
     prepareHeader: () => doc.font("Helvetica-Bold").fontSize(10),
 
