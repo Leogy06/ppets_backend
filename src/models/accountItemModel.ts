@@ -20,6 +20,10 @@ AccountItem.init(
       type: DataTypes.STRING(90),
       allowNull: false,
     },
+    DELETED: {
+      type: DataTypes.TINYINT,
+      defaultValue: 0,
+    },
   },
   {
     sequelize,

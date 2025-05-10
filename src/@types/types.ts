@@ -137,7 +137,8 @@ export interface ItemModelProps extends ItemModel {
 }
 
 export interface AccountCodeProps {
-  id: number;
+  ID: number;
   ACCOUNT_CODE: string;
   ACCOUNT_TITLE: string;
+  DELETED: number;
 }
