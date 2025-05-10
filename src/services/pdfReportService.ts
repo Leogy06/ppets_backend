@@ -148,9 +148,14 @@ export const generateItemReportService = async (
     // Current Date at the top right corner
     doc
       .fontSize(10)
-      .text(dateFormatter(currentDate, "yyyy-MM-dd hh:mm a"), 740, 40, {
-        align: "right",
-      }) // Adjust the X and Y position
+      .text(
+        `Preview on: ${dateFormatter(currentDate, "yyyy-MM-dd hh:mm:ss a")}`,
+        740,
+        40,
+        {
+          align: "right",
+        }
+      ) // Adjust the X and Y position
       .moveDown(6);
   };
 
@@ -201,7 +206,7 @@ export const generateItemReportService = async (
       header: { disabled: false, width: 2, opacity: 1 },
       horizontal: { disabled: false, width: 0.5, opacity: 0.5 },
     },
-    columnsSize: [140, 90, 90, 90, 90, 90, 80, 80, 200],
+    columnsSize: [140, 90, 90, 90, 90, 90, 80, 80, 130],
     padding: [8],
     prepareHeader: () => doc.font("Helvetica-Bold").fontSize(10),
 
