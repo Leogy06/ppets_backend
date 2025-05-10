@@ -1,7 +1,7 @@
 export const pesoFormatter = (value: number | string) => {
-  return new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
+  const num = parseFloat(value.toString().replace(/,/g, ""));
+  return `PHP ${num.toLocaleString("en-PH", {
     minimumFractionDigits: 2,
-  }).format(parseFloat(value.toString().replace(/,/g, "")));
+    maximumFractionDigits: 2,
+  })}`;
 };
