@@ -136,8 +136,6 @@ export const renderRequestPDF = async (
       doc.page.height - doc.page.margins.top - doc.page.margins.bottom;
     // total height of the page minus margis
 
-    console.log("items: ", requestRows);
-
     //loop
     // const tableRows = requestRows.map((row) => [
 

@@ -213,8 +213,6 @@ const transactionServices = {
   async rejectTransactionService(
     transactionId: Partial<TransactionProps["id"]>
   ) {
-    console.log("transaction id to reject: ", transactionId);
-
     if (!transactionId) {
       throw new CustomError(
         `Missing required fields. id: ${transactionId}`,
@@ -224,7 +222,6 @@ const transactionServices = {
 
     const transaction = await TransactionModel.findByPk(transactionId);
 
-    console.log("founded transaction: ", transaction);
     if (!transaction) {
       throw new CustomError("Transaction not found.", 404);
     }

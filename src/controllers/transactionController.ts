@@ -197,8 +197,6 @@ export const returnTransactionController = async (
   req: Request,
   res: Response
 ) => {
-  console.log("req.body", req.body);
-
   try {
     const transaction = await transactionServices.editReturnTransactionService(
       req.body

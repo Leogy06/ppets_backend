@@ -36,9 +36,6 @@ export const protectRoute = (
   next: express.NextFunction
 ): any => {
   const token = req.cookies.accessToken;
-
-  // console.log("token: ", token);
-
   if (!token) {
     return res.status(401).json({ message: "Not authorized." });
   }
