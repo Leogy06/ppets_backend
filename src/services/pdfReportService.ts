@@ -22,6 +22,7 @@ export const getPdfReportService = async (
     margin: 30,
     size: [612, 936], //long bond paper
     layout: "landscape",
+    bufferPages: true,
   });
   const today = new Date().toDateString();
   res.setHeader("Content-Type", "application/pdf");
@@ -101,6 +102,18 @@ export const getPdfReportService = async (
     },
   });
 
+  //paging
+  const range = doc.bufferedPageRange();
+  for (let i = range.start; i < range.start + range.count; i++) {
+    doc.switchToPage(i);
+    doc.fontSize(10).text(`Page ${i + 1} of ${range.count}`, 0, 570, {
+      width: doc.page.width,
+      align: "center",
+      lineBreak: false,
+      continued: false,
+    });
+  }
+
   doc.end();
 };
 
@@ -110,9 +123,15 @@ export const generateItemReportService = async (
   reports: ItemProps[]
 ) => {
   const doc = new PDFDocument({
-    margin: 30,
+    margins: {
+      top: 30,
+      left: 30,
+      bottom: 30,
+      right: 30,
+    },
     size: [612, 936], //long bond paper
     layout: "landscape",
+    bufferPages: true,
   });
   const today = new Date().toDateString();
   res.setHeader("Content-Type", "application/pdf");
@@ -140,10 +159,7 @@ export const generateItemReportService = async (
       .fontSize(9)
       .text("General Santos City", { align: "center" })
       .moveDown(0.5);
-    doc
-      .fontSize(16)
-      .text("ITEM REQUESTS LOGS", { align: "center" })
-      .moveDown(2);
+    doc.fontSize(16).text("DISTRIBUTED ITEMS", { align: "center" }).moveDown(2);
 
     // Current Date at the top right corner
     doc
@@ -158,17 +174,6 @@ export const generateItemReportService = async (
       ) // Adjust the X and Y position
       .moveDown(6);
   };
-
-  const addFooter = (currentPage: number, totalPages: number) => {
-    doc.fontSize(10).text(`Page ${currentPage} of ${totalPages}`, 500, 920, {
-      align: "center",
-    });
-  };
-
-  let pageCount = 0;
-  doc.on("pageAdded", () => {
-    pageCount++;
-  });
 
   addHeader();
 
@@ -216,9 +221,17 @@ export const generateItemReportService = async (
     },
   });
 
-  doc.on("end", () => {
-    addFooter(pageCount, pageCount);
-  });
+  //paging
+  const range = doc.bufferedPageRange();
+  for (let i = range.start; i < range.start + range.count; i++) {
+    doc.switchToPage(i);
+    doc.fontSize(10).text(`Page ${i + 1} of ${range.count}`, 0, 570, {
+      width: doc.page.width,
+      align: "center",
+      lineBreak: false,
+      continued: false,
+    });
+  }
 
   doc.end();
 };
