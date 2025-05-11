@@ -83,17 +83,19 @@ export const editTransaction = async (req: Request, res: Response) => {
 //reject transaction for reject
 export const rejectTransaction = async (req: Request, res: Response) => {
   try {
+    // * find transaction
     const transaction = await transactionServices.rejectTransactionService(
-      req.body.data.id
+      req.body.data
     );
 
+    //create notification
     await notificationServices.createTransactionNotificationService(
-      req.body.data.id,
+      req.body.data,
       4 //reject
     );
     res.status(200).json(transaction);
   } catch (error) {
-    handleServerError(res, error, "Unable to reject transaction");
+    handleServerError(res, error, "Unable to reject transaction.");
   }
 };
 
