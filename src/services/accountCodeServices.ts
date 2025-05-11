@@ -9,6 +9,17 @@ export const createAccountCodeService = async (
   if (!ACCOUNT_CODE || !ACCOUNT_TITLE)
     throw new CustomError("Required Fields are empty.", 400);
 
+  // ? check if thhe accounc code and title exist
+  const [isTitleExist, isCodeExist] = await Promise.all([
+    await AccountItem.count({ where: { ACCOUNT_TITLE: ACCOUNT_TITLE.trim() } }),
+    await AccountItem.count({ where: { ACCOUNT_CODE: ACCOUNT_CODE.trim() } }),
+  ]);
+
+  if (isTitleExist > 0)
+    throw new CustomError("Account Title Already Exist. ", 400);
+  if (isCodeExist > 0)
+    throw new CustomError("Account Code Already Exist. ", 400);
+
   return await AccountItem.create(entry);
 };
 
