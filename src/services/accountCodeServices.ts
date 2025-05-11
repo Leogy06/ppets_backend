@@ -25,7 +25,11 @@ export const createAccountCodeService = async (
 
 //get all account codes
 export const getAllAccountCodeService = async () => {
-  return await AccountItem.findAll();
+  return await AccountItem.findAll({
+    where: {
+      DELETED: 0,
+    },
+  });
 };
 
 export const editAccountCodeService = async (
