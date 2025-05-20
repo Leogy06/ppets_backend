@@ -2,8 +2,8 @@ import { config } from "dotenv";
 import { Dialect, Sequelize } from "sequelize";
 
 // Determine which .env file to load
-const envFile = process.env.NODE_ENV === "production" ? ".env" : ".env.local";
-config({ path: envFile });
+// const envFile = process.env.NODE_ENV === "production" ? ".env" : ".env.local";
+config({ path: ".env" });
 
 //adding comment
 const { DB_NAME, DB_DIALECT, DB_PASSWORD, DB_HOST, DB_PORT, DB_USERNAME } =
